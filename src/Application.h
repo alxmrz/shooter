@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <string>
+#include <vector>
 
 class Application
 {
@@ -11,7 +12,21 @@ public:
     ~Application();
     int run();
 private:
+    sf::RenderWindow* window;
+    sf::Event event;
+    sf::CircleShape shape;
+    sf::Clock clock;
+    std::vector<sf::Text*> texts;
+    int frame = 0;
+    bool right = true;
+    bool left = false;
+    
     sf::Text* makeText(std::string str, int x, int );
+    void initScene();
+    void handleEvents();
+    void updateGame();
+    void drawGameObjects();
+    
 };
 
 
