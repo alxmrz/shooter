@@ -11,6 +11,7 @@ public:
     Builder();
     sf::Drawable* getDrawForm();
     void move(int x, int y);
+    void setFormColor(sf::Color);
 };
 
 #endif /* BUILDER_H */

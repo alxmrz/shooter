@@ -78,6 +78,11 @@ void Application::handleEvents()
             {
                 this->texts[2]->setString("Left mouse pressed");
                 sf::Vector2i globalPosition = sf::Mouse::getPosition(*this->window);
+                if (this->builder->collidePoint(globalPosition.x, globalPosition.y)) {
+                    this->builder->setFormColor(sf::Color::Yellow);
+                } else {
+                    this->builder->setFormColor(sf::Color::Red);
+                }
                 this->texts[3]->setString(std::to_string(globalPosition.x) + "|" + std::to_string(globalPosition.y));
                 this->shape.setFillColor(sf::Color::Red);
             }
@@ -85,6 +90,7 @@ void Application::handleEvents()
             {
                 this->texts[2]->setString("Right mouse pressed");
                 this->shape.setFillColor(sf::Color::Blue);
+                this->builder->setFormColor(sf::Color::Blue);
             }
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
                 this->shape.move(0, 10);
@@ -127,7 +133,7 @@ void Application::updateGame()
 
 void Application::drawGameObjects()
 {
-    this->window->clear();
+    this->window->clear(sf::Color::White);
     for (unsigned i = 0; i < this->texts.size(); i++) {
         this->window->draw(*this->texts[i]);
     }

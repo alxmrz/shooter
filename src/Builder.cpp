@@ -8,7 +8,7 @@ Builder::Builder(int x, int y, int width, int height): CObject(x, y, width, heig
 {
     this->circle = sf::CircleShape(width/2);
     this->circle.setFillColor(sf::Color::Green);
-    this->circle.setPosition(x+width/2, y+height/2);
+    this->circle.setPosition(x, y);
 }
 
 sf::Drawable* Builder::getDrawForm()
@@ -19,4 +19,9 @@ sf::Drawable* Builder::getDrawForm()
 void Builder::move(int x, int y)
 {
     this->circle.move(x, y);
+}
+
+void Builder::setFormColor(sf::Color color)
+{
+    this->circle.setFillColor(color);
 }

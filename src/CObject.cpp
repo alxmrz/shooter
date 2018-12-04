@@ -17,7 +17,10 @@ bool CObject::collideRect(CObject obj)
 }
 bool CObject::collidePoint(int x, int y)
 {
-    
+    return  x <= this->x + this->width &&
+            x >= this->x &&
+            y <= this->y + this->height && 
+            y >= this->y;
 }
 
 sf::Drawable* CObject::getDrawForm(){
