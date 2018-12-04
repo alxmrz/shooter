@@ -1,15 +1,20 @@
 #ifndef COBJECT_H
 #define COBJECT_H
 #include <SFML/Graphics.hpp>
-
+#include <vector>
 class CObject
 {
 public:
     CObject();
     CObject(int x, int y, int width, int height);
-    bool collideRect(CObject obj);
+    bool collideRect(CObject* obj);
     bool collidePoint(int x, int y);
     virtual sf::Drawable* getDrawForm();
+    int getX();
+    int getY();
+    int getWidth();
+    int getHeight();
+    std::vector<std::vector<int>> getBorderPoints();
     
 protected:
     int x;

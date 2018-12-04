@@ -55,6 +55,7 @@ void Application::initScene()
     
     this->shape = sf::CircleShape(20);
     this->builder = new Builder(200,200, 100, 100);
+    this->builder1 = new Builder(500,200, 100, 100);
     this->shape.setFillColor(sf::Color::Green);
     this->clock = sf::Clock();
     
@@ -92,9 +93,30 @@ void Application::handleEvents()
                 this->shape.setFillColor(sf::Color::Blue);
                 this->builder->setFormColor(sf::Color::Blue);
             }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                this->builder1->move(0, -10);
+                if (this->builder1->collideRect(this->builder)) {
+                    this->builder1->move(0, 10);
+                }
+            } 
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-                this->shape.move(0, 10);
+                this->builder1->move(0, 10);
+                if (this->builder1->collideRect(this->builder)) {
+                    this->builder1->move(0, -10);
+                } 
             }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                this->builder1->move(-10, 0);
+                if (this->builder1->collideRect(this->builder)) {
+                    this->builder1->move(10, 0);
+                }
+            }
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                this->builder1->move(10, 0);
+                if (this->builder1->collideRect(this->builder)) {
+                    this->builder1->move(-10, 0);
+                } 
+            }  
         }
 }
 
@@ -140,5 +162,6 @@ void Application::drawGameObjects()
 
     this->window->draw(this->shape);
     this->window->draw(*this->builder->getDrawForm());
+    this->window->draw(*this->builder1->getDrawForm());
     this->window->display();
 }

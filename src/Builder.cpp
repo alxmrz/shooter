@@ -18,6 +18,8 @@ sf::Drawable* Builder::getDrawForm()
 
 void Builder::move(int x, int y)
 {
+    this->x += x;
+    this->y += y;
     this->circle.move(x, y);
 }
 
