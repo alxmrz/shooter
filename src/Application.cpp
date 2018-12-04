@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include "Builder.h"
 
 Application::Application()
 {
@@ -53,6 +54,7 @@ void Application::initScene()
     this->window->setFramerateLimit(60);
     
     this->shape = sf::CircleShape(20);
+    this->builder = new Builder(200,200, 100, 100);
     this->shape.setFillColor(sf::Color::Green);
     this->clock = sf::Clock();
     
@@ -131,5 +133,6 @@ void Application::drawGameObjects()
     }
 
     this->window->draw(this->shape);
+    this->window->draw(*this->builder->getDrawForm());
     this->window->display();
 }

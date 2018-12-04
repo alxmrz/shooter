@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <vector>
+#include "Builder.h"
 
 class Application
 {
@@ -16,6 +17,7 @@ private:
     sf::Event event;
     sf::CircleShape shape;
     sf::Clock clock;
+    Builder* builder;
     std::vector<sf::Text*> texts;
     int frame = 0;
     bool right = true;
