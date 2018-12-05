@@ -1,3 +1,4 @@
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Event.h"
 #include "GameState.h"
@@ -17,82 +18,106 @@ void Event::handle()
 {
     sf::Event event;
     
-     while (this->app->window->pollEvent(event))
+     while (app->window->pollEvent(event))
         {
             if (event.type == sf::Event::Closed) 
             {
-                this->app->window->close();
+                app->window->close();
             }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) 
-            {
-                this->gameState->texts[2]->setString("Left mouse pressed");
-                sf::Vector2i globalPosition = sf::Mouse::getPosition(*this->app->window);
-                if (this->gameState->builder->collidePoint(globalPosition.x, globalPosition.y)) {
-                    this->gameState->builder->setFormColor(sf::Color::Yellow);
-                } else {
-                    this->gameState->builder->setFormColor(sf::Color::Red);
-                }
-                this->gameState->texts[3]->setString(std::to_string(globalPosition.x) + "|" + std::to_string(globalPosition.y));
-                this->gameState->shape.setFillColor(sf::Color::Red);
-            }
-            else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-            {
-                this->gameState->texts[2]->setString("Right mouse pressed");
-                this->gameState->shape.setFillColor(sf::Color::Blue);
-                this->gameState->builder->setFormColor(sf::Color::Blue);
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                this->gameState->builder1->move(0, -10);
-                this->gameState->view->move(0, -10);
-                if (this->gameState->builder1->collideRect(this->gameState->builder)) {
-                    this->gameState->builder1->move(0, 10);
-                    this->gameState->view->move(0, 10);
-                }
-            } 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-                this->gameState->builder1->move(0, 10);
-                this->gameState->view->move(0, 10);
-
-                if (this->gameState->builder1->collideRect(this->gameState->builder)) {
-                    this->gameState->builder1->move(0, -10);
-                    this->gameState->view->move(0, -10);
-                } 
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-                this->gameState->builder1->move(-10, 0);
-                this->gameState->view->move(-10.f, 0.f);
-                if (this->gameState->builder1->collideRect(this->gameState->builder)) {
-                    this->gameState->builder1->move(10, 0);
-                    this->gameState->view->move(10, 0);
-                }
-            }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-                this->gameState->builder1->move(10, 0);
-                this->gameState->view->move(10, 0);
-                if (this->gameState->builder1->collideRect(this->gameState->builder)) {
-                    this->gameState->builder1->move(-10, 0);
-                    this->gameState->view->move(-10, 0);
-                } 
-            }  
             
-            if(event.type == sf::Event::MouseWheelScrolled)
-            {
-                if(event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
-                    if (event.mouseWheelScroll.delta == -1)
-                    {
-                        this->gameState->view->zoom(1.5);
-                    }
-                    else 
-                    {
-                       this->gameState->view->zoom(0.5); 
-                    }
-                    
-                else if(event.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel)
-                    this->gameState->view->zoom(-1.f);
-                else
-                    std::cout << "wheel type: unknown" << std::endl;
-                
-                std::cout << "wheel movement: " << event.mouseWheelScroll.delta << std::endl;
-            }
+            handleKeys(&event);
+            handelArrowKeys(&event);
+            handleMouseKeys(&event);
+            handleUiButtonsEvents(&event);
+
         }
+}
+
+void Event::handleKeys(sf::Event* event)
+{
+    
+}
+
+void Event::handelArrowKeys(sf::Event* event)
+{
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        gameState->builder1->move(0, -10);
+        gameState->view->move(0, -10);
+        if (gameState->builder1->collideRect(gameState->builder)) {
+            gameState->builder1->move(0, 10);
+            gameState->view->move(0, 10);
+        }
+    } 
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        gameState->builder1->move(0, 10);
+        gameState->view->move(0, 10);
+
+        if (gameState->builder1->collideRect(gameState->builder)) {
+            gameState->builder1->move(0, -10);
+            gameState->view->move(0, -10);
+        } 
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        gameState->builder1->move(-10, 0);
+        gameState->view->move(-10.f, 0.f);
+        if (gameState->builder1->collideRect(gameState->builder)) {
+            gameState->builder1->move(10, 0);
+            gameState->view->move(10, 0);
+        }
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        gameState->builder1->move(10, 0);
+        gameState->view->move(10, 0);
+        if (gameState->builder1->collideRect(gameState->builder)) {
+            gameState->builder1->move(-10, 0);
+            gameState->view->move(-10, 0);
+        } 
+    }  
+}
+
+void Event::handleMouseKeys(sf::Event* event)
+{
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) 
+    {
+        gameState->texts[2]->setString("Left mouse pressed");
+        sf::Vector2i globalPosition = sf::Mouse::getPosition(*app->window);
+        if (gameState->builder->collidePoint(globalPosition.x, globalPosition.y)) {
+            gameState->builder->setFormColor(sf::Color::Yellow);
+        } else {
+            gameState->builder->setFormColor(sf::Color::Red);
+        }
+        gameState->texts[3]->setString(std::to_string(globalPosition.x) + "|" + std::to_string(globalPosition.y));
+        gameState->shape.setFillColor(sf::Color::Red);
+    }
+    else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    {
+        gameState->texts[2]->setString("Right mouse pressed");
+        gameState->shape.setFillColor(sf::Color::Blue);
+        gameState->builder->setFormColor(sf::Color::Blue);
+    }
+    
+    if(event->type == sf::Event::MouseWheelScrolled)
+    {
+        if(event->mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+            if (event->mouseWheelScroll.delta == -1)
+            {
+                gameState->view->zoom(1.5);
+            }
+            else 
+            {
+               gameState->view->zoom(0.5); 
+            }
+
+        else if(event->mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel)
+            gameState->view->zoom(-1.f);
+        else
+            std::cout << "wheel type: unknown" << std::endl;
+
+        std::cout << "wheel movement: " << event->mouseWheelScroll.delta << std::endl;
+    }
+}
+
+void Event::handleUiButtonsEvents(sf::Event* event)
+{
+    
 }

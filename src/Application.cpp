@@ -24,7 +24,6 @@ Application::~Application()
     
 }
 
-
 int Application::run()
 {
     window->setFramerateLimit(fps);
@@ -39,4 +38,3 @@ int Application::run()
 
     return 0;
 }
-

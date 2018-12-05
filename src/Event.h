@@ -1,6 +1,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 
+#include <SFML/Graphics.hpp>
 #include "GameState.h"
 #include "Application.h"
 
@@ -14,6 +15,11 @@ public:
 private:
     Application* app;
     GameState* gameState;
+    
+    void handleKeys(sf::Event* event);
+    void handelArrowKeys(sf::Event* event);
+    void handleMouseKeys(sf::Event* event);
+    void handleUiButtonsEvents(sf::Event* event);
 };
 
 #endif /* EVENT_H */
