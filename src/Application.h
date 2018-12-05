@@ -4,25 +4,23 @@
 #include "GameState.h"
 #include "Scene.h"
 #include "Event.h"
+#include "Window.h"
 
 class Event;
 class Scene;
-
+class Window;
 class Application
 {
 public:
     Application();
     ~Application();
     
-    sf::RenderWindow* window;
+    Window* window;
     Event* event;
     Scene* scene;
     
     int run();
 private:
+    int fps = 120;
     GameState* gameState;
-    
-    void initWindow();
-    void draw();
-    
 };

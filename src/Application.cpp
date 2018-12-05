@@ -7,12 +7,16 @@
 #include "Event.h"
 #include "Scene.h"
 #include "GameState.h"
+#include "Window.h"
 
 Application::Application()
 {
-    this->gameState = new GameState(this);
-    this->event = new Event(this, this->gameState);
-    this->scene = new Scene(this, this->gameState);
+    gameState = new GameState(this);
+    
+    window = new Window(sf::VideoMode(900, 600), "Robofarm");
+    
+    event = new Event(this, gameState);
+    scene = new Scene(this, gameState);
 }
 
 Application::~Application()
@@ -23,37 +27,16 @@ Application::~Application()
 
 int Application::run()
 {
-    this->initWindow();
-    this->scene->init();
+    window->setFramerateLimit(fps);
+    scene->init();
     
-    while (this->window->isOpen())
+    while (window->isOpen())
     {
-        this->event->handle();
-        this->gameState->update();
-        this->draw();
+        event->handle();
+        gameState->update();
+        window->draw(gameState);
     }
 
     return 0;
 }
 
-void Application::draw()
-{
-    this->window->setView(*this->gameState->view);
-    
-    this->window->clear(sf::Color::White);
-    for (unsigned i = 0; i < this->gameState->texts.size(); i++) {
-        this->window->draw(*this->gameState->texts[i]);
-    }
-
-    this->window->draw(this->gameState->shape);
-    this->window->draw(*this->gameState->builder->getDrawForm());
-    this->window->draw(*this->gameState->builder1->getDrawForm());
-    
-    this->window->display();
-}
-
-void Application::initWindow()
-{
-    this->window = new sf::RenderWindow(sf::VideoMode(900, 600), "Robofarm");
-    this->window->setFramerateLimit(60);
-}
