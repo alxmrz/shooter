@@ -1,38 +1,28 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
 
 #include <SFML/Graphics.hpp>
-#include <string>
-#include <vector>
-#include "Builder.h"
+#include "GameState.h"
+#include "Scene.h"
+#include "Event.h"
+
+class Event;
+class Scene;
 
 class Application
 {
 public:
     Application();
     ~Application();
+    
+    sf::RenderWindow* window;
+    Event* event;
+    Scene* scene;
+    
     int run();
 private:
-    sf::RenderWindow* window;
-    sf::Event event;
-    sf::CircleShape shape;
-    sf::Clock clock;
-    Builder* builder;
-    Builder* builder1;
-    sf::View* view;
-    std::vector<sf::Text*> texts;
-    int frame = 0;
-    bool right = true;
-    bool left = false;
+    GameState* gameState;
     
-    sf::Text* makeText(std::string str, int x, int );
-    void initScene();
-    void handleEvents();
-    void updateGame();
-    void drawGameObjects();
+    void initWindow();
+    void draw();
     
 };
-
-
-#endif /* APPLICATION_H */
-
