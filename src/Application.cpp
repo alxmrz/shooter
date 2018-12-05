@@ -52,10 +52,13 @@ void Application::initScene()
 {
     this->window = new sf::RenderWindow(sf::VideoMode(900, 600), "Infinity8loop");
     this->window->setFramerateLimit(60);
-    
+    this->view = new sf::View(sf::FloatRect(0.f, 0.f, 900.f, 600.f));
     this->shape = sf::CircleShape(20);
     this->builder = new Builder(200,200, 100, 100);
     this->builder1 = new Builder(500,200, 100, 100);
+    this->view->setCenter(500.f+50, 200.f+50);
+    this->window->setView(*this->view);
+    
     this->shape.setFillColor(sf::Color::Green);
     this->clock = sf::Clock();
     
@@ -95,28 +98,57 @@ void Application::handleEvents()
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                 this->builder1->move(0, -10);
+                this->view->move(0, -10);
                 if (this->builder1->collideRect(this->builder)) {
                     this->builder1->move(0, 10);
+                    this->view->move(0, 10);
                 }
             } 
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
                 this->builder1->move(0, 10);
+                this->view->move(0, 10);
+
                 if (this->builder1->collideRect(this->builder)) {
                     this->builder1->move(0, -10);
+                    this->view->move(0, -10);
                 } 
             }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
                 this->builder1->move(-10, 0);
+                this->view->move(-10.f, 0.f);
                 if (this->builder1->collideRect(this->builder)) {
                     this->builder1->move(10, 0);
+                    this->view->move(10, 0);
                 }
             }
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
                 this->builder1->move(10, 0);
+                this->view->move(10, 0);
                 if (this->builder1->collideRect(this->builder)) {
                     this->builder1->move(-10, 0);
+                    this->view->move(-10, 0);
                 } 
             }  
+            
+            if(event.type == sf::Event::MouseWheelScrolled)
+            {
+                if(event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+                    if (event.mouseWheelScroll.delta == -1)
+                    {
+                        this->view->zoom(1.5);
+                    }
+                    else 
+                    {
+                       this->view->zoom(0.5); 
+                    }
+                    
+                else if(event.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel)
+                    this->view->zoom(-1.f);
+                else
+                    std::cout << "wheel type: unknown" << std::endl;
+                
+                std::cout << "wheel movement: " << event.mouseWheelScroll.delta << std::endl;
+            }
         }
 }
 
@@ -155,6 +187,8 @@ void Application::updateGame()
 
 void Application::drawGameObjects()
 {
+
+    this->window->setView(*this->view);//"оживляем" камеру в окне sfml
     this->window->clear(sf::Color::White);
     for (unsigned i = 0; i < this->texts.size(); i++) {
         this->window->draw(*this->texts[i]);

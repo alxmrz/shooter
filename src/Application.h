@@ -19,6 +19,7 @@ private:
     sf::Clock clock;
     Builder* builder;
     Builder* builder1;
+    sf::View* view;
     std::vector<sf::Text*> texts;
     int frame = 0;
     bool right = true;
