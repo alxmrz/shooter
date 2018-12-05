@@ -11,6 +11,7 @@ GameState::GameState() {
 
 GameState::GameState(Application* app) {
     this->app = app;
+    
 }
 
 GameState::~GameState() {
@@ -28,7 +29,7 @@ sf::Text* GameState::makeText(std::string str, int x, int y)
         text->setFont(*font); 
         text->setString(str);
         text->setCharacterSize(12); 
-        text->setFillColor(sf::Color::White);
+        text->setFillColor(sf::Color::Black);
         text->setPosition(x , y );
         text->setStyle(sf::Text::Bold | sf::Text::Underlined);
         return text; 
@@ -39,7 +40,7 @@ void GameState::update()
 {
         sf::Time elapsed = this->clock.getElapsedTime();
         
-        if (this->right) {
+        /*if (this->right) {
             if (this->shape.getPosition().x >= 900) {
                 this->right = false;
                 this->left = true;
@@ -54,7 +55,7 @@ void GameState::update()
                 this->shape.move(-3, 0);
             }
             
-        }
+        }*/
        
         float seconds = elapsed.asSeconds();
         if (seconds >= 1) {
@@ -64,6 +65,6 @@ void GameState::update()
            this->frame++; 
         }
         
-        this->texts[0]->setString(std::to_string(frame));
-        this->texts[1]->setString(std::to_string(seconds));
+        /*this->texts[0]->setString(std::to_string(frame));
+        this->texts[1]->setString(std::to_string(seconds));*/
 }

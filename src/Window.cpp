@@ -14,13 +14,10 @@ void Window::draw(GameState* gameState)
     setView(*gameState->view);
     
     clear(sf::Color::White);
-    for (unsigned i = 0; i < gameState->texts.size(); i++) {
-        sf::RenderTarget::draw(*gameState->texts[i]);
+    
+    for (unsigned i = 0; i < gameState->gameObjects.size(); i++) {
+        sf::RenderTarget::draw(*gameState->gameObjects[i]->getDrawForm());
     }
-
-    sf::RenderTarget::draw(gameState->shape);
-    sf::RenderTarget::draw(*gameState->builder->getDrawForm());
-    sf::RenderTarget::draw(*gameState->builder1->getDrawForm());
     
     display();
 }

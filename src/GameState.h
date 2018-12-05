@@ -4,15 +4,19 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "Application.h"
+#include "CObject.h"
 #include "Builder.h"
+#include <vector>
+
 class Application;
+
 class GameState 
 {
 public:
     sf::CircleShape shape;
     sf::Clock clock;
     Builder* builder;
-    Builder* builder1;
+    Builder* player;
     sf::View* view;
     
     std::vector<sf::Text*> texts;
@@ -26,6 +30,7 @@ public:
     virtual ~GameState();
     void update();
     sf::Text* makeText(std::string str, int x, int y);
+    std::vector<CObject*> gameObjects;
 private:
     Application* app;
     

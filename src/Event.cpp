@@ -41,35 +41,35 @@ void Event::handleKeys(sf::Event* event)
 void Event::handelArrowKeys(sf::Event* event)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        gameState->builder1->move(0, -10);
+        gameState->player->move(0, -10);
         gameState->view->move(0, -10);
-        if (gameState->builder1->collideRect(gameState->builder)) {
-            gameState->builder1->move(0, 10);
+        if (gameState->player->collideRect(gameState->builder)) {
+            gameState->player->move(0, 10);
             gameState->view->move(0, 10);
         }
     } 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-        gameState->builder1->move(0, 10);
+        gameState->player->move(0, 10);
         gameState->view->move(0, 10);
 
-        if (gameState->builder1->collideRect(gameState->builder)) {
-            gameState->builder1->move(0, -10);
+        if (gameState->player->collideRect(gameState->builder)) {
+            gameState->player->move(0, -10);
             gameState->view->move(0, -10);
         } 
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        gameState->builder1->move(-10, 0);
+        gameState->player->move(-10, 0);
         gameState->view->move(-10.f, 0.f);
-        if (gameState->builder1->collideRect(gameState->builder)) {
-            gameState->builder1->move(10, 0);
+        if (gameState->player->collideRect(gameState->builder)) {
+            gameState->player->move(10, 0);
             gameState->view->move(10, 0);
         }
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        gameState->builder1->move(10, 0);
+        gameState->player->move(10, 0);
         gameState->view->move(10, 0);
-        if (gameState->builder1->collideRect(gameState->builder)) {
-            gameState->builder1->move(-10, 0);
+        if (gameState->player->collideRect(gameState->builder)) {
+            gameState->player->move(-10, 0);
             gameState->view->move(-10, 0);
         } 
     }  
@@ -79,20 +79,19 @@ void Event::handleMouseKeys(sf::Event* event)
 {
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) 
     {
-        gameState->texts[2]->setString("Left mouse pressed");
         sf::Vector2i globalPosition = sf::Mouse::getPosition(*app->window);
         if (gameState->builder->collidePoint(globalPosition.x, globalPosition.y)) {
             gameState->builder->setFormColor(sf::Color::Yellow);
         } else {
             gameState->builder->setFormColor(sf::Color::Red);
         }
-        gameState->texts[3]->setString(std::to_string(globalPosition.x) + "|" + std::to_string(globalPosition.y));
-        gameState->shape.setFillColor(sf::Color::Red);
+        
+        //gameState->shape.setFillColor(sf::Color::Red);
     }
     else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
     {
-        gameState->texts[2]->setString("Right mouse pressed");
-        gameState->shape.setFillColor(sf::Color::Blue);
+        
+        //gameState->shape.setFillColor(sf::Color::Blue);
         gameState->builder->setFormColor(sf::Color::Blue);
     }
     

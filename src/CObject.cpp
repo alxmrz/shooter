@@ -64,15 +64,15 @@ std::vector<std::vector<int>> CObject::getBorderPoints()
 {
     std::vector<std::vector<int>> points;
     
-    std::vector<int> first  = {this->getX(), this->getY()};
-    std::vector<int> second = {this->getX() + this->getWidth(), this->getY() + this->getHeight()};
-    std::vector<int> third  = {this->getX(), this->getY() + this->getHeight()};
-    std::vector<int> fourth = {this->getX() + this->getWidth(), this->getY()};
+    std::vector<int> first  = {getX(), getY()};
+    std::vector<int> second = {getX() + getWidth(), getY() + getHeight()};
+    std::vector<int> third  = {getX(), getY() + getHeight()};
+    std::vector<int> fourth = {getX() + getWidth(), getY()};
     
-    std::vector<int> fifth  = {this->getX() + this->getWidth()/2, this->getY()};
-    std::vector<int> sixth = {this->getX(), this->getY() + this->getHeight()/2};
-    std::vector<int> seventh  = {this->getX() + this->getWidth()/2, this->getY() + this->getHeight()};
-    std::vector<int> eight = {this->getX() + this->getWidth(), this->getY() + this->getWidth()/2};
+    std::vector<int> fifth  = {getX() + getWidth()/2, getY()};
+    std::vector<int> sixth = {getX(), getY() + getHeight()/2};
+    std::vector<int> seventh  = {getX() + getWidth()/2, getY() + getHeight()};
+    std::vector<int> eight = {getX() + getWidth(), getY() + getWidth()/2};
     
     points.push_back(first);
     points.push_back(second);
