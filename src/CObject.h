@@ -7,6 +7,7 @@ class CObject
 public:
     CObject();
     CObject(int x, int y, int width, int height);
+    
     bool collideRect(CObject* obj);
     bool collidePoint(int x, int y);
     virtual sf::Drawable* getDrawForm();

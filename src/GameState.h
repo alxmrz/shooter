@@ -29,7 +29,7 @@ public:
     GameState(Application* app);
     virtual ~GameState();
     void update();
-    sf::Text* makeText(std::string str, int x, int y);
+    
     std::vector<CObject*> gameObjects;
 private:
     Application* app;
