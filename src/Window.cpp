@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "GameState.h"
 #include <SFML/Graphics.hpp>
 
 Window::Window(sf::VideoMode mode, 
@@ -9,14 +10,15 @@ Window::Window(sf::VideoMode mode,
 {
 }
 
-void Window::draw(GameState* gameState)
+void Window::drawAll(GameState* gameState)
 {
     setView(*gameState->view);
     
     clear(sf::Color::White);
     
     for (unsigned i = 0; i < gameState->gameObjects.size(); i++) {
-        sf::RenderTarget::draw(*gameState->gameObjects[i]->getDrawForm());
+        //sf::RenderTarget::draw(*gameState->gameObjects[i]->getDrawForm());
+        gameState->gameObjects[i]->draw(this);
     }
     
     display();

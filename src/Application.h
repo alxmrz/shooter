@@ -1,14 +1,17 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "GameState.h"
+#include "Window.h"
 #include "Scene.h"
 #include "Event.h"
-#include "Window.h"
+#include "GameState.h"
 
 class Event;
 class Scene;
 class Window;
+
+class GameState;
+
 class Application
 {
 public:

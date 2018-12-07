@@ -2,6 +2,10 @@
 #define COBJECT_H
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "Window.h"
+
+class Window;
+
 class CObject
 {
 public:
@@ -15,6 +19,7 @@ public:
     int getY();
     int getWidth();
     int getHeight();
+    virtual void draw(Window* window);
     std::vector<std::vector<int>> getBorderPoints();
     
 protected:

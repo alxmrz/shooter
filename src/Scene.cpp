@@ -1,7 +1,8 @@
-
+#include <string>
 #include "GameState.h"
 #include "Application.h"
 #include "Scene.h"
+#include "Builder.h"
 #include "ui/Button.h"
 
 Scene::Scene() {
@@ -32,7 +33,8 @@ void Scene::init()
     this->gameState->gameObjects.push_back(this->gameState->makeText("", 300, 100));
     this->gameState->gameObjects.push_back(this->gameState->makeText("", 400, 200));*/
     //this->gameState->gameObjects.push_back(this->gameState->shape);
-    this->gameState->gameObjects.push_back(this->gameState->builder);
-    this->gameState->gameObjects.push_back(this->gameState->player);
-    this->gameState->gameObjects.push_back(new Button(100, 100, 100, 100));
+    //this->gameState->gameObjects.push_back(this->gameState->builder);
+    //this->gameState->gameObjects.push_back(this->gameState->player);
+    std::string str = "This is good";
+    this->gameState->gameObjects.push_back(new Button(str, 100, 100, 100, 100));
 }

@@ -3,10 +3,11 @@
 #include "CObject.h"
 #include <SFML/Graphics.hpp>
 
+
 class Builder: public CObject
 {
 public:
-    sf::CircleShape circle;
+    sf::CircleShape* circle;
     Builder(int x, int y, int width, int height);
     Builder();
     sf::Drawable* getDrawForm();

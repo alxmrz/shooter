@@ -2,9 +2,9 @@
 #define EVENT_H
 
 #include <SFML/Graphics.hpp>
-#include "GameState.h"
-#include "Application.h"
 
+class Application;
+class GameState;
 
 class Event {
 public:

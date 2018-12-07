@@ -1,14 +1,17 @@
-#pragma once
+#ifndef GAMESTATE_H
+#define GAMESTATE_H
 
 #include <string>
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include "Application.h"
 #include "CObject.h"
 #include "Builder.h"
-#include <vector>
 
 class Application;
+class CObject;
+class Builder;
 
 class GameState 
 {
@@ -36,4 +39,4 @@ private:
     
 };
 
-
+#endif

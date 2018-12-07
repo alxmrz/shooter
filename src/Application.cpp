@@ -1,12 +1,11 @@
-#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
+#include <SFML/Graphics.hpp>
 #include "Application.h"
-
+#include "GameState.h"
 #include "Builder.h"
 #include "Event.h"
 #include "Scene.h"
-#include "GameState.h"
 #include "Window.h"
 
 Application::Application()
@@ -33,7 +32,7 @@ int Application::run()
     {
         event->handle();
         gameState->update();
-        window->draw(gameState);
+        window->drawAll(gameState);
     }
 
     return 0;

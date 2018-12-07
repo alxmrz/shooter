@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Event.h"
+#include "Application.h"
 #include "GameState.h"
 
 Event::Event() {
