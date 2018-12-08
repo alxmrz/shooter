@@ -1,8 +1,10 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <string>
 #include "Event.h"
 #include "Application.h"
 #include "GameState.h"
+#include "ui/Button.h"
 
 Event::Event() {
 }
@@ -119,5 +121,23 @@ void Event::handleMouseKeys(sf::Event* event)
 
 void Event::handleUiButtonsEvents(sf::Event* event)
 {
-    
+    for (unsigned i = 0; i< gameState->objects.buttons.size();i++) {
+        Button* button = (Button*)gameState->objects.buttons[i];
+        sf::Vector2i globalPosition = sf::Mouse::getPosition(*app->window);
+        bool isHovered = button->collidePoint(globalPosition.x, globalPosition.y);
+        bool isClicked = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+        if (isHovered && isClicked) {
+            button->clicked();
+            std::string id = button->getId();
+            std::cout << "111!"<<std::endl;
+            if (id == "start") {
+                std::cout << "Start button clicked!";
+            }
+        } else if (isHovered) {
+            button->hovered();
+        } else {
+            button->defaultState();
+        }
+   
+    }
 }

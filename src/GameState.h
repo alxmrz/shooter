@@ -8,10 +8,20 @@
 #include "Application.h"
 #include "CObject.h"
 #include "Builder.h"
+#include "ui/Button.h"
 
 class Application;
 class CObject;
 class Builder;
+
+struct GameObjects 
+{
+    GameObjects();
+    
+    std::vector<CObject*> buttons;
+    virtual ~GameObjects();
+    std::vector<CObject*>* all();
+};
 
 class GameState 
 {
@@ -21,6 +31,7 @@ public:
     Builder* builder;
     Builder* player;
     sf::View* view;
+    GameObjects objects;
     
     std::vector<sf::Text*> texts;
     

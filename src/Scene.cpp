@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 #include "GameState.h"
 #include "Application.h"
 #include "Scene.h"
@@ -36,5 +37,8 @@ void Scene::init()
     //this->gameState->gameObjects.push_back(this->gameState->builder);
     //this->gameState->gameObjects.push_back(this->gameState->player);
     std::string str = "This is good";
-    this->gameState->gameObjects.push_back(new Button(str, 100, 100, 100, 100));
+    std::cout << "Before " << gameState->objects.buttons.size() << std::endl;
+    this->gameState->objects.buttons.push_back(new Button("start", "Start", 100, 100, 100, 30));
+    
+    std::cout << "After " << gameState->objects.buttons.size() << std::endl;
 }

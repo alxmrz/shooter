@@ -30,7 +30,7 @@ sf::Text* Text::makeText(std::string str, int x, int y)
         sf::Text* text = new sf::Text;
         text->setFont(*font); 
         text->setString(str);
-        text->setCharacterSize(12); 
+        text->setCharacterSize(15); 
         text->setFillColor(sf::Color::Black);
         text->setPosition(x , y );
         text->setStyle(sf::Text::Bold | sf::Text::Underlined);
