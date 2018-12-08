@@ -8,6 +8,7 @@
 #include "Scene.h"
 #include "Builder.h"
 #include "objects/Ground.h"
+#include "objects/Shooter.h"
 #include "ui/Button.h"
 
 Scene::Scene() {
@@ -76,21 +77,34 @@ void Scene::initNewGame()
 void Scene::generateLevel()
 {
     std::string level = 
-            "GGGGGGGG|"
-            "G      G|"
-            "G      G|"
-            "G      G|"
-            "GGGGGGGG|"
+            "GGGGGGGGGGGG|"
+            "G          G|"
+            "G     GGG  G|"
+            "G          G|"
+            "G GGGG     G|"
+            "G          G|"
+            "G  S  GGG  G|"
+            "G GG       G|"
+            "GGGGGGGGGGGG|"
             ;
     std::vector<std::string> lines;
     boost::split(lines, level, boost::algorithm::is_any_of("|"), boost::token_compress_on);
     int x = 0;
     int y = 0;
-    for (std::string line: lines) {
+    for (std::string line: lines) 
+    {
         x=0;
-        for(char c : line) {
-            if (c == 'G') {
+        for(char c : line) 
+        {
+            if (c == 'G') 
+            {
                 gameState->objects.background.push_back(new Ground(x, y, 50, 50));
+            }
+            else if (c == 'S')
+            {
+                Shooter* shooter = new Shooter(x, y, 50, 50);
+                gameState->objects.player = shooter;
+                gameState->objects.background.push_back(shooter);
             }
             x += 50;
             std::cout << c << std::endl;

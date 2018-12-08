@@ -26,6 +26,7 @@ Application::~Application()
 int Application::run()
 {
     window->setFramerateLimit(fps);
+    //scene->initMainMenu();
     scene->initNewGame();
     
     while (window->isOpen())

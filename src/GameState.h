@@ -13,6 +13,7 @@
 class Application;
 class CObject;
 class Builder;
+class Shooter;
 
 struct GameObjects 
 {
@@ -21,7 +22,7 @@ struct GameObjects
     std::vector<CObject*> buttons;
     std::vector<CObject*> background;
     std::vector<Builder*> playable;
-    Builder* player;
+    Shooter* player;
     
     virtual ~GameObjects();
     std::vector<CObject*>* all();
