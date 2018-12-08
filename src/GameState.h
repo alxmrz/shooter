@@ -6,28 +6,29 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "Application.h"
+#include "GameObjects.h"
 #include "CObject.h"
 #include "Builder.h"
-#include "ui/Button.h"
+
 
 class Application;
 class CObject;
 class Builder;
-class Shooter;
+class GameObjects;
 
-struct GameObjects 
+/*struct GameObjects 
 {
     GameObjects();
     
     std::vector<CObject*> buttons;
     std::vector<CObject*> background;
-    std::vector<Builder*> playable;
+    std::vector<CObject*> playable;
     Shooter* player;
     
     virtual ~GameObjects();
     std::vector<CObject*>* all();
     void reset();
-};
+};*/
 
 class GameState 
 {
@@ -53,6 +54,7 @@ public:
     std::vector<CObject*> gameObjects;
 private:
     Application* app;
+    void gravity();
     
 };
 

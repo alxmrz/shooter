@@ -2,15 +2,19 @@
 #define COBJECT_H
 #include <SFML/Graphics.hpp>
 #include <vector>
+
 #include "Window.h"
+#include "GameObjects.h"
 
 class Window;
+struct GameObjects;
 
 class CObject
 {
 public:
     CObject();
     CObject(int x, int y, int width, int height);
+    CObject(GameObjects* go, int x, int y, int width, int height);
     
     bool collideRect(CObject* obj);
     bool collidePoint(int x, int y);
@@ -27,6 +31,7 @@ protected:
     int y;
     int width;
     int height;
+    GameObjects* go;
 };
 
 #endif /* COBJECT_H */

@@ -1,9 +1,10 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "GameState.h"
-#include "ui/Button.h"
+#include "GameObjects.h"
 #include "CObject.h"
+#include "objects/Shooter.h"
+#include "ui/Button.h"
 
 
 GameObjects::GameObjects()

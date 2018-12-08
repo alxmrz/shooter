@@ -1,7 +1,6 @@
 #include <vector>
 #include "Window.h"
 #include "GameState.h"
-#include "CObject.h"
 #include <SFML/Graphics.hpp>
 
 Window::Window(sf::VideoMode mode, 

@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "GameState.h"
 #include "Application.h"
+#include "CObject.h"
 #include "Builder.h"
 
 GameState::GameState() {
@@ -19,33 +20,39 @@ GameState::~GameState() {
 
 void GameState::update()
 {
-        sf::Time elapsed = this->clock.getElapsedTime();
-        
-        /*if (this->right) {
-            if (this->shape.getPosition().x >= 900) {
-                this->right = false;
-                this->left = true;
-            } else {
-                this->shape.move(3, 0);  
-            }
-        } else if(this->left) {
-            if (this->shape.getPosition().x <= 0) {
-                this->left = false;
-                this->right = true;
-            } else {
-                this->shape.move(-3, 0);
-            }
-            
-        }*/
-       
-        float seconds = elapsed.asSeconds();
-        if (seconds >= 1) {
-           this->clock.restart();
-           this->frame = 0;
-        } else {
-           this->frame++; 
+    sf::Time elapsed = this->clock.getElapsedTime();
+    gravity();
+    float seconds = elapsed.asSeconds();
+    if (seconds >= 1) {
+       this->clock.restart();
+       this->frame = 0;
+    } else {
+       this->frame++; 
+    }
+}
+
+void GameState::gravity()
+{
+   
+    bool collided = false;
+    for (auto* obj: objects.background)
+    {
+        CObject* collider = new CObject(
+                objects.player->getX(), 
+                objects.player->getY()+10, 
+                objects.player->getWidth(), 
+                objects.player->getHeight()
+        );
+        if (collider->collideRect(obj))
+        {
+            collided = true;
+            break;
         }
-        
-        /*this->texts[0]->setString(std::to_string(frame));
-        this->texts[1]->setString(std::to_string(seconds));*/
+        delete collider;
+    }
+    
+    if (!collided) {
+        objects.player->move(0, 1); 
+    }
+    
 }

@@ -102,9 +102,9 @@ void Scene::generateLevel()
             }
             else if (c == 'S')
             {
-                Shooter* shooter = new Shooter(x, y, 50, 50);
+                Shooter* shooter = new Shooter(&gameState->objects, x, y, 50, 50);
                 gameState->objects.player = shooter;
-                gameState->objects.background.push_back(shooter);
+                gameState->objects.playable.push_back(shooter);
             }
             x += 50;
             std::cout << c << std::endl;

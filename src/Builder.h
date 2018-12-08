@@ -1,8 +1,7 @@
 #ifndef BUILDER_H
 #define BUILDER_H
-#include "CObject.h"
 #include <SFML/Graphics.hpp>
-
+#include "CObject.h"
 
 class Builder: public CObject
 {

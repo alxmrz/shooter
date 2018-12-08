@@ -1,9 +1,21 @@
 #include "CObject.h"
+#include "GameObjects.h"
+#include "Window.h"
 #include <vector>
 
 CObject::CObject(){}
 
 CObject::CObject(int x, int y, int width, int height):
+        x(x), 
+        y(y), 
+        width(width), 
+        height(height)
+{
+    
+}
+
+CObject::CObject(GameObjects* go, int x, int y, int width, int height):
+        go(go),
         x(x), 
         y(y), 
         width(width), 

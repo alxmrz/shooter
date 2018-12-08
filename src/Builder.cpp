@@ -1,5 +1,6 @@
-#include "Builder.h"
 #include "CObject.h"
+#include "Builder.h"
+
 #include <SFML/Graphics.hpp>
 
 Builder::Builder(){}

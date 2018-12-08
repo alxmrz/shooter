@@ -38,7 +38,10 @@ void Event::handle()
 
 void Event::handleKeys(sf::Event* event)
 {
-    
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) 
+    {
+        gameState->objects.player->move(0,-10);
+    }
 }
 
 void Event::handelArrowKeys(sf::Event* event)
@@ -47,13 +50,13 @@ void Event::handelArrowKeys(sf::Event* event)
     
     } 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-    
+        
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-     
+       gameState->objects.player->move(-10,0);
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-       
+       gameState->objects.player->move(10,0);
     }  
 }
 

@@ -9,7 +9,6 @@
 class Event;
 class Scene;
 class Window;
-
 class GameState;
 
 class Application
