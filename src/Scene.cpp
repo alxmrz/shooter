@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "Scene.h"
 #include "Builder.h"
+#include "objects/Ground.h"
 #include "ui/Button.h"
 
 Scene::Scene() {
@@ -63,6 +64,7 @@ void Scene::initNewGame()
             
     gameState->objects.playable.push_back(builder);
     gameState->objects.playable.push_back(player);
+    gameState->objects.background.push_back(new Ground(400, 400, 50, 50));
     
     gameState->objects.player = player;
     

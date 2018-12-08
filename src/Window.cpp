@@ -28,6 +28,10 @@ void Window::drawAll(GameState* gameState)
         gameState->objects.playable[i]->draw(this);
     }
     
+    for (unsigned i = 0; i < gameState->objects.background.size(); i++) {
+        gameState->objects.background[i]->draw(this);
+    }
+    
     
     display();
 }

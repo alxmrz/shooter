@@ -33,5 +33,6 @@ void GameObjects::reset()
 {
     buttons.clear();
     playable.clear();
+    background.clear();
     player = NULL;
 }
