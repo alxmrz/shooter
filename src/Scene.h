@@ -14,6 +14,8 @@ public:
     Scene(Application* app, GameState* gameState);
     virtual ~Scene();
     void init();
+    void initMainMenu();
+    void initNewGame();
 private:
     Application* app;
     GameState* gameState;

@@ -19,8 +19,12 @@ struct GameObjects
     GameObjects();
     
     std::vector<CObject*> buttons;
+    std::vector<Builder*> playable;
+    Builder* player;
+    
     virtual ~GameObjects();
     std::vector<CObject*>* all();
+    void reset();
 };
 
 class GameState 

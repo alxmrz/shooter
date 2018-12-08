@@ -44,37 +44,16 @@ void Event::handleKeys(sf::Event* event)
 void Event::handelArrowKeys(sf::Event* event)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        gameState->player->move(0, -10);
-        gameState->view->move(0, -10);
-        if (gameState->player->collideRect(gameState->builder)) {
-            gameState->player->move(0, 10);
-            gameState->view->move(0, 10);
-        }
+    
     } 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-        gameState->player->move(0, 10);
-        gameState->view->move(0, 10);
-
-        if (gameState->player->collideRect(gameState->builder)) {
-            gameState->player->move(0, -10);
-            gameState->view->move(0, -10);
-        } 
+    
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        gameState->player->move(-10, 0);
-        gameState->view->move(-10.f, 0.f);
-        if (gameState->player->collideRect(gameState->builder)) {
-            gameState->player->move(10, 0);
-            gameState->view->move(10, 0);
-        }
+     
     }
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        gameState->player->move(10, 0);
-        gameState->view->move(10, 0);
-        if (gameState->player->collideRect(gameState->builder)) {
-            gameState->player->move(-10, 0);
-            gameState->view->move(-10, 0);
-        } 
+       
     }  
 }
 
@@ -82,20 +61,14 @@ void Event::handleMouseKeys(sf::Event* event)
 {
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) 
     {
-        sf::Vector2i globalPosition = sf::Mouse::getPosition(*app->window);
-        if (gameState->builder->collidePoint(globalPosition.x, globalPosition.y)) {
-            gameState->builder->setFormColor(sf::Color::Yellow);
-        } else {
-            gameState->builder->setFormColor(sf::Color::Red);
-        }
+      
         
         //gameState->shape.setFillColor(sf::Color::Red);
     }
     else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
     {
         
-        //gameState->shape.setFillColor(sf::Color::Blue);
-        gameState->builder->setFormColor(sf::Color::Blue);
+     
     }
     
     if(event->type == sf::Event::MouseWheelScrolled)
@@ -129,9 +102,13 @@ void Event::handleUiButtonsEvents(sf::Event* event)
         if (isHovered && isClicked) {
             button->clicked();
             std::string id = button->getId();
-            std::cout << "111!"<<std::endl;
+
             if (id == "start") {
-                std::cout << "Start button clicked!";
+               app->scene->initNewGame(); 
+               break;
+            } 
+            else if (id == "exit") {
+                app->window->close();
             }
         } else if (isHovered) {
             button->hovered();

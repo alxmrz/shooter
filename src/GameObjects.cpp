@@ -13,7 +13,7 @@ GameObjects::GameObjects()
 
 GameObjects::~GameObjects()
 {
-    
+   
 }
 std::vector<CObject*>*  GameObjects::all()
 {
@@ -27,4 +27,11 @@ std::vector<CObject*>*  GameObjects::all()
         std::cout << buttons.size() << "###" << i;
     }
     return al1l;
+}
+
+void GameObjects::reset()
+{
+    buttons.clear();
+    playable.clear();
+    player = NULL;
 }

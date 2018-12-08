@@ -19,8 +19,15 @@ void Window::drawAll(GameState* gameState)
     clear(sf::Color::White);
   
     
+    
     for (unsigned i = 0; i < gameState->objects.buttons.size(); i++) {
         gameState->objects.buttons[i]->draw(this);
     }
+    
+    for (unsigned i = 0; i < gameState->objects.playable.size(); i++) {
+        gameState->objects.playable[i]->draw(this);
+    }
+    
+    
     display();
 }
