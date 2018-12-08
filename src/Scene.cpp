@@ -1,5 +1,8 @@
 #include <string>
+#include <vector>
 #include <iostream>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #include "GameState.h"
 #include "Application.h"
 #include "Scene.h"
@@ -58,14 +61,41 @@ void Scene::initMainMenu()
 void Scene::initNewGame()
 {
     gameState->objects.reset();
-    
-    Builder* builder = new Builder(200,200, 100, 100);
+    generateLevel();
+    /*Builder* builder = new Builder(200,200, 100, 100);
     Builder* player = new Builder(500,200, 100, 100);
             
     gameState->objects.playable.push_back(builder);
     gameState->objects.playable.push_back(player);
     gameState->objects.background.push_back(new Ground(400, 400, 50, 50));
     
-    gameState->objects.player = player;
+    gameState->objects.player = player;*/
     
+}
+
+void Scene::generateLevel()
+{
+    std::string level = 
+            "GGGGGGGG|"
+            "G      G|"
+            "G      G|"
+            "G      G|"
+            "GGGGGGGG|"
+            ;
+    std::vector<std::string> lines;
+    boost::split(lines, level, boost::algorithm::is_any_of("|"), boost::token_compress_on);
+    int x = 0;
+    int y = 0;
+    for (std::string line: lines) {
+        x=0;
+        for(char c : line) {
+            if (c == 'G') {
+                gameState->objects.background.push_back(new Ground(x, y, 50, 50));
+            }
+            x += 50;
+            std::cout << c << std::endl;
+        }
+        y+=50;
+    }
+    std::cout << lines[0];
 }

@@ -16,6 +16,7 @@ public:
     void init();
     void initMainMenu();
     void initNewGame();
+    void generateLevel();
 private:
     Application* app;
     GameState* gameState;
