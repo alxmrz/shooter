@@ -16,12 +16,10 @@ Window::Window(sf::VideoMode mode,
 void Window::drawAll(GameState* gameState)
 {
     setView(*gameState->view);
+    
     sf::Time elapsed = gameState->clock.getElapsedTime();
     float dt = elapsed.asMilliseconds() / 1000.f;
-   /* std::cout << dt << std::endl;
-    std::cout << elapsed.asMilliseconds() / 1000 << std::endl;
-    std::cout << elapsed.asMilliseconds() / 1000.f << std::endl;
-    std::cout << elapsed.asMilliseconds() << std::endl;*/
+    
     clear(sf::Color::White);
   
     
@@ -40,6 +38,4 @@ void Window::drawAll(GameState* gameState)
     
     gameState->clock.restart();
     display();
-    this->setFramerateLimit(60);
-    
 }

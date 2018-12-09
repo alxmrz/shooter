@@ -29,7 +29,7 @@ Shooter::Shooter(GameObjects* go, int x, int y, int width, int height): CObject(
 Shooter::~Shooter() {
 }
 
-void Shooter::move(int x, int y)
+bool Shooter::move(int x, int y)
 {    
     if (!collideObjectAfterMove(x, y))
     {
@@ -53,9 +53,10 @@ void Shooter::move(int x, int y)
             isMoving = true;
         }
         
+        return true;
     }
     
-    
+    return false;
 }
 
 sf::Drawable* Shooter::getDrawForm()

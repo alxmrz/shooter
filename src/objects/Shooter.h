@@ -23,12 +23,12 @@ public:
     sf::Drawable* getDrawForm() override;
     
     void draw(Window* window, float dt) override;
-    void move(int x, int y);
+    bool move(int x, int y);
     void setFormColor(sf::Color);
 private:
     std::string direction = "right";
     int currentFrame = 0;
-    float animationTime = 0.1;
+    float animationTime = 0.08;
     float elapsedTime = 0.0;
     bool isMoving = false;
     bool isJump = false;

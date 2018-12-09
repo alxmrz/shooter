@@ -29,5 +29,5 @@ void GameState::update()
 
 void GameState::gravity()
 {
-    objects.player->move(0, 5);    
+    sf::Time elapsed = clock.getElapsedTime();
 }

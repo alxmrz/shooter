@@ -50,6 +50,7 @@ public:
     std::vector<CObject*> gameObjects;
 private:
     Application* app;
+    int gravityPower = 0;
     void gravity();
     
 };
