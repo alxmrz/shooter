@@ -70,8 +70,8 @@ void Scene::generateLevel()
     std::string level = 
             "GGGGGGGGGGGGGGGGGG|"
             "G      S         G|"
-            "G  S  GGG        G|"
-            "G  G             G|"
+            "G     GGG        G|"
+            "GS G             G|"
             "GGGGG            G|"
             "G    G         S G|"
             "G  P          GGGG|"
