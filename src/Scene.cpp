@@ -34,14 +34,7 @@ void Scene::init()
     
     this->gameState->shape.setFillColor(sf::Color::Green);
     this->gameState->clock = sf::Clock();
-    
-    /*this->gameState->gameObjects.push_back(this->gameState->makeText("", 100, 100));
-    this->gameState->gameObjects.push_back(this->gameState->makeText("", 200, 100));
-    this->gameState->gameObjects.push_back(this->gameState->makeText("", 300, 100));
-    this->gameState->gameObjects.push_back(this->gameState->makeText("", 400, 200));*/
-    //this->gameState->gameObjects.push_back(this->gameState->shape);
-    //this->gameState->gameObjects.push_back(this->gameState->builder);
-    //this->gameState->gameObjects.push_back(this->gameState->player);
+
     std::string str = "This is good";
     std::cout << "Before " << gameState->objects.buttons.size() << std::endl;
     this->gameState->objects.buttons.push_back(new Button("start", "Start", 100, 100, 100, 30));
@@ -75,7 +68,10 @@ void Scene::generateLevel()
             "GGGGG            G|"
             "G    G         S G|"
             "G  P          GGGG|"
-            "G GG         S   G|"
+            "G GG             G|"
+            "G GG             G|"
+            "G GG             G|"
+            "G GG           S G|"
             "GGGGGGGGGGGGGGGGGG|"
             ;
     std::vector<std::string> lines;
