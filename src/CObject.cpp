@@ -105,3 +105,24 @@ void CObject::draw(Window* window)
 {
     window->draw(*getDrawForm());
 }
+
+bool CObject::collideObjectAfterMove(int x, int y)
+{
+    for (auto* obj: go->background)
+    {
+        CObject* collider = new CObject(
+                getX() + x, 
+                getY()+ y, 
+                getWidth(), 
+                getHeight()
+        );
+        if (collider->collideRect(obj))
+        {
+            return true;
+            break;
+        }
+        delete collider;
+    }
+    
+    return false;
+}

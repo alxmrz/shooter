@@ -29,6 +29,7 @@ protected:
     int y;
     int width;
     int height;
+    bool collideObjectAfterMove(int x, int y);
     
 };
 

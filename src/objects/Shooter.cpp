@@ -29,9 +29,13 @@ Shooter::~Shooter() {
 
 void Shooter::move(int x, int y)
 {
-    this->x += x;
-    this->y += y;
-    this->sprite->setPosition(this->x, this->y);
+    if (!collideObjectAfterMove(x, y))
+    {
+        this->x += x;
+        this->y += y;
+        this->sprite->setPosition(this->x, this->y);
+    }
+    
 }
 
 sf::Drawable* Shooter::getDrawForm()

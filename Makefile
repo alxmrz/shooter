@@ -22,23 +22,24 @@ DIRS = build build/src build/src/objects build/src/ui
 
 OBJECTS=$(SOURCES:.cpp=.o)
 
-EXECUTABLE=hello
+EXECUTABLE=run
 
 DIR_OBJECTS:=$(addprefix  build/, $(OBJECTS))
 
 	
-all: dirs $(SOURCES) $(EXECUTABLE)
+all: clean dirs $(SOURCES) $(EXECUTABLE)
+	
 dirs:
 	$(info $(shell mkdir -p $(DIRS)))
 	
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC)  $(DIR_OBJECTS) $(LDFLAGS) -o dist/$@
+	$(CC)  $(DIR_OBJECTS) $(LDFLAGS) -o $@
 
 %.o : %.cpp
 	$(CC) $(CFLAGS) $< -o build/$@
 
 clean:
-	rm -rf *.o dist/hello
+	rm -rf *.o dist/hello build/*.o build/src/*.o
 	
 ex:
 	echo $(DIR_OBJECTS)
