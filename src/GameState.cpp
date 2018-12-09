@@ -6,6 +6,7 @@
 #include "Application.h"
 #include "CObject.h"
 #include "Builder.h"
+#include "objects/Shooter.h"
 
 GameState::GameState() {
 }
@@ -33,26 +34,5 @@ void GameState::update()
 
 void GameState::gravity()
 {
-   
-    bool collided = false;
-    for (auto* obj: objects.background)
-    {
-        CObject* collider = new CObject(
-                objects.player->getX(), 
-                objects.player->getY()+10, 
-                objects.player->getWidth(), 
-                objects.player->getHeight()
-        );
-        if (collider->collideRect(obj))
-        {
-            collided = true;
-            break;
-        }
-        delete collider;
-    }
-    
-    if (!collided) {
-        objects.player->move(0, 1); 
-    }
-    
+    objects.player->move(0, 5);    
 }

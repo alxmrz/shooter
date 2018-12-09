@@ -3,7 +3,7 @@ CFLAGS=-c -Wall
 LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system
 
 SOURCES= \
-main.cpp \
+main_check.cpp \
 src/Application.cpp \
 src/Builder.cpp \
 src/CObject.cpp \
@@ -22,24 +22,23 @@ DIRS = build build/src build/src/objects build/src/ui
 
 OBJECTS=$(SOURCES:.cpp=.o)
 
-EXECUTABLE=run
+EXECUTABLE=hello
 
 DIR_OBJECTS:=$(addprefix  build/, $(OBJECTS))
 
 	
-all: clean dirs $(SOURCES) $(EXECUTABLE)
-	
+all: dirs $(SOURCES) $(EXECUTABLE)
 dirs:
 	$(info $(shell mkdir -p $(DIRS)))
 	
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC)  $(DIR_OBJECTS) $(LDFLAGS) -o $@
+	$(CC)  $(DIR_OBJECTS) $(LDFLAGS) -o dist/$@
 
 %.o : %.cpp
 	$(CC) $(CFLAGS) $< -o build/$@
 
 clean:
-	rm -rf *.o dist/hello build/*.o build/src/*.o
+	rm -rf *.o dist/hello
 	
 ex:
 	echo $(DIR_OBJECTS)

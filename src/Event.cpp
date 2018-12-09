@@ -2,6 +2,9 @@
 #include <iostream>
 #include <string>
 #include "Event.h"
+#include "Window.h"
+#include "objects/Shooter.h"
+#include "Scene.h"
 #include "Application.h"
 #include "GameState.h"
 #include "ui/Button.h"
@@ -47,7 +50,7 @@ void Event::handleKeys(sf::Event* event)
 void Event::handelArrowKeys(sf::Event* event)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-    
+        gameState->objects.player->move(0,-50);
     } 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
         

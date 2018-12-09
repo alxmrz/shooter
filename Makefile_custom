@@ -1,2 +1,0 @@
-all:
-	g++ main_check.cpp -o hello

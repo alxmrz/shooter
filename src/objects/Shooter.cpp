@@ -1,8 +1,8 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "Shooter.h"
-#include "CObject.h"
-#include "GameObjects.h"
+#include "../CObject.h"
+#include "../GameObjects.h"
 
 Shooter::Shooter() {
 }
@@ -29,9 +29,13 @@ Shooter::~Shooter() {
 
 void Shooter::move(int x, int y)
 {
-    this->x += x;
-    this->y += y;
-    this->sprite->setPosition(this->x, this->y);
+    if (!collideObjectAfterMove(x, y))
+    {
+        this->x += x;
+        this->y += y;
+        this->sprite->setPosition(this->x, this->y);
+    }
+    
 }
 
 sf::Drawable* Shooter::getDrawForm()

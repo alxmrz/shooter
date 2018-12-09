@@ -80,11 +80,11 @@ void Scene::generateLevel()
             "GGGGGGGGGGGG|"
             "G          G|"
             "G     GGG  G|"
-            "G          G|"
-            "G GGGG     G|"
-            "G          G|"
-            "G  S  GGG  G|"
-            "G GG       G|"
+            "G  G       G|"
+            "GGGGG      G|"
+            "G    G     G|"
+            "G  S    GGGG|"
+            "G GG   G   G|"
             "GGGGGGGGGGGG|"
             ;
     std::vector<std::string> lines;

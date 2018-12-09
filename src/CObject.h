@@ -3,9 +3,6 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
-#include "Window.h"
-#include "GameObjects.h"
-
 class Window;
 struct GameObjects;
 
@@ -27,11 +24,13 @@ public:
     std::vector<std::vector<int>> getBorderPoints();
     
 protected:
+    GameObjects* go;
     int x;
     int y;
     int width;
     int height;
-    GameObjects* go;
+    bool collideObjectAfterMove(int x, int y);
+    
 };
 
 #endif /* COBJECT_H */

@@ -2,9 +2,6 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "Application.h"
-#include "GameState.h"
-
 class Application;
 class GameState;
 
