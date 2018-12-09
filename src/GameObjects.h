@@ -2,10 +2,6 @@
 #define GAMEOBJECTS_H
 
 
-#include "CObject.h"
-#include "objects/Shooter.h"
-
-
 class Shooter;
 class CObject;
 

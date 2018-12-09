@@ -4,12 +4,8 @@
 #include <string>
 #include <vector>
 #include <SFML/Graphics.hpp>
-#include <vector>
-#include "Application.h"
 #include "GameObjects.h"
-#include "CObject.h"
-#include "Builder.h"
-
+#include <vector>
 
 class Application;
 class CObject;

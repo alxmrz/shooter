@@ -6,6 +6,7 @@
 #include "Application.h"
 #include "CObject.h"
 #include "Builder.h"
+#include "objects/Shooter.h"
 
 GameState::GameState() {
 }

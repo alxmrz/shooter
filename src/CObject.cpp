@@ -50,7 +50,9 @@ bool CObject::collidePoint(int x, int y)
             y >= this->y +1;
 }
 
-sf::Drawable* CObject::getDrawForm(){}
+sf::Drawable* CObject::getDrawForm(){
+
+}
 
 int CObject::getX()
 {

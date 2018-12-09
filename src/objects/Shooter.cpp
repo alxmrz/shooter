@@ -1,8 +1,8 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "Shooter.h"
-#include "CObject.h"
-#include "GameObjects.h"
+#include "../CObject.h"
+#include "../GameObjects.h"
 
 Shooter::Shooter() {
 }

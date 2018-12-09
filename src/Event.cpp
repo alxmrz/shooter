@@ -2,6 +2,9 @@
 #include <iostream>
 #include <string>
 #include "Event.h"
+#include "Window.h"
+#include "objects/Shooter.h"
+#include "Scene.h"
 #include "Application.h"
 #include "GameState.h"
 #include "ui/Button.h"

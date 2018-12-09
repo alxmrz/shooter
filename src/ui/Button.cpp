@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "Button.h"
 #include "../CObject.h"
+#include "../Window.h"
 #include "Text.h"
 
 Button::Button() {

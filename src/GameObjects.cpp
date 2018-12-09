@@ -18,16 +18,16 @@ GameObjects::~GameObjects()
 }
 std::vector<CObject*>*  GameObjects::all()
 {
-    std::vector<int>* all;
-    std::vector<CObject*>* al1l;
+
+    std::vector<CObject*>* all;
     
-    std::cout << buttons.size() << "###" << std::endl;
+    /*std::cout << buttons.size() << "###" << std::endl;
     for (unsigned i = 0; i < buttons.size(); i++) {
         Button* b = (Button*)buttons[i];
-        (*al1l)[i] = b;
+        (*all)[i] = b;
         std::cout << buttons.size() << "###" << i;
-    }
-    return al1l;
+    }*/
+    return all;
 }
 
 void GameObjects::reset()
