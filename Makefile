@@ -1,5 +1,5 @@
-CC=g++
-CFLAGS=-c -Wall
+CC=g++ 
+CFLAGS=-c -Wall -g
 LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system
 
 SOURCES= \
@@ -27,19 +27,19 @@ EXECUTABLE=run
 DIR_OBJECTS:=$(addprefix  build/, $(OBJECTS))
 
 	
-all: clean dirs $(SOURCES) $(EXECUTABLE)
+all: dirs $(SOURCES) $(EXECUTABLE)
 	
 dirs:
 	$(info $(shell mkdir -p $(DIRS)))
 	
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC)  $(DIR_OBJECTS) $(LDFLAGS) -o $@
+	$(CC) -no-pie $(DIR_OBJECTS) $(LDFLAGS) -o $@
 
 %.o : %.cpp
 	$(CC) $(CFLAGS) $< -o build/$@
 
 clean:
-	rm -rf *.o dist/hello build/*.o build/src/*.o
+	rm -rf *.o ./run build/*.o build/src/*.o
 	
 ex:
 	echo $(DIR_OBJECTS)

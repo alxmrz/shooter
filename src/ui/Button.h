@@ -16,7 +16,7 @@ public:
     Button(const CObject& orig);
     Button(std::string id, std::string text, int x, int y, int width, int height);
     virtual ~Button();
-    void draw(Window* window) override;
+    void draw(Window* window, float dt) override;
     sf::Drawable* getDrawForm() override;
     std::string getId();
     void setBorderColor(sf::Color);

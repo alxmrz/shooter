@@ -101,7 +101,7 @@ std::vector<std::vector<int>> CObject::getBorderPoints()
     return points; 
 }
 
-void CObject::draw(Window* window)
+void CObject::draw(Window* window, float dt)
 {
     window->draw(*getDrawForm());
 }

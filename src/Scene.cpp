@@ -63,29 +63,20 @@ void Scene::initNewGame()
 {
     gameState->objects.reset();
     generateLevel();
-    /*Builder* builder = new Builder(200,200, 100, 100);
-    Builder* player = new Builder(500,200, 100, 100);
-            
-    gameState->objects.playable.push_back(builder);
-    gameState->objects.playable.push_back(player);
-    gameState->objects.background.push_back(new Ground(400, 400, 50, 50));
-    
-    gameState->objects.player = player;*/
-    
 }
 
 void Scene::generateLevel()
 {
     std::string level = 
-            "GGGGGGGGGGGG|"
-            "G          G|"
-            "G     GGG  G|"
-            "G  G       G|"
-            "GGGGG      G|"
-            "G    G     G|"
-            "G  S    GGGG|"
-            "G GG   G   G|"
-            "GGGGGGGGGGGG|"
+            "GGGGGGGGGGGGGGGGGG|"
+            "G      S         G|"
+            "G  S  GGG        G|"
+            "G  G             G|"
+            "GGGGG            G|"
+            "G    G         S G|"
+            "G  P          GGGG|"
+            "G GG         S   G|"
+            "GGGGGGGGGGGGGGGGGG|"
             ;
     std::vector<std::string> lines;
     boost::split(lines, level, boost::algorithm::is_any_of("|"), boost::token_compress_on);
@@ -100,16 +91,20 @@ void Scene::generateLevel()
             {
                 gameState->objects.background.push_back(new Ground(x, y, 50, 50));
             }
-            else if (c == 'S')
+            else if (c == 'P')
             {
                 Shooter* shooter = new Shooter(&gameState->objects, x, y, 50, 50);
                 gameState->objects.player = shooter;
                 gameState->objects.playable.push_back(shooter);
             }
+            else if (c == 'S')
+            {
+                Shooter* shooter = new Shooter(&gameState->objects, x, y, 50, 50);
+                gameState->objects.playable.push_back(shooter);
+            }
             x += 50;
-            std::cout << c << std::endl;
         }
         y+=50;
     }
-    std::cout << lines[0];
+ 
 }

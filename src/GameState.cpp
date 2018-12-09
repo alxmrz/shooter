@@ -21,15 +21,10 @@ GameState::~GameState() {
 
 void GameState::update()
 {
-    sf::Time elapsed = this->clock.getElapsedTime();
+    //sf::Time elapsed = this->clock.getElapsedTime();
     gravity();
-    float seconds = elapsed.asSeconds();
-    if (seconds >= 1) {
-       this->clock.restart();
-       this->frame = 0;
-    } else {
-       this->frame++; 
-    }
+    
+    
 }
 
 void GameState::gravity()

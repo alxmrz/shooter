@@ -20,7 +20,7 @@ public:
     int getY();
     int getWidth();
     int getHeight();
-    virtual void draw(Window* window);
+    virtual void draw(Window* window, float dt);
     std::vector<std::vector<int>> getBorderPoints();
     
 protected:

@@ -35,9 +35,8 @@ sf::Drawable* Button::getDrawForm()
     return shape;
 }
 
-void Button::draw(Window* window)
+void Button::draw(Window* window, float dt)
 {
-    //std::cout<< "Button draw";
     window->draw(*shape);
     window->draw(*text->getDrawForm());
 }

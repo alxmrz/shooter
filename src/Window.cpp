@@ -1,4 +1,5 @@
 #include <vector>
+#include <iostream>
 #include "Window.h"
 #include "GameState.h"
 #include "CObject.h"
@@ -15,23 +16,30 @@ Window::Window(sf::VideoMode mode,
 void Window::drawAll(GameState* gameState)
 {
     setView(*gameState->view);
-    
+    sf::Time elapsed = gameState->clock.getElapsedTime();
+    float dt = elapsed.asMilliseconds() / 1000.f;
+   /* std::cout << dt << std::endl;
+    std::cout << elapsed.asMilliseconds() / 1000 << std::endl;
+    std::cout << elapsed.asMilliseconds() / 1000.f << std::endl;
+    std::cout << elapsed.asMilliseconds() << std::endl;*/
     clear(sf::Color::White);
   
     
     
     for (unsigned i = 0; i < gameState->objects.buttons.size(); i++) {
-        gameState->objects.buttons[i]->draw(this);
+        gameState->objects.buttons[i]->draw(this, dt);
     }
     
     for (unsigned i = 0; i < gameState->objects.playable.size(); i++) {
-        gameState->objects.playable[i]->draw(this);
+        gameState->objects.playable[i]->draw(this, dt);
     }
     
     for (unsigned i = 0; i < gameState->objects.background.size(); i++) {
-        gameState->objects.background[i]->draw(this);
+        gameState->objects.background[i]->draw(this, dt);
     }
     
-    
+    gameState->clock.restart();
     display();
+    this->setFramerateLimit(60);
+    
 }
