@@ -15,7 +15,20 @@ struct GameObjects {
     Shooter* player;
 
     virtual ~GameObjects();
+    
+    /**
+     * Get all objects of the game.
+     * Not used. Bad implementation. 
+     * 
+     * TODO: fix and use in Window
+     * 
+     * @return 
+     */
     std::vector<CObject*>* all();
+    
+    /**
+     * Delete all game objects
+     */
     void reset();
 };
 

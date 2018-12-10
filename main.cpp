@@ -1,9 +1,9 @@
 #include "src/Application.h"
 
 int
-main ()
+main()
 {
-  Application app = Application ();
+    Application app = Application();
 
-  return app.run ();
+    return app.run();
 }

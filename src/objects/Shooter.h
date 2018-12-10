@@ -16,22 +16,82 @@ public:
     Shooter(GameObjects* go, int x, int y, int width, int height);
     Shooter(const Shooter& orig);
     virtual ~Shooter();
+    
 
-    sf::Sprite* sprite;
-    sf::Texture* texture;
+    
+    /**
+     * sf::Drawable is required by Window 
+     * to display simple SFML object on the screen
+     * 
+     * @return shape to draw 
+     */
     sf::Drawable* getDrawForm() override;
 
+    /**
+     * Draw the object with it's specific algorithm
+     * 
+     * @param window
+     * @param dt Delayed time after last frame (in milliseconds / 1000)
+     */
     void draw(Window* window, float dt) override;
+    
+    /**
+     * Shift object position on x and y
+     * 
+     * @param x
+     * @param y
+     * @return is moving done successfully
+     */
     bool move(int x, int y);
-    void setFormColor(sf::Color);
+    
+    /**
+     * Make a fire (it creates Bullet instance)
+     */
     void fire();
 private:
+    /**
+     * @var Sprite for drawing
+     */
+    sf::Sprite* sprite;
+    
+    /**
+     * Texture for sprite (Texture loads image). Sprite contains the texture
+     */
+    sf::Texture* texture;
+    
+    /**
+     * Direction of the object for sprite choose
+     */
     std::string direction = "right";
+    
+    /**
+     * @var current frame for sprite choose
+     */
     int currentFrame = 0;
+    
+    /**
+     * Time to show new sprite
+     */
     float animationTime = 0.08;
+    
+    /**
+     * @var time passed after new sprite choose
+     */
     float elapsedTime = 0.0;
+    
+    /**
+     * @var is current object moving
+     */
     bool isMoving = false;
+    
+    /**
+     * @var is current object jumping
+     */
     bool isJump = false;
+    
+    /**
+     * Sprites for showing run images depending on direction (left, right)
+     */
     std::map<std::string, std::vector<std::vector<int>>> runSprites
     {
         {
@@ -64,6 +124,9 @@ private:
         },
     };
 
+    /**
+     * @var sprite for jump action
+     */
     std::map<std::string, std::vector<int>> jumpSprites
     {
         {
@@ -80,6 +143,9 @@ private:
         }
     };
 
+    /**
+     * @var Sprites when object does not move
+     */
     std::map<std::string, std::vector<int>> noMotionSprites
     {
         {

@@ -1,135 +1,130 @@
+#include <vector>
 #include "CObject.h"
 #include "GameObjects.h"
 #include "Window.h"
-#include <vector>
 
-CObject::CObject () { }
-
-CObject::CObject (int x, int y, int width, int height) :
-x (x),
-y (y),
-width (width),
-height (height) { }
-
-CObject::CObject (GameObjects* go, int x, int y, int width, int height) :
-go (go),
-x (x),
-y (y),
-width (width),
-height (height) { }
-
-bool
-CObject::collideRect (CObject* obj)
+CObject::CObject()
 {
-  std::vector<std::vector<int>> objPoints = obj->getBorderPoints ();
-  for (unsigned i = 0; i < objPoints.size (); i++)
-    {
-      if (this->collidePoint (objPoints[i][0], objPoints[i][1]))
-        {
-          return true;
+}
+
+CObject::CObject(int x, int y, int width, int height) :
+x(x),
+y(y),
+width(width),
+height(height)
+{
+}
+
+CObject::CObject(GameObjects* go, int x, int y, int width, int height) :
+go(go),
+x(x),
+y(y),
+width(width),
+height(height)
+{
+}
+
+bool CObject::collideRect(CObject* obj)
+{
+    //TODO: is there more elegant and more easy way?
+    
+    std::vector<std::vector<int>> objPoints = obj->getBorderPoints();
+    for (unsigned i = 0; i < objPoints.size(); i++) {
+        if (this->collidePoint(objPoints[i][0], objPoints[i][1])) {
+            return true;
         }
     }
 
-  std::vector<std::vector<int>> thisPoints = this->getBorderPoints ();
-  for (unsigned i = 0; i < thisPoints.size (); i++)
-    {
-      if (obj->collidePoint (thisPoints[i][0], thisPoints[i][1]))
-        {
-          return true;
+    std::vector<std::vector<int>> thisPoints = this->getBorderPoints();
+    for (unsigned i = 0; i < thisPoints.size(); i++) {
+        if (obj->collidePoint(thisPoints[i][0], thisPoints[i][1])) {
+            return true;
         }
     }
 
-  return false;
+    return false;
 }
 
-bool
-CObject::collidePoint (int x, int y)
+bool CObject::collidePoint(int x, int y)
 {
-  return x <= this->x + this->width - 1 &&
-          x >= this->x + 1 &&
-          y <= this->y + this->height - 1 &&
-          y >= this->y + 1;
+    return x <= this->x + this->width - 1 &&
+            x >= this->x + 1 &&
+            y <= this->y + this->height - 1 &&
+            y >= this->y + 1;
 }
 
-sf::Drawable*
-CObject::getDrawForm () { }
-
-int
-CObject::getX ()
+sf::Drawable* CObject::getDrawForm()
 {
-  return this->x;
 }
 
-int
-CObject::getY ()
+int CObject::getX()
 {
-  return this->y;
+    return this->x;
 }
 
-int
-CObject::getWidth ()
+int CObject::getY()
 {
-  return this->width;
+    return this->y;
 }
 
-int
-CObject::getHeight ()
+int CObject::getWidth()
 {
-  return this->height;
+    return this->width;
 }
 
-std::vector<std::vector<int>>
-CObject::getBorderPoints ()
+int CObject::getHeight()
 {
-  std::vector<std::vector<int>> points;
-
-  std::vector<int> first = {getX (), getY ()};
-  std::vector<int> second = {getX () + getWidth (), getY () + getHeight ()};
-  std::vector<int> third = {getX (), getY () + getHeight ()};
-  std::vector<int> fourth = {getX () + getWidth (), getY ()};
-
-  std::vector<int> fifth = {getX () + getWidth () / 2, getY ()};
-  std::vector<int> sixth = {getX (), getY () + getHeight () / 2};
-  std::vector<int> seventh = {getX () + getWidth () / 2, getY () + getHeight ()};
-  std::vector<int> eight = {getX () + getWidth (), getY () + getWidth () / 2};
-
-  points.push_back (first);
-  points.push_back (second);
-  points.push_back (third);
-  points.push_back (fourth);
-
-  points.push_back (fifth);
-  points.push_back (sixth);
-  points.push_back (seventh);
-  points.push_back (eight);
-
-  return points;
+    return this->height;
 }
 
-void
-CObject::draw (Window* window, float dt)
+std::vector<std::vector<int>> CObject::getBorderPoints()
 {
-  window->draw (*getDrawForm ());
+    std::vector<std::vector<int>> points;
+    // TODO: dirty and complicated view, need to refactor
+    std::vector<int> first = {getX(), getY()};
+    std::vector<int> second = {getX() + getWidth(), getY() + getHeight()};
+    std::vector<int> third = {getX(), getY() + getHeight()};
+    std::vector<int> fourth = {getX() + getWidth(), getY()};
+
+    std::vector<int> fifth = {getX() + getWidth() / 2, getY()};
+    std::vector<int> sixth = {getX(), getY() + getHeight() / 2};
+    std::vector<int> seventh = {getX() + getWidth() / 2, getY() + getHeight()};
+    std::vector<int> eight = {getX() + getWidth(), getY() + getWidth() / 2};
+
+    points.push_back(first);
+    points.push_back(second);
+    points.push_back(third);
+    points.push_back(fourth);
+
+    points.push_back(fifth);
+    points.push_back(sixth);
+    points.push_back(seventh);
+    points.push_back(eight);
+
+    return points;
 }
 
-bool
-CObject::collideObjectAfterMove (int x, int y)
+void CObject::draw(Window* window, float dt)
 {
-  for (auto* obj : go->background)
-    {
-      CObject* collider = new CObject (
-                                       getX () + x,
-                                       getY () + y,
-                                       getWidth (),
-                                       getHeight ()
-                                       );
-      if (collider->collideRect (obj))
-        {
-          return true;
-          break;
+    window->draw(*getDrawForm());
+}
+
+bool CObject::collideObjectAfterMove(int x, int y)
+{
+    // TODO: this check only for background, are other objects required?
+    for (auto* obj : go->background) {
+        CObject* collider = new CObject(
+                getX() + x,
+                getY() + y,
+                getWidth(),
+                getHeight()
+                );
+        if (collider->collideRect(obj)) {
+            return true;
+            break;
         }
-      delete collider;
+        delete collider;
     }
 
-  return false;
+    return false;
 }

@@ -5,7 +5,6 @@ LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system
 SOURCES= \
 main.cpp \
 src/Application.cpp \
-src/Builder.cpp \
 src/CObject.cpp \
 src/Event.cpp \
 src/GameObjects.cpp \

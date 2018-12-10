@@ -11,14 +11,40 @@ public:
     Event();
     Event(Application* app, GameState* gameState);
     virtual ~Event();
+    
+    /**
+     * Handle all events
+     */
     void handle();
 private:
     Application* app;
     GameState* gameState;
 
+    /**
+     * Handle events of usual keys
+     * 
+     * @param event
+     */
     void handleKeys(sf::Event* event);
+    
+    /**
+     * Handle arrow keys events
+     * 
+     * @param event
+     */
     void handelArrowKeys(sf::Event* event);
+    
+    /**
+     * Handle mouse events
+     * @param event
+     */
     void handleMouseKeys(sf::Event* event);
+    
+    /**
+     * Handle buttons events (click, hover)
+     * 
+     * @param event
+     */
     void handleUiButtonsEvents(sf::Event* event);
 };
 

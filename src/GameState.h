@@ -9,7 +9,6 @@
 
 class Application;
 class CObject;
-class Builder;
 class GameObjects;
 
 /*struct GameObjects 
@@ -28,28 +27,44 @@ class GameObjects;
 
 class GameState {
 public:
-    sf::CircleShape shape;
+    /**
+     * @var Object for getting elapsed time after last frame
+     */
     sf::Clock clock;
-    Builder* builder;
-    Builder* player;
+    
+    /**
+     * @var Object for ruling game camera.
+     */
     sf::View* view;
+    
+    /**
+     * @var game objects container
+     */
     GameObjects objects;
-
-    std::vector<sf::Text*> texts;
-
-    int frame = 0;
-    bool right = true;
-    bool left = false;
 
     GameState();
     GameState(Application* app);
     virtual ~GameState();
+    
+    /**
+     * Update current game state every frame
+     */
     void update();
-
-    std::vector<CObject*> gameObjects;
 private:
+    /**
+     * @var current application instance
+     */
     Application* app;
+    
+    /**
+     * @var Done for rule the gravity in the game. Not used yet.
+     * TODO: need to make real gravity simulation
+     */
     int gravityPower = 0;
+    
+    /**
+     * Current realization of gravity, that makes player falls down. Not good one
+     */
     void gravity();
 
 };

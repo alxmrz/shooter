@@ -1,7 +1,7 @@
 #include "src/objects/Shooter.h"
 
 int
-main ()
+main()
 {
-  return 0;
+    return 0;
 }
