@@ -43,7 +43,7 @@ void Event::handleKeys(sf::Event* event)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) 
     {
-        gameState->objects.player->move(0,-10);
+        gameState->objects.player->fire();
     }
 }
 
@@ -68,8 +68,6 @@ void Event::handleMouseKeys(sf::Event* event)
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) 
     {
       
-        
-        //gameState->shape.setFillColor(sf::Color::Red);
     }
     else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
     {

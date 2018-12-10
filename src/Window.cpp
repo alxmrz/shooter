@@ -36,6 +36,10 @@ void Window::drawAll(GameState* gameState)
         gameState->objects.background[i]->draw(this, dt);
     }
     
+    for (unsigned i = 0; i < gameState->objects.bullets.size(); i++) {
+        gameState->objects.bullets[i]->draw(this, dt);
+    }
+    
     gameState->clock.restart();
     display();
 }

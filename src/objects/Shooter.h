@@ -25,6 +25,7 @@ public:
     void draw(Window* window, float dt) override;
     bool move(int x, int y);
     void setFormColor(sf::Color);
+    void fire();
 private:
     std::string direction = "right";
     int currentFrame = 0;

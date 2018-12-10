@@ -14,6 +14,7 @@ src/Scene.cpp \
 src/Window.cpp \
 src/objects/Ground.cpp \
 src/objects/Shooter.cpp \
+src/objects/Bullet.cpp \
 src/ui/Button.cpp \
 src/ui/Text.cpp \
 
