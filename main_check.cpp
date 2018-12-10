@@ -1,7 +1,8 @@
 #include "src/objects/Shooter.h"
 
-int
-main()
+//This file only for checking headers inludes. Not use it. Makefile_check compile it.
+
+int main()
 {
     return 0;
 }
