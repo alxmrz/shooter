@@ -100,14 +100,14 @@ void Shooter::fire()
 {
     if (direction == "right") 
     {
-        std::vector<int> coords = {getX()+getWidth() + 5, getY()+20, 10, 10};
+        std::vector<int> coords = {getX()+getWidth() + 50, getY()+20, 10, 10};
         Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
         bullet->setDirection("right");
         go->bullets.push_back(bullet);
     }
     else
     {
-        std::vector<int> coords = {getX() - 5, getY()+20, 10, 10};
+        std::vector<int> coords = {getX() - 50, getY()+20, 10, 10};
         Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
         bullet->setDirection("left");
         go->bullets.push_back(bullet);

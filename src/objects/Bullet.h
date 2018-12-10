@@ -23,6 +23,8 @@ private:
     sf::CircleShape* shape;
     std::string direction;
     std::vector<int> endPosition;
+    
+    bool collidePlayableAfterMove(int x, int y);
 };
 
 #endif /* BULLET_H */
