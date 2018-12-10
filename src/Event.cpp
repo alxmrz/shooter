@@ -98,6 +98,7 @@ void Event::handleUiButtonsEvents(sf::Event* event)
             std::string id = button->getId();
 
             if (id == "start") {
+                gameState->isGameStarted = true;
                 app->scene->initNewGame();
                 break;
             } else if (id == "exit") {

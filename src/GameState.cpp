@@ -23,16 +23,18 @@ GameState::~GameState()
 
 void GameState::update()
 {
-    //sf::Time elapsed = this->clock.getElapsedTime();
-    gravity();
-    
-    //deletes bullets when they should die. Must be moved in separate method (or class?)
-    for (unsigned i = 0; i < objects.bullets.size(); i++) {
-        Bullet* bullet = (Bullet*) objects.bullets[i];
-        if (!bullet->move(10, 0)) {
-            objects.bullets.erase(objects.bullets.begin() + i);
-            break;
-        }
+    if (isGameStarted) {
+        //sf::Time elapsed = this->clock.getElapsedTime();
+        gravity();
+
+        //deletes bullets when they should die. Must be moved in separate method (or class?)
+        for (unsigned i = 0; i < objects.bullets.size(); i++) {
+            Bullet* bullet = (Bullet*) objects.bullets[i];
+            if (!bullet->move(10, 0)) {
+                objects.bullets.erase(objects.bullets.begin() + i);
+                break;
+            }
+        }   
     }
 }
 

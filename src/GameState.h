@@ -50,6 +50,7 @@ public:
      * Update current game state every frame
      */
     void update();
+    bool isGameStarted = false;
 private:
     /**
      * @var current application instance

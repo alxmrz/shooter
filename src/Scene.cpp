@@ -28,12 +28,12 @@ Scene::~Scene()
 void Scene::initMainMenu()
 {
     this->gameState->objects.buttons.push_back(
-            new Button("start", "Start", 100, 100, 100, 30)
-            );
+        new Button("start", "Start", 100, 100, 100, 30)
+    );
 
     this->gameState->objects.buttons.push_back(
-            new Button("exit", "Exit", 100, 150, 100, 30)
-            );
+        new Button("exit", "Exit", 100, 150, 100, 30)
+    );
 }
 
 void Scene::initNewGame()
