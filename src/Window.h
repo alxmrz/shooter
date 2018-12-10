@@ -5,16 +5,15 @@
 
 class GameState;
 
-class Window: public sf::RenderWindow
-{
+class Window : public sf::RenderWindow {
 public:
     using sf::RenderTarget::draw;
-    
-    Window(sf::VideoMode mode, 
-            const sf::String& title, 
-            sf::Uint32 style = sf::Style::Default, 
+
+    Window(sf::VideoMode mode,
+            const sf::String& title,
+            sf::Uint32 style = sf::Style::Default,
             const sf::ContextSettings& settings = sf::ContextSettings());
-    
+
     void drawAll(GameState*);
 private:
 

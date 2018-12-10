@@ -3,13 +3,13 @@
 
 #include "../CObject.h"
 
-class Ground: public CObject {
+class Ground : public CObject {
 public:
     Ground();
     Ground(const Ground& orig);
     Ground(int x, int y, int width, int height);
     virtual ~Ground();
-    
+
     sf::RectangleShape* shape;
     sf::Sprite* sprite;
     sf::Texture* texture;

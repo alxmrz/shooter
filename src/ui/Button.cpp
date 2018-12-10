@@ -6,60 +6,64 @@
 #include "../Window.h"
 #include "Text.h"
 
-Button::Button() {
-}
-Button::Button(const CObject& orig) {
+Button::Button () { }
+
+Button::Button (const CObject& orig) { }
+
+Button::Button (std::string id, std::string text, int x, int y, int width, int height) : CObject (x, y, width, height)
+{
+  this->id = id;
+  this->text = new Text (text, x, y);
+  shape = new sf::RectangleShape (sf::Vector2f (width, height));
+  shape->setOutlineColor (sf::Color::Red);
+  shape->setOutlineThickness (5);
+  shape->setPosition (x, y);
 }
 
-Button::Button(std::string id, std::string text, int x, int y, int width, int height): CObject(x, y, width, height)
+void
+Button::setBorderColor (sf::Color color)
 {
-    this->id = id;
-    this->text = new Text(text, x, y);
-    shape = new sf::RectangleShape(sf::Vector2f(width, height));
-    shape->setOutlineColor(sf::Color::Red);
-    shape->setOutlineThickness(5);
-    shape->setPosition(x, y);
+  shape->setOutlineColor (color);
 }
 
-void Button::setBorderColor(sf::Color color)
+Button::~Button () { }
+
+sf::Drawable*
+Button::getDrawForm ()
 {
-    shape->setOutlineColor(color);
+  return shape;
 }
 
-Button::~Button() 
+void
+Button::draw (Window* window, float dt)
 {
+  window->draw (*shape);
+  window->draw (*text->getDrawForm ());
 }
 
-sf::Drawable* Button::getDrawForm()
+std::string
+Button::getId ()
 {
-    return shape;
+  return id;
 }
 
-void Button::draw(Window* window, float dt)
+void
+Button::clicked ()
 {
-    window->draw(*shape);
-    window->draw(*text->getDrawForm());
+  shape->setOutlineColor (sf::Color::Green);
+  text->message->setFillColor (sf::Color::Green);
 }
 
-std::string Button::getId()
+void
+Button::hovered ()
 {
-    return id;
+  shape->setOutlineColor (sf::Color::Blue);
+  text->message->setFillColor (sf::Color::Black);
 }
 
-void Button::clicked()
+void
+Button::defaultState ()
 {
-    shape->setOutlineColor(sf::Color::Green);
-    text->message->setFillColor(sf::Color::Green);
-}
-
-void Button::hovered()
-{
-    shape->setOutlineColor(sf::Color::Blue);
-    text->message->setFillColor(sf::Color::Black);
-}
-
-void Button::defaultState()
-{
-    shape->setOutlineColor(sf::Color::Red);
-    text->message->setFillColor(sf::Color::Black); 
+  shape->setOutlineColor (sf::Color::Red);
+  text->message->setFillColor (sf::Color::Black);
 }

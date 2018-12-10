@@ -3,8 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "CObject.h"
 
-class Builder: public CObject
-{
+class Builder : public CObject {
 public:
     sf::CircleShape* circle;
     Builder(int x, int y, int width, int height);

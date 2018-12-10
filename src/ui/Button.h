@@ -9,8 +9,7 @@
 class Text;
 class Window;
 
-class Button: public CObject 
-{
+class Button : public CObject {
 public:
     Button();
     Button(const CObject& orig);
@@ -23,8 +22,8 @@ public:
     void clicked();
     void hovered();
     void defaultState();
-    
-    
+
+
 private:
     sf::RectangleShape* shape;
     Text* text;

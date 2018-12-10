@@ -9,41 +9,42 @@
 #include "objects/Shooter.h"
 #include "objects/Bullet.h"
 
-GameState::GameState() {
-}
+GameState::GameState () { }
 
-GameState::GameState(Application* app) {
-    this->app = app;
-    
-}
-
-GameState::~GameState() {
-}
-
-void GameState::update()
+GameState::GameState (Application* app)
 {
-    //sf::Time elapsed = this->clock.getElapsedTime();
-    gravity();
-    for (unsigned i = 0; i < objects.bullets.size(); i++)
+  this->app = app;
+
+}
+
+GameState::~GameState () { }
+
+void
+GameState::update ()
+{
+  //sf::Time elapsed = this->clock.getElapsedTime();
+  gravity ();
+  for (unsigned i = 0; i < objects.bullets.size (); i++)
     {
-        Bullet* bullet = (Bullet*)objects.bullets[i];
-        int b = 0;
-        if (!bullet->move(10, 0))
+      Bullet* bullet = (Bullet*) objects.bullets[i];
+      int b = 0;
+      if (!bullet->move (10, 0))
         {
-            objects.bullets.erase(objects.bullets.begin() + i);
-            //delete bullet;
-            break;
+          objects.bullets.erase (objects.bullets.begin () + i);
+          //delete bullet;
+          break;
         }
     }
-    
-    int a = 0;
-    
+
+  int a = 0;
+
 }
 
-void GameState::gravity()
+void
+GameState::gravity ()
 {
-    if (objects.player->move(0, 5)) 
+  if (objects.player->move (0, 5))
     {
-        
+
     }
 }

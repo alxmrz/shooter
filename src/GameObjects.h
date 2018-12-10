@@ -5,16 +5,15 @@
 class Shooter;
 class CObject;
 
-struct GameObjects 
-{
+struct GameObjects {
     GameObjects();
-    
+
     std::vector<CObject*> buttons;
     std::vector<CObject*> background;
     std::vector<CObject*> bullets;
     std::vector<CObject*> playable;
     Shooter* player;
-    
+
     virtual ~GameObjects();
     std::vector<CObject*>* all();
     void reset();

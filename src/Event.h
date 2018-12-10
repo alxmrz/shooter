@@ -15,7 +15,7 @@ public:
 private:
     Application* app;
     GameState* gameState;
-    
+
     void handleKeys(sf::Event* event);
     void handelArrowKeys(sf::Event* event);
     void handleMouseKeys(sf::Event* event);

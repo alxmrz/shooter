@@ -26,8 +26,7 @@ class GameObjects;
     void reset();
 };*/
 
-class GameState 
-{
+class GameState {
 public:
     sf::CircleShape shape;
     sf::Clock clock;
@@ -35,9 +34,9 @@ public:
     Builder* player;
     sf::View* view;
     GameObjects objects;
-    
+
     std::vector<sf::Text*> texts;
-    
+
     int frame = 0;
     bool right = true;
     bool left = false;
@@ -46,13 +45,13 @@ public:
     GameState(Application* app);
     virtual ~GameState();
     void update();
-    
+
     std::vector<CObject*> gameObjects;
 private:
     Application* app;
     int gravityPower = 0;
     void gravity();
-    
+
 };
 
 #endif
