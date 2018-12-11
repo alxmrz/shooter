@@ -33,7 +33,7 @@ sf::Drawable* Bullet::getDrawForm()
 
 bool Bullet::move(int x, int y)
 {
-    if (direction == "right" && (x < 0 || direction == "left")) {
+    if ((direction == "right" && x < 0 )|| direction == "left") {
         x *= -1;
     }
 
