@@ -1,7 +1,6 @@
 #include "src/Application.h"
 
-int
-main()
+int main()
 {
     Application app = Application();
 
