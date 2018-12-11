@@ -27,16 +27,16 @@ EXECUTABLE=run
 DIR_OBJECTS:=$(addprefix  build/, $(OBJECTS))
 
 	
-all: dirs $(SOURCES) $(EXECUTABLE)
+all: dirs $(SOURCE) $(EXECUTABLE)
 	
 dirs:
 	$(info $(shell mkdir -p $(DIRS)))
 	
-$(EXECUTABLE): $(OBJECTS) 
+$(EXECUTABLE): $(DIR_OBJECTS) 
 	$(CC) -no-pie $(DIR_OBJECTS) $(LDFLAGS) -o $@
 
-%.o : %.cpp
-	$(CC) $(CFLAGS) $< -o build/$@
+build/%.o : %.cpp
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	rm -rf *.o ./run build/*.o build/src/*.o
