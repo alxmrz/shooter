@@ -24,6 +24,10 @@ height(height)
 {
 }
 
+CObject::~CObject()
+{
+}
+
 bool CObject::collideRect(CObject* obj)
 {
     //TODO: is there more elegant and more easy way?
@@ -55,6 +59,7 @@ bool CObject::collidePoint(int x, int y)
 
 sf::Drawable* CObject::getDrawForm()
 {
+    return NULL;
 }
 
 int CObject::getX()

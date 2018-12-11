@@ -67,7 +67,7 @@ private:
     /**
      * @var current frame for sprite choose
      */
-    int currentFrame = 0;
+    unsigned int currentFrame = 0;
     
     /**
      * Time to show new sprite

@@ -33,12 +33,13 @@ sf::Drawable* Bullet::getDrawForm()
 
 bool Bullet::move(int x, int y)
 {
-    if (direction == "right" && x < 0 || direction == "left") {
+    if (direction == "right" && (x < 0 || direction == "left")) {
         x *= -1;
     }
 
-    bool isEndPosition = endPosition[0] == this->x + x && endPosition[1] == this->y + y;
     // TODO: isEndPosition is not in use yet. Fix and use.
+    //bool isEndPosition = endPosition[0] == this->x + x && endPosition[1] == this->y + y;
+    
     if (!collidePlayableAfterMove(x, y) && !collideObjectAfterMove(x, y)) {
         this->x += x;
         this->y += y;

@@ -18,7 +18,7 @@ std::vector<CObject*>* GameObjects::all()
 {
     // TODO: fix that
     
-    std::vector<CObject*>* all;
+    std::vector<CObject*>* all = {};
     
     /*std::cout << buttons.size() << "###" << std::endl;
     for (unsigned i = 0; i < buttons.size(); i++) {
