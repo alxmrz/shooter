@@ -39,7 +39,7 @@ build/%.o : %.cpp
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o ./run build/*.o build/src/*.o
+	rm -rf *.o ./run build/*.o build/src/*.o build/src/objects/*.o build/src/ui/*.o
 	
 ex:
 	echo $(DIR_OBJECTS)

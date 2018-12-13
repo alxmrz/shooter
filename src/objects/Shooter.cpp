@@ -28,6 +28,12 @@ Shooter::Shooter(GameObjects* go, int x, int y, int width, int height)
         std::cout << "NO image found";
     }
     
+    explosion = new sf::Texture();
+    if (!explosion->loadFromFile("images/oneshot.png")) {
+        throw;
+        std::cout << "NO image found";
+    }
+    
     sprite->setTexture(*texture);
 }
 
@@ -68,22 +74,37 @@ sf::Drawable* Shooter::getDrawForm()
 
 void Shooter::draw(Window* window, float dt)
 {
-    // TODO: seems it can be simplified
-    if (isMoving && elapsedTime >= animationTime) {
-        std::vector<int> current = this->runSprites[direction][currentFrame];
+    if (!isDead) {
+        // TODO: seems it can be simplified
+        if (isMoving && elapsedTime >= animationTime) {
+            std::vector<int> current = this->runSprites[direction][currentFrame];
+            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
+            currentFrame++;
+            if (currentFrame >= this->runSprites[direction].size()) {
+                currentFrame = 0;
+            }
+            elapsedTime = 0.0;
+        } else if (isFalling && !isMoving) {
+            std::vector<int> current = this->jumpSprites[direction];
+            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
+        } else if (!isMoving && !isFalling && elapsedTime >= animationTime) {
+            std::vector<int> current = this->noMotionSprites[direction];
+            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
+        }
+    }  else if (elapsedTime >= animationTime){
+        sprite->setTexture(*explosion);
+        sprite->setScale(0.5f, 0.5f);
+        std::vector<int> current = this->explosionSprites[currentFrame];
         sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
         currentFrame++;
-        if (currentFrame >= this->runSprites[direction].size()) {
+        if (currentFrame >= this->explosionSprites.size()) {
             currentFrame = 0;
+            isNeedToDie = true;
         }
-        elapsedTime = 0.0;
-    } else if (isFalling && !isMoving) {
-        std::vector<int> current = this->jumpSprites[direction];
-        sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
-    } else if (!isMoving && !isFalling && elapsedTime >= animationTime) {
-        std::vector<int> current = this->noMotionSprites[direction];
-        sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
+        
+        elapsedTime = 0.0;      
     }
+    
     elapsedTime += dt;
 
     this->CObject::draw(window, dt);

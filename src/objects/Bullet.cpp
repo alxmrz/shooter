@@ -1,6 +1,7 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include "Bullet.h"
+#include "Shooter.h"
 #include "../GameObjects.h"
 
 Bullet::Bullet()
@@ -67,7 +68,8 @@ bool Bullet::collidePlayableAfterMove(int x, int y)
                 getHeight()
                 );
         if (collider->collideRect(obj)) {
-            go->playable.erase(go->playable.begin() + i);
+            //go->playable.erase(go->playable.begin() + i);
+            ((Shooter*)go->playable[i])->isDead = true;
             delete collider;
             return true;
         }

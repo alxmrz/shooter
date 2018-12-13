@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "GameState.h"
 #include "CObject.h"
+#include "objects/Shooter.h"
 
 Window::Window(sf::VideoMode mode,
         const sf::String& title,
@@ -31,6 +32,10 @@ void Window::drawAll(GameState* gameState)
 
     for (unsigned i = 0; i < gameState->objects.playable.size(); i++) {
         gameState->objects.playable[i]->draw(this, dt);
+        if (((Shooter*)gameState->objects.playable[i])->isNeedToDie) {
+            gameState->objects.playable.erase(gameState->objects.playable.begin() + i);
+        }
+        
     }
 
     for (unsigned i = 0; i < gameState->objects.background.size(); i++) {

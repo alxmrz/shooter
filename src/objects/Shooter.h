@@ -26,7 +26,8 @@ public:
      * @var is current object jumping
      */
     bool isJump = false;
-    
+    bool isDead = false;
+    bool isNeedToDie = false;
     bool isFalling = false;
 
     
@@ -74,6 +75,7 @@ private:
      * Texture for sprite (Texture loads image). Sprite contains the texture
      */
     sf::Texture* texture;
+    sf::Texture* explosion;
     
     /**
      * Direction of the object for sprite choose
@@ -166,6 +168,15 @@ private:
                 24, 144, 50, 50
             }
         }
+    };
+    
+    std::vector<std::vector<int>> explosionSprites = {
+        {2,0,80, 75},
+        {80,0,80, 75},
+        {160,0,80, 75},
+        {240,0,80, 75},
+        {320,0,75, 75},
+        {400,0,0, 75},
     };
     
     std::multimap<std::string, std::vector<float>> operations;
