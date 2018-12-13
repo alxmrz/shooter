@@ -61,6 +61,7 @@ void Event::handelArrowKeys(sf::Event* event)
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
         gameState->objects.player->move(10, 0);
     }
+    
 }
 
 void Event::handleMouseKeys(sf::Event* event)

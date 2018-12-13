@@ -21,7 +21,15 @@ public:
      */
     void drawAll(GameState*);
 private:
-
+    /**
+     * @var Sprite for drawing
+     */
+    sf::Sprite* sprite;
+    
+    /**
+     * Texture for sprite (Texture loads image). Sprite contains the texture
+     */
+    sf::Texture* texture;
 };
 
 #endif /* WINDOW_H */

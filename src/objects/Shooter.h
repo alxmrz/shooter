@@ -105,28 +105,28 @@ private:
         {
             "left",
             {
-                std::vector<int>{24, 375, 50, 50},
-                std::vector<int>{74, 375, 50, 50},
-                std::vector<int>{124, 375, 50, 50},
-                std::vector<int>{174, 375, 50, 50},
-                std::vector<int>{224, 375, 50, 50},
-                std::vector<int>{274, 375, 50, 50},
-                std::vector<int>{324, 375, 50, 50},
-                std::vector<int>{374, 375, 50, 50}
+                std::vector<int>{26, 375, 50, 50},
+                std::vector<int>{76, 375, 50, 50},
+                std::vector<int>{126, 375, 50, 50},
+                std::vector<int>{176, 375, 50, 50},
+                std::vector<int>{226, 375, 50, 50},
+                std::vector<int>{276, 375, 50, 50},
+                std::vector<int>{326, 375, 50, 50},
+                std::vector<int>{376, 375, 50, 50}
             },
         },
 
         {
             "right",
             {
-                std::vector<int>{24, 315, 50, 50},
-                std::vector<int>{74, 315, 50, 50},
-                std::vector<int>{124, 315, 50, 50},
-                std::vector<int>{174, 315, 50, 50},
-                std::vector<int>{224, 315, 50, 50},
-                std::vector<int>{274, 315, 50, 50},
-                std::vector<int>{324, 315, 50, 50},
-                std::vector<int>{374, 315, 50, 50}
+                std::vector<int>{26, 315, 50, 50},
+                std::vector<int>{76, 315, 50, 50},
+                std::vector<int>{126, 315, 50, 50},
+                std::vector<int>{176, 315, 50, 50},
+                std::vector<int>{226, 315, 50, 50},
+                std::vector<int>{276, 315, 50, 50},
+                std::vector<int>{326, 315, 50, 50},
+                std::vector<int>{376, 315, 50, 50}
             },
 
         },

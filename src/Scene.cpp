@@ -45,18 +45,18 @@ void Scene::initNewGame()
 void Scene::generateLevel()
 {
     std::string level =
-            "GGGGGGGGGGGGGGGGGG|"
-            "G                G|"
-            "G                G|"
-            "GS               G|"
-            "GGGGG            G|"
-            "G    G         S G|"
-            "G  P          SGGG|"
-            "G GG         G   G|"
-            "G GG        S    G|"
-            "G GG      GGG    G|"
-            "G GG           S G|"
-            "GGGGGGGGGGGGGGGGGG|"
+            "                                             |"
+            "                                  GGGGG      |"
+            "                                             |"
+            "                             GGGGG           |"
+            "                                             |"
+            "                         GGGGG               |"
+            " GGG                                       GG|"
+            " GG                 GGGGG                   G|"
+            " GG                                         G|"
+            " GG           GGGGG                         G|"
+            " GGP       S     S     S       S        S   G|"
+            "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG|"
             ;
     std::vector<std::string> lines;
     boost::split(lines, level, boost::algorithm::is_any_of("|"), boost::token_compress_on);
