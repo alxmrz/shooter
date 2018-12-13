@@ -31,7 +31,7 @@ sf::Drawable* Bullet::getDrawForm()
     return shape;
 }
 
-bool Bullet::move(int x, int y)
+bool Bullet::move(float x, float y)
 {
     if ((direction == "right" && x < 0 )|| direction == "left") {
         x *= -1;

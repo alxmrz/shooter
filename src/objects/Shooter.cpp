@@ -37,13 +37,13 @@ Shooter::~Shooter()
 
 bool Shooter::move(int x, int y)
 {
-    if (!collideObjectAfterMove(x, y)) {
+    if (!collideObjectAfterMove(x, y) && !this->y + y < 600) {
         this->x += x;
         this->y += y;
         this->sprite->setPosition(this->x, this->y);
 
         if (y != 0) {
-            isJump = true;
+            isFalling = true;
             isMoving = false;
         } else if (x < 0) {
             direction = "left";
@@ -54,8 +54,10 @@ bool Shooter::move(int x, int y)
         }
 
         return true;
-    }
-
+    } 
+    isMoving = false;
+    isFalling = false;
+    
     return false;
 }
 
@@ -75,19 +77,17 @@ void Shooter::draw(Window* window, float dt)
             currentFrame = 0;
         }
         elapsedTime = 0.0;
-    } else if (isJump && !isMoving) {
+    } else if (isFalling && !isMoving) {
         std::vector<int> current = this->jumpSprites[direction];
         sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
-    } else if (!isMoving && !isJump && elapsedTime >= animationTime) {
+    } else if (!isMoving && !isFalling && elapsedTime >= animationTime) {
         std::vector<int> current = this->noMotionSprites[direction];
         sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
     }
     elapsedTime += dt;
 
     this->CObject::draw(window, dt);
-
-    isMoving = false;
-    isJump = false;
+    
 }
 
 void Shooter::fire()
@@ -104,4 +104,57 @@ void Shooter::fire()
         bullet->setDirection("left");
         go->bullets.push_back(bullet);
     }
+}
+
+void Shooter::jump(float x, float y)
+{
+    operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
+}
+
+void Shooter::moveLeft(float x, float y)
+{
+    operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
+}
+
+void Shooter::runOperations()
+{
+    if (!operations.empty()) {
+         std::multimap<std::string,std::vector<float>>::iterator operation;
+        for ( operation = operations.begin(); operation != operations.end();) {
+            if (operation->first == "move") {
+                std::vector<float> point= operation->second;
+                int x = 0;
+                int y = 0;
+                if (point[0] > 0) {
+                    x += 5;
+                } else if (point[0] < 0) {
+                    x -= 5;
+                }
+
+                if (point[1] > 0) {
+                    y += 5;
+                } else if (point[1] < 0) {
+                    y -= 5;
+                }
+                move(x, y);
+
+                if (operation->second[0] != 0) {
+                    operation->second[0] -= x;
+                } 
+
+                if (operation->second[1] != 0) {
+                    operation->second[1] -= y;            
+                }
+
+                if (operation->second[0] == 0 && operation->second[1] == 0) {
+                    isJump = false;
+                    operations.erase(operation++);
+                } else {
+                    isJump = true;
+                    operation++;
+                }
+            }
+        }
+    }
+   
 }

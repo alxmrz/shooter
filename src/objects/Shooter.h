@@ -17,6 +17,17 @@ public:
     Shooter(const Shooter& orig);
     virtual ~Shooter();
     
+    /**
+     * @var is current object moving
+     */
+    bool isMoving = false;
+    
+    /**
+     * @var is current object jumping
+     */
+    bool isJump = false;
+    
+    bool isFalling = false;
 
     
     /**
@@ -48,6 +59,11 @@ public:
      * Make a fire (it creates Bullet instance)
      */
     void fire();
+    
+    void jump(float x, float y);
+    void moveLeft(float x, float y);
+    void runOperations();
+    
 private:
     /**
      * @var Sprite for drawing
@@ -78,16 +94,6 @@ private:
      * @var time passed after new sprite choose
      */
     float elapsedTime = 0.0;
-    
-    /**
-     * @var is current object moving
-     */
-    bool isMoving = false;
-    
-    /**
-     * @var is current object jumping
-     */
-    bool isJump = false;
     
     /**
      * Sprites for showing run images depending on direction (left, right)
@@ -161,6 +167,8 @@ private:
             }
         }
     };
+    
+    std::multimap<std::string, std::vector<float>> operations;
 };
 
 #endif /* SHOOTER_H */

@@ -32,7 +32,7 @@ public:
      * @param y
      * @return is moving done successfully
      */
-    bool move(int x, int y);
+    bool move(float x, float y);
     
     /**
      * Set direction the objects will be moving

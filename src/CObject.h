@@ -72,8 +72,8 @@ public:
 
 protected:
     GameObjects* go;
-    int x;
-    int y;
+    float x;
+    float y;
     int width;
     int height;
 };

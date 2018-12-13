@@ -61,7 +61,11 @@ private:
      * @var Done for rule the gravity in the game. Not used yet.
      * TODO: need to make real gravity simulation
      */
-    int gravityPower = 0;
+    float gravityPower = 0.1f;
+    
+    float elapsedTime = 0.0;
+    float velocity = 0.f;
+    float acceleration = 1.f;
     
     /**
      * Current realization of gravity, that makes player falls down. Not good one

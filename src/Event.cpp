@@ -36,7 +36,6 @@ void Event::handle()
         handelArrowKeys(&event);
         handleMouseKeys(&event);
         handleUiButtonsEvents(&event);
-
     }
 }
 
@@ -50,9 +49,10 @@ void Event::handleKeys(sf::Event* event)
 void Event::handelArrowKeys(sf::Event* event)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        gameState->objects.player->move(0, -50);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        if (!gameState->objects.player->isFalling && !gameState->objects.player->isJump) {
+            gameState->objects.player->jump(0, -125);
+        }
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 
     }
     
