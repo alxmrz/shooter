@@ -27,6 +27,7 @@ void GameState::update()
         sf::Time elapsed = this->clock.getElapsedTime();
         float dt = elapsed.asMilliseconds() / 1000.f;
         elapsedTime += dt;
+        
         gravity();
 
         //deletes bullets when they should die. Must be moved in separate method (or class?)
@@ -44,13 +45,10 @@ void GameState::update()
 
 void GameState::gravity()
 {
-
-    
     if (!objects.player->isJump) {
         float y = 0;
         y += elapsedTime * (velocity + elapsedTime * acceleration / 2);
         
-       // std::cout << y <<std::endl;
         if (objects.player->move(0, y) || objects.player->move(0, 1)) {
             velocity += elapsedTime * acceleration;
         } else {

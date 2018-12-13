@@ -108,6 +108,7 @@ void Shooter::fire()
 
 void Shooter::jump(float x, float y)
 {
+    isJump = true;
     operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
 }
 
