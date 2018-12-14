@@ -23,13 +23,13 @@ Shooter::Shooter(GameObjects* go, int x, int y, int width, int height)
     sprite->setPosition(x, y);
     
     texture = new sf::Texture();
-    if (!texture->loadFromFile("images/OpenGunnerHeroVer2.png")) {
+    if (!texture->loadFromFile("resources/images/OpenGunnerHeroVer2.png")) {
         throw;
         std::cout << "NO image found";
     }
     
     explosion = new sf::Texture();
-    if (!explosion->loadFromFile("images/oneshot.png")) {
+    if (!explosion->loadFromFile("resources/images/oneshot.png")) {
         throw;
         std::cout << "NO image found";
     }

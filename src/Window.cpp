@@ -16,7 +16,7 @@ Window::Window(sf::VideoMode mode,
    /// sprite->setTextureRect(sf::IntRect(0, 100, 50, 50));
     sprite->setPosition(0.f, -300.f);
     texture = new sf::Texture();
-    if (!texture->loadFromFile("images/background.png")) {
+    if (!texture->loadFromFile("resources/images/background.png")) {
         std::cout << "Image images/background.png is not found" << std::endl;
         throw;
     }

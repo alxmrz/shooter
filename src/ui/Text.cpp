@@ -26,7 +26,7 @@ sf::Drawable* Text::getDrawForm()
 sf::Text* Text::makeText(std::string str, int x, int y)
 {
     sf::Font* font = new sf::Font;
-    if (!font->loadFromFile("fonts/arial.ttf")) {
+    if (!font->loadFromFile("resources/fonts/arial.ttf")) {
         std::cout << "Font fonts/arial.ttf not found!";
         throw;
     } else {

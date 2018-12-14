@@ -20,7 +20,7 @@ Ground::Ground(int x, int y, int width, int height) : CObject(x, y, width, heigh
     sprite->setTextureRect(sf::IntRect(0, 100, 50, 50));
     sprite->setPosition(x, y);
     texture = new sf::Texture();
-    if (!texture->loadFromFile("images/ground.jpeg")) {
+    if (!texture->loadFromFile("resources/images/ground.jpeg")) {
         std::cout << "Image images/ground.jpeg is not found" << std::endl;
         throw;
     }
