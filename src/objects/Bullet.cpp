@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include "Bullet.h"
 #include "Shooter.h"
@@ -14,14 +15,22 @@ Bullet::Bullet(const Bullet& orig)
 
 Bullet::~Bullet()
 {
+    delete sprite;
+    delete texture;
 }
 
 Bullet::Bullet(GameObjects* go, int x, int y, int width, int height)
 : CObject(go, x, y, width, height)
 {
-    this->shape = new sf::CircleShape(width / 2);
-    this->shape->setFillColor(sf::Color::Red);
-    this->shape->setPosition(x, y);
+    sprite = new sf::Sprite();
+    sprite->setTextureRect(sf::IntRect(0, 0, 18, 7));
+    sprite->setPosition(x, y);
+    texture = new sf::Texture();
+    if (!texture->loadFromFile("resources/images/shell.png")) {
+        std::cout << "Image images/ground.jpeg is not found" << std::endl;
+        throw;
+    }
+    sprite->setTexture(*texture);
 
     endPosition.push_back(x + 500);
     endPosition.push_back(y);
@@ -29,7 +38,7 @@ Bullet::Bullet(GameObjects* go, int x, int y, int width, int height)
 
 sf::Drawable* Bullet::getDrawForm()
 {
-    return shape;
+    return sprite;
 }
 
 bool Bullet::move(float x, float y)
@@ -44,7 +53,7 @@ bool Bullet::move(float x, float y)
     if (!collidePlayableAfterMove(x, y) && !collideObjectAfterMove(x, y)) {
         this->x += x;
         this->y += y;
-        this->shape->setPosition(this->x, this->y);
+        this->sprite->setPosition(this->x, this->y);
 
         return true;
     }
@@ -68,7 +77,6 @@ bool Bullet::collidePlayableAfterMove(int x, int y)
                 getHeight()
                 );
         if (collider->collideRect(obj)) {
-            //go->playable.erase(go->playable.begin() + i);
             ((Shooter*)go->playable[i])->isDead = true;
             delete collider;
             return true;

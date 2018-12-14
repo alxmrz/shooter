@@ -42,10 +42,14 @@ public:
     void setDirection(std::string direction);
 private:
     /**
-     * @var shape Shape to draw in Window
+     * @var Sprite for drawing
      */
-    sf::CircleShape* shape;
+    sf::Sprite* sprite;
     
+    /**
+     * Texture for sprite (Texture loads image). Sprite contains the texture
+     */
+    sf::Texture* texture;
     /**
      * @var direction Direction of the object to move 
      */
