@@ -13,7 +13,7 @@ class Window;
 class Shooter : public CObject {
 public:
     Shooter();
-    Shooter(GameObjects* go, int x, int y, int width, int height);
+    Shooter(GameObjects* go, float x, float y, int width, int height);
     Shooter(const Shooter& orig);
     virtual ~Shooter();
     
@@ -29,7 +29,9 @@ public:
     bool isDead = false;
     bool isNeedToDie = false;
     bool isFalling = false;
-
+    float acceleration = 0.3f;
+    float velocity = 0.f;
+    float maxVelocity = 5.f;
     
     /**
      * sf::Drawable is required by Window 
@@ -54,7 +56,8 @@ public:
      * @param y
      * @return is moving done successfully
      */
-    bool move(int x, int y);
+    bool move(float x, float y);
+    bool move();
     
     /**
      * Make a fire (it creates Bullet instance)
@@ -63,6 +66,7 @@ public:
     
     void jump(float x, float y);
     void moveLeft(float x, float y);
+    void moveRight(float x, float y);
     void runOperations();
     
 private:
@@ -98,6 +102,7 @@ private:
     float elapsedTime = 0.0;
     
     float fireTime = 0.f;
+
     /**
      * Sprites for showing run images depending on direction (left, right)
      */

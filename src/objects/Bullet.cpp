@@ -63,10 +63,13 @@ bool Bullet::move(float x, float y)
 
 void Bullet::setDirection(std::string dir)
 {
+    if (dir == "left") {
+        sprite->rotate(180);
+    }
     direction = dir;
 }
 
-bool Bullet::collidePlayableAfterMove(int x, int y)
+bool Bullet::collidePlayableAfterMove(float x, float y)
 {
     for (unsigned i = 0; i < go->playable.size(); i++) {
         auto* obj = go->playable[i];

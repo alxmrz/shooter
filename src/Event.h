@@ -32,7 +32,7 @@ private:
      * 
      * @param event
      */
-    void handelArrowKeys(sf::Event* event);
+    void handelArrowKeys();
     
     /**
      * Handle mouse events

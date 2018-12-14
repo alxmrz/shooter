@@ -55,18 +55,18 @@ public:
      * @param y
      * @return 
      */
-    bool collideObjectAfterMove(int x, int y);
+    bool collideObjectAfterMove(float x, float y);
     
     /**
      * Get border points of the rectangle of the object
      * 
      * @return 
      */
-    std::vector<std::vector<int>> getBorderPoints();
+    std::vector<std::vector<float>> getBorderPoints();
     
     //Getters
-    int getX();
-    int getY();
+    float getX();
+    float getY();
     int getWidth();
     int getHeight();
 

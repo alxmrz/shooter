@@ -46,10 +46,10 @@ void GameState::update()
 void GameState::gravity()
 {
     if (!objects.player->isJump) {
-        float y = 0;
-        y += elapsedTime * (velocity + elapsedTime * acceleration / 4);
+        float y = 0.f;
+        y += elapsedTime * (velocity + elapsedTime * acceleration / 4.f);
         
-        if (objects.player->move(0, y) || objects.player->move(0, 1)) {
+        if (objects.player->move(0.f, y) || objects.player->move(0.f, 2.f)) {
             velocity += elapsedTime * acceleration;
         } else {
             velocity = 0.0;

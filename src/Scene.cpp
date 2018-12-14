@@ -60,8 +60,8 @@ void Scene::generateLevel()
             ;
     std::vector<std::string> lines;
     boost::split(lines, level, boost::algorithm::is_any_of("|"), boost::token_compress_on);
-    int x = 0;
-    int y = 0;
+    float x = 0;
+    float y = 0;
     for (std::string line : lines) {
         x = 0;
         for (char c : line) {

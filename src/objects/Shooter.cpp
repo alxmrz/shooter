@@ -15,7 +15,7 @@ Shooter::Shooter(const Shooter& orig)
 {
 }
 
-Shooter::Shooter(GameObjects* go, int x, int y, int width, int height) 
+Shooter::Shooter(GameObjects* go, float x, float y, int width, int height) 
 : CObject(go, x, y, width, height)
 {
     sprite = new sf::Sprite();
@@ -41,15 +41,21 @@ Shooter::~Shooter()
 {
 }
 
-bool Shooter::move(int x, int y)
+bool Shooter::move(float x, float y)
 {
     if (!collideObjectAfterMove(x, y) && !this->y + y < 600) {
         this->x += x;
         this->y += y;
         this->sprite->setPosition(this->x, this->y);
 
-        if (y != 0) {
-            isFalling = true;
+        if (y != 0.f) {
+            if (y < 0) {
+                isJump = true;
+                isFalling = false;
+            } else {
+                isJump = false;
+                isFalling = true;
+            }
             isMoving = false;
         } else if (x < 0) {
             direction = "left";
@@ -61,10 +67,21 @@ bool Shooter::move(int x, int y)
 
         return true;
     } 
-    isMoving = false;
-    isFalling = false;
+    if (x != 0.f) {
+        isMoving = false;
+    }
+    if (y < 0) {
+        isJump = false;
+    } else if (y > 0) {
+        isFalling = false;
+    }
     
     return false;
+}
+
+bool Shooter::move() 
+{
+    return move(velocity, 0.f);
 }
 
 sf::Drawable* Shooter::getDrawForm()
@@ -76,7 +93,7 @@ void Shooter::draw(Window* window, float dt)
 {
     if (!isDead) {
         // TODO: seems it can be simplified
-        if (isMoving && elapsedTime >= animationTime) {
+        if (isMoving && !isJump && !isFalling && elapsedTime >= animationTime) {
             std::vector<int> current = this->runSprites[direction][currentFrame];
             sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
             currentFrame++;
@@ -84,10 +101,10 @@ void Shooter::draw(Window* window, float dt)
                 currentFrame = 0;
             }
             elapsedTime = 0.0;
-        } else if (isFalling && !isMoving) {
+        } else if ((isFalling || isJump) && !isMoving) {
             std::vector<int> current = this->jumpSprites[direction];
             sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
-        } else if (!isMoving && !isFalling && elapsedTime >= animationTime) {
+        } else if (!isMoving && !isFalling && !isJump && elapsedTime >= animationTime) {
             std::vector<int> current = this->noMotionSprites[direction];
             sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
         }
@@ -118,12 +135,12 @@ void Shooter::fire()
         fireTime = 0.f;
         // TODO: dry
         if (direction == "right") {
-            std::vector<int> coords = {getX() + getWidth() + 50, getY() + 10, 10, 10};
+            std::vector<float> coords = {getX() + getWidth() + 50.f, getY() + 10.f, 10, 10};
             Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
             bullet->setDirection("right");
             go->bullets.push_back(bullet);
         } else {
-            std::vector<int> coords = {getX() - 50, getY() + 10, 10, 10};
+            std::vector<float> coords = {getX() - 50.f, getY() + 10.f, 10, 10};
             Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
             bullet->setDirection("left");
             go->bullets.push_back(bullet);
@@ -142,8 +159,20 @@ void Shooter::jump(float x, float y)
 
 void Shooter::moveLeft(float x, float y)
 {
-    operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
+    if (!isMoving) {
+       operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y})); 
+    }
+    
 }
+
+void Shooter::moveRight(float x, float y)
+{
+    if (!isMoving) {
+        operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
+    }
+    
+}
+
 
 void Shooter::runOperations()
 {
@@ -181,6 +210,7 @@ void Shooter::runOperations()
 
                 if (operation->second[0] == 0 && operation->second[1] == 0) {
                     isJump = false;
+                    isFalling = true;
                     operations.erase(operation++);
                 } else {
                     isJump = true;

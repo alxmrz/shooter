@@ -67,7 +67,7 @@ private:
      * @param y
      * @return bool
      */
-    bool collidePlayableAfterMove(int x, int y);
+    bool collidePlayableAfterMove(float x, float y);
 };
 
 #endif /* BULLET_H */

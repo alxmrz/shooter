@@ -65,7 +65,7 @@ private:
     
     float elapsedTime = 0.0;
     float velocity = 0.f;
-    float acceleration = 0.2f;
+    float acceleration = 0.5f;
     
     /**
      * Current realization of gravity, that makes player falls down. Not good one

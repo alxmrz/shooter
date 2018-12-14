@@ -33,10 +33,11 @@ void Event::handle()
         }
 
         handleKeys(&event);
-        handelArrowKeys(&event);
+       
         handleMouseKeys(&event);
         handleUiButtonsEvents(&event);
     }
+     handelArrowKeys();
 }
 
 void Event::handleKeys(sf::Event* event)
@@ -46,7 +47,7 @@ void Event::handleKeys(sf::Event* event)
     }
 }
 
-void Event::handelArrowKeys(sf::Event* event)
+void Event::handelArrowKeys()
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
         if (!gameState->objects.player->isFalling && !gameState->objects.player->isJump) {
@@ -57,10 +58,29 @@ void Event::handelArrowKeys(sf::Event* event)
     }
     
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        gameState->objects.player->move(-10, 0);
+        if (gameState->objects.player->velocity > -gameState->objects.player->maxVelocity) {
+            gameState->objects.player->velocity -= gameState->objects.player->acceleration;
+        }
+        
+        gameState->objects.player->move();
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        std::cout << "Coords" << gameState->objects.player->getX() <<std::endl;
-        gameState->objects.player->move(10, 0);
+        //std::cout << "Coords " << gameState->objects.player->getX() <<std::endl;
+        
+        if (gameState->objects.player->velocity < gameState->objects.player->maxVelocity) {
+            gameState->objects.player->velocity += gameState->objects.player->acceleration;
+        }
+        //std::cout << "Velocity " << gameState->objects.player->velocity <<std::endl;
+        
+        gameState->objects.player->move();
+    } else {
+        /*if (gameState->objects.player->velocity > 0.f) {
+            gameState->objects.player->velocity -= gameState->objects.player->acceleration;
+        } else if (gameState->objects.player->velocity < 0.3f) {
+            gameState->objects.player->velocity += gameState->objects.player->acceleration;
+        }*/
+        gameState->objects.player->isMoving = false;
+        gameState->objects.player->velocity = 0.f;
+        //std::cout << "Decrease  " << gameState->objects.player->velocity <<std::endl;
     }
     
 }
