@@ -106,6 +106,7 @@ void Shooter::draw(Window* window, float dt)
     }
     
     elapsedTime += dt;
+    fireTime += dt;
 
     this->CObject::draw(window, dt);
     
@@ -113,18 +114,22 @@ void Shooter::draw(Window* window, float dt)
 
 void Shooter::fire()
 {
-    // TODO: dry
-    if (direction == "right") {
-        std::vector<int> coords = {getX() + getWidth() + 50, getY() + 10, 10, 10};
-        Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
-        bullet->setDirection("right");
-        go->bullets.push_back(bullet);
-    } else {
-        std::vector<int> coords = {getX() - 50, getY() + 10, 10, 10};
-        Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
-        bullet->setDirection("left");
-        go->bullets.push_back(bullet);
+    if (fireTime >= 1.f) {
+        fireTime = 0.f;
+        // TODO: dry
+        if (direction == "right") {
+            std::vector<int> coords = {getX() + getWidth() + 50, getY() + 10, 10, 10};
+            Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
+            bullet->setDirection("right");
+            go->bullets.push_back(bullet);
+        } else {
+            std::vector<int> coords = {getX() - 50, getY() + 10, 10, 10};
+            Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
+            bullet->setDirection("left");
+            go->bullets.push_back(bullet);
+        }
     }
+    
     
    // std::cout << go->bullets.size() << std::endl;
 }
@@ -160,7 +165,11 @@ void Shooter::runOperations()
                 } else if (point[1] < 0) {
                     y -= 5;
                 }
-                move(x, y);
+                if(!move(x, y)) {
+                    isJump = false;
+                    operations.erase(operation++);
+                    break;
+                }
 
                 if (operation->second[0] != 0) {
                     operation->second[0] -= x;

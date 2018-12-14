@@ -59,6 +59,7 @@ void Event::handelArrowKeys(sf::Event* event)
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
         gameState->objects.player->move(-10, 0);
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        std::cout << "Coords" << gameState->objects.player->getX() <<std::endl;
         gameState->objects.player->move(10, 0);
     }
     
@@ -67,7 +68,7 @@ void Event::handelArrowKeys(sf::Event* event)
 void Event::handleMouseKeys(sf::Event* event)
 {
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-
+        
     } else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
 
     }

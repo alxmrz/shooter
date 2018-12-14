@@ -97,6 +97,7 @@ private:
      */
     float elapsedTime = 0.0;
     
+    float fireTime = 0.f;
     /**
      * Sprites for showing run images depending on direction (left, right)
      */
