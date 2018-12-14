@@ -176,6 +176,7 @@ void Shooter::runOperations()
                 }
                 if(!move(x, y)) {
                     isJump = false;
+                    isFalling = true;
                     operations.erase(operation++);
                     break;
                 }
