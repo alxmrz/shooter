@@ -63,24 +63,15 @@ void Event::handelArrowKeys()
         }
         
         gameState->objects.player->move();
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        //std::cout << "Coords " << gameState->objects.player->getX() <<std::endl;
-        
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) { 
         if (gameState->objects.player->velocity < gameState->objects.player->maxVelocity) {
             gameState->objects.player->velocity += gameState->objects.player->acceleration;
         }
-        //std::cout << "Velocity " << gameState->objects.player->velocity <<std::endl;
         
         gameState->objects.player->move();
     } else {
-        /*if (gameState->objects.player->velocity > 0.f) {
-            gameState->objects.player->velocity -= gameState->objects.player->acceleration;
-        } else if (gameState->objects.player->velocity < 0.3f) {
-            gameState->objects.player->velocity += gameState->objects.player->acceleration;
-        }*/
         gameState->objects.player->isMoving = false;
         gameState->objects.player->velocity = 0.f;
-        //std::cout << "Decrease  " << gameState->objects.player->velocity <<std::endl;
     }
     
 }

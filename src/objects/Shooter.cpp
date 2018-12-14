@@ -131,24 +131,21 @@ void Shooter::draw(Window* window, float dt)
 
 void Shooter::fire()
 {
-    if (fireTime >= 1.f) {
+    if (fireTime >= 0.5f) {
         fireTime = 0.f;
         // TODO: dry
         if (direction == "right") {
-            std::vector<float> coords = {getX() + getWidth() + 50.f, getY() + 10.f, 10, 10};
+            std::vector<float> coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
             Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
             bullet->setDirection("right");
             go->bullets.push_back(bullet);
         } else {
-            std::vector<float> coords = {getX() - 50.f, getY() + 10.f, 10, 10};
+            std::vector<float> coords = {getX() - 20.f, getY() + 20.f, 10, 10};
             Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
             bullet->setDirection("left");
             go->bullets.push_back(bullet);
         }
     }
-    
-    
-   // std::cout << go->bullets.size() << std::endl;
 }
 
 void Shooter::jump(float x, float y)
@@ -156,23 +153,6 @@ void Shooter::jump(float x, float y)
     isJump = true;
     operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
 }
-
-void Shooter::moveLeft(float x, float y)
-{
-    if (!isMoving) {
-       operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y})); 
-    }
-    
-}
-
-void Shooter::moveRight(float x, float y)
-{
-    if (!isMoving) {
-        operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
-    }
-    
-}
-
 
 void Shooter::runOperations()
 {

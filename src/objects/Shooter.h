@@ -65,8 +65,6 @@ public:
     void fire();
     
     void jump(float x, float y);
-    void moveLeft(float x, float y);
-    void moveRight(float x, float y);
     void runOperations();
     
 private:
