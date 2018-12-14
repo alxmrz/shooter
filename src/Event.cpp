@@ -49,13 +49,17 @@ void Event::handleKeys(sf::Event* event)
 
 void Event::handelArrowKeys()
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        if (!gameState->objects.player->isFalling && !gameState->objects.player->isJump) {
-            gameState->objects.player->jump(0, -125);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {       
+        if (!gameState->objects.player->isFalling) {
+            if (gameState->objects.player->velocityHorizontal > -gameState->objects.player->maxVelocity) {
+                gameState->objects.player->velocityHorizontal -= gameState->objects.player->acceleration;
+            }
+            gameState->objects.player->jump();
         }
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-
-    }
+    } else {
+        gameState->objects.player->isJump = false;
+        gameState->objects.player->velocityHorizontal = 0.f;
+    } 
     
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
         if (gameState->objects.player->velocity > -gameState->objects.player->maxVelocity) {

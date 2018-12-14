@@ -31,7 +31,9 @@ public:
     bool isFalling = false;
     float acceleration = 0.3f;
     float velocity = 0.f;
+    float velocityHorizontal = 0.f;
     float maxVelocity = 5.f;
+    float currentJumpHeight = 0.f;
     
     /**
      * sf::Drawable is required by Window 
@@ -64,7 +66,7 @@ public:
      */
     void fire();
     
-    void jump(float x, float y);
+    void jump();
     void runOperations();
     
 private:

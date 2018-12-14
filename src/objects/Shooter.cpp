@@ -148,55 +148,34 @@ void Shooter::fire()
     }
 }
 
-void Shooter::jump(float x, float y)
+void Shooter::jump()
 {
+    if (currentJumpHeight == 0.f) {
+        currentJumpHeight = this->y - 125.f;
+    }
     isJump = true;
-    operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
+    
+    if (this->y > currentJumpHeight) {
+        move(0.f, velocityHorizontal);
+    } else {
+        isFalling = true;
+        isJump = false;
+        currentJumpHeight = 0.f;
+    }
+    
 }
 
 void Shooter::runOperations()
 {
+    /**
+     * I does not use this function, but it can be very usefull in the future
+     */
+    //operations.insert(std::pair<std::string, std::vector<float>>("move", {x, y}));
     if (!operations.empty()) {
          std::multimap<std::string,std::vector<float>>::iterator operation;
         for ( operation = operations.begin(); operation != operations.end();) {
             if (operation->first == "move") {
-                std::vector<float> point= operation->second;
-                int x = 0;
-                int y = 0;
-                if (point[0] > 0) {
-                    x += 5;
-                } else if (point[0] < 0) {
-                    x -= 5;
-                }
-
-                if (point[1] > 0) {
-                    y += 5;
-                } else if (point[1] < 0) {
-                    y -= 5;
-                }
-                if(!move(x, y)) {
-                    isJump = false;
-                    isFalling = true;
-                    operations.erase(operation++);
-                    break;
-                }
-
-                if (operation->second[0] != 0) {
-                    operation->second[0] -= x;
-                } 
-
-                if (operation->second[1] != 0) {
-                    operation->second[1] -= y;            
-                }
-
-                if (operation->second[0] == 0 && operation->second[1] == 0) {
-                    isJump = false;
-                    isFalling = true;
-                    operations.erase(operation++);
-                } else {
-                    isJump = true;
-                    operation++;
-                }
+               
             }
         }
     }
