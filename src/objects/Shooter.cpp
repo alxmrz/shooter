@@ -22,6 +22,11 @@ Shooter::Shooter(GameObjects* go, float x, float y, int width, int height)
     sprite = new sf::Sprite();
     sprite->setTextureRect(sf::IntRect(24, 143, 50, 50));
     sprite->setPosition(x, y);
+    
+    heartSprite = new sf::Sprite();
+    heartSprite->setScale(0.5f, 0.5f);
+    heartSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    heartSprite->setPosition(x, y);
 }
 
 Shooter::~Shooter()
@@ -34,7 +39,7 @@ bool Shooter::move(float x, float y)
         this->x += x;
         this->y += y;
         this->sprite->setPosition(this->x, this->y);
-
+        
         if (y != 0.f) {
             if (y < 0) {
                 isJump = true;
@@ -111,7 +116,24 @@ void Shooter::draw(Window* window, float dt)
     
     elapsedTime += dt;
     fireTime += dt;
-
+    
+    if (health > 0) {
+        if (!isPlayer) {
+           for (int x=this->x,i=0; i < health; i++) {
+                heartSprite->setPosition(x, y-25);
+                window->draw(*heartSprite);
+                x+=20;
+            } 
+        } else {
+            sf::Vector2f windowCoords = window->mapPixelToCoords(sf::Vector2i(50, 50));
+            for (int i=0; i < health; i++) {
+                heartSprite->setPosition(windowCoords.x, windowCoords.y);
+                window->draw(*heartSprite);
+                windowCoords.x += 20;
+            }
+        }
+        
+    }
     this->CObject::draw(window, dt);
     
 }
@@ -177,6 +199,12 @@ void Shooter::setMainTexture(sf::Texture* texture)
 {
     sprite->setTexture(*texture);
 }
+
+void Shooter::setHeartTexture(sf::Texture* texture)
+{
+    heartSprite->setTexture(*texture);
+}
+
 void Shooter::setExplosionTexture(sf::Texture* texture)
 {
     explosion = texture;

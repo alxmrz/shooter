@@ -33,6 +33,12 @@ Resources::Resources()
         throw;
     }
     
+    heartTexture = new sf::Texture();
+    if (!heartTexture->loadFromFile("resources/images/heart.png")) {
+        std::cout << "Image images/ground.jpeg is not found" << std::endl;
+        throw;
+    }
+    
     arialFont = new sf::Font;
     if (!arialFont->loadFromFile("resources/fonts/arial.ttf")) {
         std::cout << "Font fonts/arial.ttf not found!";
@@ -84,6 +90,8 @@ sf::Texture* Resources::getTexture(std::string type)
         return explosionTexture;
     } else if (type == "ground") {
         return groundTexture;
+    } else if (type == "heart") {
+        return heartTexture;
     }
     std::cout << "Not found texture type " + type;
     throw;

@@ -27,8 +27,8 @@ void Window::drawAll(GameState* gameState)
 {
     if (gameState->isGameStarted) {
         sf::Vector2i target = mapCoordsToPixel(sf::Vector2f(
-        (float)gameState->objects->player->getX(),
-        (float)gameState->objects->player->getY())
+            (float)gameState->objects->player->getX(),
+            (float)gameState->objects->player->getY())
         );
 
         sf::Vector2f backgroundCoords = mapPixelToCoords(sf::Vector2i(0, 0));
@@ -57,20 +57,20 @@ void Window::drawAll(GameState* gameState)
         gameState->objects->buttons[i]->draw(this, dt);
     }
 
-    for (unsigned i = 0; i < gameState->objects->playable.size(); i++) {
-        gameState->objects->playable[i]->draw(this, dt);
-        if (((Shooter*)gameState->objects->playable[i])->isNeedToDie) {
-            gameState->objects->playable.erase(gameState->objects->playable.begin() + i);
-        }
-        
-    }
-
     for (unsigned i = 0; i < gameState->objects->background.size(); i++) {
         gameState->objects->background[i]->draw(this, dt);
     }
 
     for (unsigned i = 0; i < gameState->objects->bullets.size(); i++) {
         gameState->objects->bullets[i]->draw(this, dt);
+    }
+    
+    for (unsigned i = 0; i < gameState->objects->playable.size(); i++) {
+        gameState->objects->playable[i]->draw(this, dt);
+        if (((Shooter*)gameState->objects->playable[i])->isNeedToDie) {
+            gameState->objects->playable.erase(gameState->objects->playable.begin() + i);
+        }
+        
     }
 
     gameState->clock.restart();

@@ -31,6 +31,8 @@ public:
     bool isDead = false;
     bool isNeedToDie = false;
     bool isFalling = false;
+    bool isPlayer = false;
+    int health = 3;
     float acceleration = 0.3f;
     float velocity = 0.f;
     float velocityHorizontal = 0.f;
@@ -71,6 +73,7 @@ public:
     void jump();
     void runOperations();
     void setMainTexture(sf::Texture* texture);
+    void setHeartTexture(sf::Texture* texture);
     void setExplosionTexture(sf::Texture* texture);
     void setJumpSound(sf::Sound* jumpSound);
 private:
@@ -79,6 +82,8 @@ private:
      * @var Sprite for drawing
      */
     sf::Sprite* sprite;
+    
+    sf::Sprite* heartSprite;
     
     /**
      * Texture for sprite (Texture loads image). Sprite contains the texture

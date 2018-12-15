@@ -35,6 +35,7 @@ Shooter* Fabric::createShooter(float x, float y, int width, int height)
 {
     Shooter* shooter = new Shooter(go, x, y, width, height);
     shooter->setMainTexture( resources->getTexture("shooter")); 
+    shooter->setHeartTexture( resources->getTexture("heart")); 
     shooter->setExplosionTexture( resources->getTexture("explosion"));
     shooter->setJumpSound(resources->getSound("jump"));
     
