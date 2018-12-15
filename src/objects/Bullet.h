@@ -13,7 +13,7 @@ class GameObjects;
 class Bullet : public CObject {
 public:
     Bullet();
-    Bullet(GameObjects* go, int x, int y, int width, int height);
+    Bullet(GameObjects* go, sf::Texture* texture, int x, int y, int width, int height);
     Bullet(const Bullet& orig);
     virtual ~Bullet();
 
@@ -46,10 +46,6 @@ private:
      */
     sf::Sprite* sprite;
     
-    /**
-     * Texture for sprite (Texture loads image). Sprite contains the texture
-     */
-    sf::Texture* texture;
     /**
      * @var direction Direction of the object to move 
      */

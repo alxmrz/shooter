@@ -5,9 +5,11 @@
 #include "CObject.h"
 #include "objects/Shooter.h"
 #include "ui/Button.h"
+#include "Fabric.h"
 
 GameObjects::GameObjects()
 {
+    fabric = new Fabric(this);
 }
 
 GameObjects::~GameObjects()

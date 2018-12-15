@@ -43,39 +43,39 @@ void Event::handle()
 void Event::handleKeys(sf::Event* event)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        gameState->objects.player->fire();
+        gameState->objects->player->fire();
     }
 }
 
 void Event::handelArrowKeys()
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {       
-        if (!gameState->objects.player->isFalling) {
-            if (gameState->objects.player->velocityHorizontal > -gameState->objects.player->maxVelocity) {
-                gameState->objects.player->velocityHorizontal -= gameState->objects.player->acceleration;
+        if (!gameState->objects->player->isFalling) {
+            if (gameState->objects->player->velocityHorizontal > -gameState->objects->player->maxVelocity) {
+                gameState->objects->player->velocityHorizontal -= gameState->objects->player->acceleration;
             }
-            gameState->objects.player->jump();
+            gameState->objects->player->jump();
         }
     } else {
-        gameState->objects.player->isJump = false;
-        gameState->objects.player->velocityHorizontal = 0.f;
+        gameState->objects->player->isJump = false;
+        gameState->objects->player->velocityHorizontal = 0.f;
     } 
     
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        if (gameState->objects.player->velocity > -gameState->objects.player->maxVelocity) {
-            gameState->objects.player->velocity -= gameState->objects.player->acceleration;
+        if (gameState->objects->player->velocity > -gameState->objects->player->maxVelocity) {
+            gameState->objects->player->velocity -= gameState->objects->player->acceleration;
         }
         
-        gameState->objects.player->move();
+        gameState->objects->player->move();
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) { 
-        if (gameState->objects.player->velocity < gameState->objects.player->maxVelocity) {
-            gameState->objects.player->velocity += gameState->objects.player->acceleration;
+        if (gameState->objects->player->velocity < gameState->objects->player->maxVelocity) {
+            gameState->objects->player->velocity += gameState->objects->player->acceleration;
         }
         
-        gameState->objects.player->move();
+        gameState->objects->player->move();
     } else {
-        gameState->objects.player->isMoving = false;
-        gameState->objects.player->velocity = 0.f;
+        gameState->objects->player->isMoving = false;
+        gameState->objects->player->velocity = 0.f;
     }
     
 }
@@ -104,8 +104,8 @@ void Event::handleMouseKeys(sf::Event* event)
 
 void Event::handleUiButtonsEvents(sf::Event* event)
 {
-    for (unsigned i = 0; i < gameState->objects.buttons.size(); i++) {
-        Button* button = (Button*) gameState->objects.buttons[i];
+    for (unsigned i = 0; i < gameState->objects->buttons.size(); i++) {
+        Button* button = (Button*) gameState->objects->buttons[i];
         sf::Vector2i globalPosition = sf::Mouse::getPosition(*app->window);
         
         bool isHovered = button->collidePoint(globalPosition.x, globalPosition.y);

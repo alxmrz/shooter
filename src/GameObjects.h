@@ -1,9 +1,11 @@
 #ifndef GAMEOBJECTS_H
 #define GAMEOBJECTS_H
 
+#include <vector>
 
 class Shooter;
 class CObject;
+class Fabric;
 
 struct GameObjects {
     GameObjects();
@@ -13,6 +15,7 @@ struct GameObjects {
     std::vector<CObject*> bullets;
     std::vector<CObject*> playable;
     Shooter* player;
+    Fabric* fabric;
 
     virtual ~GameObjects();
     

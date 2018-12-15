@@ -11,6 +11,8 @@ src/GameObjects.cpp \
 src/GameState.cpp \
 src/Scene.cpp \
 src/Window.cpp \
+src/Fabric.cpp \
+src/Resources.cpp \
 src/objects/Ground.cpp \
 src/objects/Shooter.cpp \
 src/objects/Bullet.cpp \

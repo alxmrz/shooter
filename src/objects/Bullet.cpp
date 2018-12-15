@@ -16,20 +16,15 @@ Bullet::Bullet(const Bullet& orig)
 Bullet::~Bullet()
 {
     delete sprite;
-    delete texture;
 }
 
-Bullet::Bullet(GameObjects* go, int x, int y, int width, int height)
+Bullet::Bullet(GameObjects* go, sf::Texture* texture, int x, int y, int width, int height)
 : CObject(go, x, y, width, height)
 {
     sprite = new sf::Sprite();
     sprite->setTextureRect(sf::IntRect(0, 0, 18, 7));
     sprite->setPosition(x, y);
-    texture = new sf::Texture();
-    if (!texture->loadFromFile("resources/images/shell.png")) {
-        std::cout << "Image images/ground.jpeg is not found" << std::endl;
-        throw;
-    }
+
     sprite->setTexture(*texture);
 
     endPosition.push_back(x + 500);

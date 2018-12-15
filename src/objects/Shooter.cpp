@@ -6,6 +6,7 @@
 #include "../CObject.h"
 #include "../Window.h"
 #include "../GameObjects.h"
+#include "../Fabric.h"
 
 Shooter::Shooter()
 {
@@ -136,12 +137,14 @@ void Shooter::fire()
         // TODO: dry
         if (direction == "right") {
             std::vector<float> coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
-            Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
+            Bullet* bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
+            //Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
             bullet->setDirection("right");
             go->bullets.push_back(bullet);
         } else {
             std::vector<float> coords = {getX() - 20.f, getY() + 20.f, 10, 10};
-            Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
+            Bullet* bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
+            //Bullet* bullet = new Bullet(go, coords[0], coords[1], coords[2], coords[3]);
             bullet->setDirection("left");
             go->bullets.push_back(bullet);
         }

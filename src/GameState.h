@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <SFML/Graphics.hpp>
-#include "GameObjects.h"
 #include <vector>
 
 class Application;
@@ -40,7 +39,7 @@ public:
     /**
      * @var game objects container
      */
-    GameObjects objects;
+    GameObjects* objects;
 
     GameState();
     GameState(Application* app);
