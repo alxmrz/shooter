@@ -24,12 +24,13 @@ public:
     virtual ~Resources();
     
     sf::Texture* getTexture(std::string type);
+    sf::Font* getFont(std::string type);
 private:
-     /** Bullet texture */
     sf::Texture* bulletTexture;
     sf::Texture* shooterTexture;
     sf::Texture* explosionTexture;
     sf::Texture* groundTexture;
+    sf::Font* arialFont;
 };
 
 #endif /* RESOURCES_H */

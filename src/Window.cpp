@@ -25,24 +25,26 @@ Window::Window(sf::VideoMode mode,
 
 void Window::drawAll(GameState* gameState)
 {
-    
-    sf::Vector2i target = mapCoordsToPixel(sf::Vector2f(
+    if (gameState->isGameStarted) {
+        sf::Vector2i target = mapCoordsToPixel(sf::Vector2f(
         (float)gameState->objects->player->getX(),
         (float)gameState->objects->player->getY())
-    );
-    
-    sf::Vector2f backgroundCoords = mapPixelToCoords(sf::Vector2i(0, 0));
-    sprite->setPosition(backgroundCoords.x, backgroundCoords.y - 300);
-    
-    if (target.x >= 800) {
-        sprite->move(500.f, 0.f);
-        gameState->view->move(600.f, 0.f);
-    } else if (target.x <= 50) {
-        sprite->move(-800.f, 0.f);
-        gameState->view->move(-600.f, 0.f);  
+        );
+
+        sf::Vector2f backgroundCoords = mapPixelToCoords(sf::Vector2i(0, 0));
+        sprite->setPosition(backgroundCoords.x, backgroundCoords.y - 300);
+
+        if (target.x >= 800) {
+            sprite->move(500.f, 0.f);
+            gameState->view->move(600.f, 0.f);
+        } else if (target.x <= 50) {
+            sprite->move(-800.f, 0.f);
+            gameState->view->move(-600.f, 0.f);  
+        }
+
+        setView(*gameState->view);
     }
     
-    setView(*gameState->view);
 
     sf::Time elapsed = gameState->clock.getElapsedTime();
     float dt = elapsed.asMilliseconds() / 1000.f;

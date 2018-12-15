@@ -8,10 +8,15 @@ Text::Text()
 {
 }
 
-Text::Text(std::string text, int x, int y, int fontSize, sf::Color)
+Text::Text(std::string text, sf::Font* font, int x, int y, int fontSize, sf::Color)
 {
-    // TODO: fontSize is not in use
-    this->message = makeText(text, x, y);
+    message = new sf::Text;
+    message->setFont(*font);
+    message->setString(text);
+    message->setCharacterSize(fontSize);
+    message->setFillColor(sf::Color::Black);
+    message->setPosition(x, y);
+    message->setStyle(sf::Text::Bold | sf::Text::Underlined);
 }
 
 Text::~Text()
@@ -21,22 +26,4 @@ Text::~Text()
 sf::Drawable* Text::getDrawForm()
 {
     return message;
-}
-
-sf::Text* Text::makeText(std::string str, int x, int y)
-{
-    sf::Font* font = new sf::Font;
-    if (!font->loadFromFile("resources/fonts/arial.ttf")) {
-        std::cout << "Font fonts/arial.ttf not found!";
-        throw;
-    } else {
-        sf::Text* text = new sf::Text;
-        text->setFont(*font);
-        text->setString(str);
-        text->setCharacterSize(15);
-        text->setFillColor(sf::Color::Black);
-        text->setPosition(x, y);
-        text->setStyle(sf::Text::Bold | sf::Text::Underlined);
-        return text;
-    }
 }

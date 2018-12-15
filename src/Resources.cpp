@@ -31,6 +31,12 @@ Resources::Resources()
         std::cout << "Image images/ground.jpeg is not found" << std::endl;
         throw;
     }
+    
+    arialFont = new sf::Font;
+    if (!arialFont->loadFromFile("resources/fonts/arial.ttf")) {
+        std::cout << "Font fonts/arial.ttf not found!";
+        throw;
+    } 
 }
 
 Resources::Resources(const Resources& orig)
@@ -53,7 +59,16 @@ sf::Texture* Resources::getTexture(std::string type)
     } else if (type == "ground") {
         return groundTexture;
     }
-    
+    std::cout << "Not found texture type " + type;
+    throw;
+}
+
+sf::Font* Resources::getFont(std::string type)
+{
+    if (type == "arial") {
+        return arialFont;
+    }
+    std::cout << "Not found font type " + type;
     throw;
 }
 

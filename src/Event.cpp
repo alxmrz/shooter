@@ -31,13 +31,17 @@ void Event::handle()
         if (event.type == sf::Event::Closed) {
             app->window->close();
         }
-
-        handleKeys(&event);
+        if (gameState->isGameStarted) {
+            handleKeys(&event);
+            handleMouseKeys(&event);
+        }
        
-        handleMouseKeys(&event);
         handleUiButtonsEvents(&event);
     }
-     handelArrowKeys();
+    if (gameState->isGameStarted) {
+        handelArrowKeys();
+    }
+     
 }
 
 void Event::handleKeys(sf::Event* event)

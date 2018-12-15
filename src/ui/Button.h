@@ -13,7 +13,7 @@ class Button : public CObject {
 public:
     Button();
     Button(const CObject& orig);
-    Button(std::string id, std::string text, int x, int y, int width, int height);
+    Button(int x, int y, int width, int height);
     virtual ~Button();
     
     /**
@@ -38,6 +38,8 @@ public:
      * @return 
      */
     std::string getId();
+    void setId(std::string id);
+    void setText(Text* text);
     
     /**
      * Set border color of the current button

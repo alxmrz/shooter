@@ -14,17 +14,14 @@ Button::Button(const CObject& orig)
 {
 }
 
-Button::Button(std::string id, std::string text, int x, int y, int width, int height)
+Button::Button(int x, int y, int width, int height)
 : CObject(x, y, width, height)
 {
-    this->id = id;
-    this->text = new Text(text, x, y);
     shape = new sf::RectangleShape(sf::Vector2f(width, height));
     shape->setOutlineColor(sf::Color::Red);
     shape->setOutlineThickness(5);
     shape->setPosition(x, y);
 }
-
 
 Button::~Button()
 {
@@ -50,6 +47,15 @@ void Button::draw(Window* window, float dt)
 std::string Button::getId()
 {
     return id;
+}
+
+void Button::setId(std::string id)
+{
+    this->id = id;
+}
+void Button::setText(Text* text)
+{
+    this->text = text;
 }
 
 void Button::clicked()
