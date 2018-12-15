@@ -140,11 +140,13 @@ void Shooter::fire()
 void Shooter::jump()
 {
     if (currentJumpHeight == 0.f) {
+        jumpSound->play();
         currentJumpHeight = this->y - 125.f;
     }
     isJump = true;
     
     if (this->y > currentJumpHeight) {
+        
         move(0.f, velocityHorizontal);
     } else {
         isFalling = true;
@@ -178,4 +180,9 @@ void Shooter::setMainTexture(sf::Texture* texture)
 void Shooter::setExplosionTexture(sf::Texture* texture)
 {
     explosion = texture;
+}
+
+void Shooter::setJumpSound(sf::Sound* jumpSound)
+{
+    this->jumpSound = jumpSound;
 }

@@ -1,6 +1,6 @@
 CC=g++ 
 CFLAGS=-c -Wall -g -std=c++11
-LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system
+LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 SOURCES= \
 main.cpp \

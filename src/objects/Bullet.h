@@ -2,6 +2,8 @@
 #define BULLET_H
 
 #include <string>
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "../CObject.h"
 
 namespace sf {
@@ -40,6 +42,9 @@ public:
      * @param direction
      */
     void setDirection(std::string direction);
+    
+    sf::Sound* explosionSound;
+    void setExplosionSound(sf::Sound* sound);
 private:
     /**
      * @var Sprite for drawing

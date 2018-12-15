@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "Bullet.h"
 #include "Shooter.h"
 #include "../GameObjects.h"
@@ -75,6 +76,7 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
                 getHeight()
                 );
         if (collider->collideRect(obj)) {
+            explosionSound->play();
             ((Shooter*)go->playable[i])->isDead = true;
             delete collider;
             return true;
@@ -84,4 +86,9 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
     }
 
     return false;
+}
+
+void Bullet::setExplosionSound(sf::Sound* sound)
+{
+    explosionSound = sound;
 }

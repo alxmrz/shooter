@@ -4,25 +4,12 @@
 #include <string>
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <vector>
 
 class Application;
 class CObject;
 class GameObjects;
-
-/*struct GameObjects 
-{
-    GameObjects();
-    
-    std::vector<CObject*> buttons;
-    std::vector<CObject*> background;
-    std::vector<CObject*> playable;
-    Shooter* player;
-    
-    virtual ~GameObjects();
-    std::vector<CObject*>* all();
-    void reset();
-};*/
 
 class GameState {
 public:
@@ -50,6 +37,7 @@ public:
      */
     void update();
     bool isGameStarted = false;
+    void playBackgroundSound();
 private:
     /**
      * @var current application instance
@@ -70,6 +58,7 @@ private:
      * Current realization of gravity, that makes player falls down. Not good one
      */
     void gravity();
+    sf::Sound* backgroundLoop;
 
 };
 

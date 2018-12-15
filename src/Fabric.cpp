@@ -1,4 +1,5 @@
 #include <string>
+#include <SFML/Audio.hpp>
 #include "Fabric.h"
 #include "GameObjects.h"
 #include "Resources.h"
@@ -25,7 +26,9 @@ Fabric::~Fabric()
 
 Bullet* Fabric::createBullet(float x, float y, int width, int height)
 {
-    return new Bullet(go, resources->getTexture("bullet"), x, y, width, height);
+    Bullet* bullet = new Bullet(go, resources->getTexture("bullet"), x, y, width, height);
+    bullet->setExplosionSound(resources->getSound("explosion"));
+    return bullet;
 }
 
 Shooter* Fabric::createShooter(float x, float y, int width, int height)
@@ -33,6 +36,7 @@ Shooter* Fabric::createShooter(float x, float y, int width, int height)
     Shooter* shooter = new Shooter(go, x, y, width, height);
     shooter->setMainTexture( resources->getTexture("shooter")); 
     shooter->setExplosionTexture( resources->getTexture("explosion"));
+    shooter->setJumpSound(resources->getSound("jump"));
     
     return shooter;
 }
@@ -54,4 +58,9 @@ Button* Fabric::createButton(std::string id, std::string text, float x, float y,
     button->setText(createText(text, x, y));
     
     return button;
+}
+
+sf::Sound* Fabric::getBackgroundSound()
+{
+    return resources->getSound("background");
 }

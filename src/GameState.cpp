@@ -8,6 +8,7 @@
 #include "CObject.h"
 #include "objects/Shooter.h"
 #include "objects/Bullet.h"
+#include "Fabric.h"
 
 GameState::GameState()
 {
@@ -17,6 +18,7 @@ GameState::GameState(Application* app)
 {
     this->app = app;
     objects = new GameObjects();
+    backgroundLoop = objects->fabric->getBackgroundSound();
 }
 
 GameState::~GameState()
@@ -59,4 +61,10 @@ void GameState::gravity()
         }
     }
     
+}
+
+void GameState::playBackgroundSound()
+{
+    backgroundLoop->setLoop(true);
+    backgroundLoop->play();
 }

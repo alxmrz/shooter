@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "../CObject.h"
 #include "../GameObjects.h"
 
@@ -71,8 +72,9 @@ public:
     void runOperations();
     void setMainTexture(sf::Texture* texture);
     void setExplosionTexture(sf::Texture* texture);
-    
+    void setJumpSound(sf::Sound* jumpSound);
 private:
+    sf::Sound* jumpSound;
     /**
      * @var Sprite for drawing
      */

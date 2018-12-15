@@ -2,6 +2,7 @@
 #include <iostream>
 #include <exception>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "Resources.h"
 
 
@@ -37,6 +38,31 @@ Resources::Resources()
         std::cout << "Font fonts/arial.ttf not found!";
         throw;
     } 
+    
+    explosionSoundBuffer = new sf::SoundBuffer;
+    if (!explosionSoundBuffer->loadFromFile("resources/audio/explosion_sound.wav")) {
+        std::cout << "Audio resources/audio/explosion_sound.wav not found!";
+        throw;
+    }
+    explosionSound = new sf::Sound;
+    explosionSound->setBuffer(*explosionSoundBuffer);
+    
+    backgroundSoundBuffer = new sf::SoundBuffer;
+    if (!backgroundSoundBuffer->loadFromFile("resources/audio/background_loop.wav")) {
+        std::cout << "Audio resources/audio/background_loop.wav not found!";
+        throw;
+    }
+    backgroundSound = new sf::Sound;
+    backgroundSound->setBuffer(*backgroundSoundBuffer);
+    
+    jumpSoundBuffer = new sf::SoundBuffer;
+    if (!jumpSoundBuffer->loadFromFile("resources/audio/jump_sound.wav")) {
+        std::cout << "Audio resources/audio/jump_sound.wav not found!";
+        throw;
+    }
+    jumpSound = new sf::Sound;
+    jumpSound->setBuffer(*jumpSoundBuffer);
+    
 }
 
 Resources::Resources(const Resources& orig)
@@ -72,4 +98,16 @@ sf::Font* Resources::getFont(std::string type)
     throw;
 }
 
+sf::Sound* Resources::getSound(std::string type)
+{
+    if (type == "explosion") {
+        return explosionSound;
+    } else if (type == "background") {
+        return backgroundSound;
+    } else if (type == "jump") {
+        return jumpSound;
+    }
+    std::cout << "Not found sound buffer type " + type;
+    throw;
+}
 

@@ -121,6 +121,7 @@ void Event::handleUiButtonsEvents(sf::Event* event)
             if (id == "start") {
                 gameState->isGameStarted = true;
                 app->scene->initNewGame();
+                gameState->playBackgroundSound();
                 break;
             } else if (id == "exit") {
                 app->window->close();

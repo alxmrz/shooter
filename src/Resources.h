@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 class NotLoadedTexture: public std::exception
 {
@@ -25,12 +26,23 @@ public:
     
     sf::Texture* getTexture(std::string type);
     sf::Font* getFont(std::string type);
+    sf::Sound* getSound(std::string type);
 private:
     sf::Texture* bulletTexture;
     sf::Texture* shooterTexture;
     sf::Texture* explosionTexture;
     sf::Texture* groundTexture;
+    
     sf::Font* arialFont;
+    
+    sf::SoundBuffer* explosionSoundBuffer;
+    sf::Sound* explosionSound;
+    
+    sf::SoundBuffer* backgroundSoundBuffer;
+    sf::Sound* backgroundSound;
+    
+    sf::SoundBuffer* jumpSoundBuffer;
+    sf::Sound* jumpSound;
 };
 
 #endif /* RESOURCES_H */
