@@ -7,6 +7,42 @@
 
 
 Resources::Resources()
+{   
+}
+
+Resources::Resources(const Resources& orig)
+{
+}
+
+Resources::~Resources()
+{
+    //TODO: to many variables. Maybe should use a container for resources?
+    delete bulletTexture;
+    delete shooterTexture;
+    delete explosionTexture;
+    delete groundTexture;
+    delete heartTexture;
+
+    delete arialFont;
+
+    delete explosionSoundBuffer;
+    delete explosionSound;
+
+    delete backgroundSoundBuffer;
+    delete backgroundSound;
+
+    delete jumpSoundBuffer;
+    delete jumpSound;
+}
+
+void Resources::load()
+{
+    loadTextures();
+    loadFonts();
+    loadSounds();
+}
+
+void Resources::loadTextures()
 {
     bulletTexture = new sf::Texture();
     if (!bulletTexture->loadFromFile("resources/images/shell.png")) {
@@ -38,13 +74,19 @@ Resources::Resources()
         std::cout << "Image images/ground.jpeg is not found" << std::endl;
         throw;
     }
-    
+}
+
+void Resources::loadFonts()
+{
     arialFont = new sf::Font;
     if (!arialFont->loadFromFile("resources/fonts/arial.ttf")) {
         std::cout << "Font fonts/arial.ttf not found!";
         throw;
     } 
-    
+}
+
+void Resources::loadSounds()
+{
     explosionSoundBuffer = new sf::SoundBuffer;
     if (!explosionSoundBuffer->loadFromFile("resources/audio/explosion_sound.wav")) {
         std::cout << "Audio resources/audio/explosion_sound.wav not found!";
@@ -68,16 +110,6 @@ Resources::Resources()
     }
     jumpSound = new sf::Sound;
     jumpSound->setBuffer(*jumpSoundBuffer);
-    
-}
-
-Resources::Resources(const Resources& orig)
-{
-}
-
-Resources::~Resources()
-{
-    delete bulletTexture;
 }
 
 sf::Texture* Resources::getTexture(std::string type)

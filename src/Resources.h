@@ -27,6 +27,8 @@ public:
     sf::Texture* getTexture(std::string type);
     sf::Font* getFont(std::string type);
     sf::Sound* getSound(std::string type);
+    
+    void load();
 private:
     sf::Texture* bulletTexture;
     sf::Texture* shooterTexture;
@@ -44,6 +46,10 @@ private:
     
     sf::SoundBuffer* jumpSoundBuffer;
     sf::Sound* jumpSound;
+    
+    void loadTextures();
+    void loadFonts();
+    void loadSounds();
 };
 
 #endif /* RESOURCES_H */

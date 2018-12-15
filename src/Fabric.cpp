@@ -14,6 +14,7 @@ Fabric::Fabric(GameObjects* go):
 go(go)
 {
     resources = new Resources();
+    resources->load();
 }
 
 Fabric::Fabric(const Fabric& orig)
