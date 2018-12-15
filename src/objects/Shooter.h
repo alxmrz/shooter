@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <SFML/Graphics.hpp>
 #include "../CObject.h"
 #include "../GameObjects.h"
 
@@ -68,6 +69,8 @@ public:
     
     void jump();
     void runOperations();
+    void setMainTexture(sf::Texture* texture);
+    void setExplosionTexture(sf::Texture* texture);
     
 private:
     /**

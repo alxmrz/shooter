@@ -4,6 +4,7 @@
 class Bullet;
 class GameObjects;
 class Resources;
+class Shooter;
 
 class Fabric {
 public:
@@ -12,6 +13,7 @@ public:
     virtual ~Fabric();
 
     Bullet* createBullet(float x, float y, int width, int height);
+    Shooter* createShooter(float x, float y, int width, int height);
     
 private:
     GameObjects* go;

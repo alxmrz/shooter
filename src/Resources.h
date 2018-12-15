@@ -27,6 +27,8 @@ public:
 private:
      /** Bullet texture */
     sf::Texture* bulletTexture;
+    sf::Texture* shooterTexture;
+    sf::Texture* explosionTexture;
 };
 
 #endif /* RESOURCES_H */

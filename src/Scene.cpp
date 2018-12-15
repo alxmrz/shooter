@@ -9,6 +9,7 @@
 #include "objects/Ground.h"
 #include "objects/Shooter.h"
 #include "ui/Button.h"
+#include "Fabric.h"
 
 Scene::Scene()
 {
@@ -68,11 +69,12 @@ void Scene::generateLevel()
             if (c == 'G') {
                 gameState->objects->background.push_back(new Ground(x, y, 50, 50));
             } else if (c == 'P') {
-                Shooter* shooter = new Shooter(gameState->objects, x, y, 50, 50);
+                Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
+                //Shooter* shooter = new Shooter(gameState->objects, x, y, 50, 50);
                 gameState->objects->player = shooter;
                 gameState->objects->playable.push_back(shooter);
             } else if (c == 'S') {
-                Shooter* shooter = new Shooter(gameState->objects, x, y, 50, 50);
+                Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
                 gameState->objects->playable.push_back(shooter);
             }
             x += 50;
