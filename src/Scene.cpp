@@ -49,16 +49,16 @@ void Scene::initNewGame()
 void Scene::generateLevel()
 {
     std::string level =
-            "                                             |"
-            "                                  GGGGG      |"
-            "                                             |"
-            "                             GGGGG           |"
-            "                                             |"
-            "                         GGGGG               |"
+            "                                     S       |"
+            "                    S             GGGGG      |"
+            "   S        GGGGGGGGGGGG                     |"
+            "GGGGGGG                      GGGGG           |"
+            "                           S                 |"
+            "    GGGGGG               GGGGG               |"
             " GGG                                       GG|"
-            " GG                 GGGGG                   G|"
-            " GG                                         G|"
-            " GG           GGGGG                         G|"
+            " GG                 GGG                    G|"
+            " GGGGGGG                                    G|"
+            " GG           GGGG                          G|"
             " GGP       S     S     S       S        S   G|"
             "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG|"
             ;
