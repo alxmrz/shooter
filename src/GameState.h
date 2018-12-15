@@ -38,6 +38,7 @@ public:
     void update();
     bool isGameStarted = false;
     void playBackgroundSound();
+    void stopBackgroundSound();
 private:
     /**
      * @var current application instance

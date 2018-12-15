@@ -29,6 +29,8 @@ void Event::handle()
 
     while (app->window->pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
+            gameState->stopBackgroundSound();
+            delete gameState;
             app->window->close();
         }
         if (gameState->isGameStarted) {

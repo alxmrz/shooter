@@ -23,6 +23,9 @@ GameState::GameState(Application* app)
 
 GameState::~GameState()
 {
+    delete backgroundLoop;
+    objects->reset();
+    delete objects;
 }
 
 void GameState::update()
@@ -67,4 +70,10 @@ void GameState::playBackgroundSound()
 {
     backgroundLoop->setLoop(true);
     backgroundLoop->play();
+}
+
+void GameState::stopBackgroundSound()
+{
+    backgroundLoop->setLoop(false);
+    backgroundLoop->stop();
 }
