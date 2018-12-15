@@ -44,9 +44,9 @@ bool Bullet::move(float x, float y)
     }
 
     // TODO: isEndPosition is not in use yet. Fix and use.
-    //bool isEndPosition = endPosition[0] == this->x + x && endPosition[1] == this->y + y;
+    bool isEndPosition = endPosition[0] == this->x + x && endPosition[1] == this->y + y;
     
-    if (!collidePlayableAfterMove(x, y) && !collideObjectAfterMove(x, y)) {
+    if (!isEndPosition && !collidePlayableAfterMove(x, y) && !collideObjectAfterMove(x, y)) {
         this->x += x;
         this->y += y;
         this->sprite->setPosition(this->x, this->y);
@@ -60,6 +60,8 @@ bool Bullet::move(float x, float y)
 void Bullet::setDirection(std::string dir)
 {
     if (dir == "left") {
+        //TODO: it is a hack to set left border for bullet. @see constructor
+        endPosition[0] -= 1000;
         sprite->rotate(180);
     }
     direction = dir;
