@@ -5,6 +5,7 @@ class Bullet;
 class GameObjects;
 class Resources;
 class Shooter;
+class Ground;
 
 class Fabric {
 public:
@@ -14,6 +15,7 @@ public:
 
     Bullet* createBullet(float x, float y, int width, int height);
     Shooter* createShooter(float x, float y, int width, int height);
+    Ground* createGround(float x, float y, int width, int height);
     
 private:
     GameObjects* go;

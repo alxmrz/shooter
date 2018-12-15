@@ -7,23 +7,13 @@ class Ground : public CObject {
 public:
     Ground();
     Ground(const Ground& orig);
-    Ground(int x, int y, int width, int height);
+    Ground(sf::Texture* texture, int x, int y, int width, int height);
     virtual ~Ground();
 
-    /**
-     * @var shape Shape to draw in Window
-     */
-    sf::RectangleShape* shape;
-    
     /**
      * @var Sprite for drawing
      */
     sf::Sprite* sprite;
-    
-    /**
-     * Texture for sprite (Texture loads image). Sprite contains the texture
-     */
-    sf::Texture* texture;
     
     /**
      * sf::Drawable is required by Window 

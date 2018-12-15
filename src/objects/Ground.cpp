@@ -10,20 +10,11 @@ Ground::Ground(const Ground& orig)
 {
 }
 
-Ground::Ground(int x, int y, int width, int height) : CObject(x, y, width, height)
+Ground::Ground(sf::Texture* texture, int x, int y, int width, int height) : CObject(x, y, width, height)
 {
-    this->shape = new sf::RectangleShape(sf::Vector2f(width, height));
-    this->shape->setPosition(x, y);
-    shape->setFillColor(sf::Color(0, 100, 0));
-
     sprite = new sf::Sprite();
     sprite->setTextureRect(sf::IntRect(0, 100, 50, 50));
     sprite->setPosition(x, y);
-    texture = new sf::Texture();
-    if (!texture->loadFromFile("resources/images/ground.jpeg")) {
-        std::cout << "Image images/ground.jpeg is not found" << std::endl;
-        throw;
-    }
     sprite->setTexture(*texture);
 }
 

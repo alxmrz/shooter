@@ -25,6 +25,12 @@ Resources::Resources()
         std::cout << "Image resources/images/shoneshotell.png is not found";
         throw;     
     }
+    
+    groundTexture = new sf::Texture();
+    if (!groundTexture->loadFromFile("resources/images/ground.jpeg")) {
+        std::cout << "Image images/ground.jpeg is not found" << std::endl;
+        throw;
+    }
 }
 
 Resources::Resources(const Resources& orig)
@@ -44,6 +50,8 @@ sf::Texture* Resources::getTexture(std::string type)
         return shooterTexture;
     } else if (type == "explosion") {
         return explosionTexture;
+    } else if (type == "ground") {
+        return groundTexture;
     }
     
     throw;

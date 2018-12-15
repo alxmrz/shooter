@@ -67,10 +67,11 @@ void Scene::generateLevel()
         x = 0;
         for (char c : line) {
             if (c == 'G') {
-                gameState->objects->background.push_back(new Ground(x, y, 50, 50));
+                gameState->objects->background.push_back(
+                    gameState->objects->fabric->createGround(x, y, 50, 50)
+                );
             } else if (c == 'P') {
                 Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
-                //Shooter* shooter = new Shooter(gameState->objects, x, y, 50, 50);
                 gameState->objects->player = shooter;
                 gameState->objects->playable.push_back(shooter);
             } else if (c == 'S') {

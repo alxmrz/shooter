@@ -3,6 +3,7 @@
 #include "Resources.h"
 #include "objects/Bullet.h"
 #include "objects/Shooter.h"
+#include "objects/Ground.h"
 
 
 Fabric::Fabric(GameObjects* go):
@@ -32,3 +33,7 @@ Shooter* Fabric::createShooter(float x, float y, int width, int height)
     return shooter;
 }
 
+Ground* Fabric::createGround(float x, float y, int width, int height)
+{
+    return new Ground(resources->getTexture("ground"), x, y, width, height);
+}
