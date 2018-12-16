@@ -49,6 +49,11 @@ void Event::handleKeys(sf::Event* event)
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
         gameState->objects->player->fire();
+    } else if (event->type == sf::Event::KeyPressed) {
+        if (event->key.code  == sf::Keyboard::Escape) {
+            gameState->stopBackgroundSound();
+            app->window->close();
+        }
     }
 }
 

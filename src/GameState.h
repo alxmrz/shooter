@@ -37,6 +37,7 @@ public:
      */
     void update();
     bool isGameStarted = false;
+    bool isGamePaused = false;
     void playBackgroundSound();
     void stopBackgroundSound();
 private:

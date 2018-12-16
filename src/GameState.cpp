@@ -30,7 +30,7 @@ GameState::~GameState()
 
 void GameState::update()
 {
-    if (isGameStarted) {
+    if (isGameStarted && !isGamePaused) {
         sf::Time elapsed = this->clock.getElapsedTime();
         float dt = elapsed.asMilliseconds() / 1000.f;
         elapsedTime += dt;
