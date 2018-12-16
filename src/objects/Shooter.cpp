@@ -162,6 +162,7 @@ void Shooter::draw(Window* window, float dt)
 void Shooter::fire()
 {
     if (fireTime >= 0.5f) {
+        shotgunSound->play();
         fireTime = 0.f;
         // TODO: dry
         if (direction == "right") {
@@ -262,6 +263,11 @@ void Shooter::setExplosionTexture(sf::Texture* texture)
 void Shooter::setJumpSound(sf::Sound* jumpSound)
 {
     this->jumpSound = jumpSound;
+}
+
+void Shooter::setShotgunSound(sf::Sound* shotgunSound)
+{
+    this->shotgunSound = shotgunSound;
 }
 
 void Shooter::setCrystalCountText(Text* text)

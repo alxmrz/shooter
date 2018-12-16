@@ -42,6 +42,7 @@ Shooter* Fabric::createShooter(float x, float y, int width, int height)
     shooter->setExplosionTexture( resources->getTexture("explosion"));
     shooter->setCrystalCountText(createText("", x, y));
     shooter->setJumpSound(resources->getSound("jump"));
+    shooter->setShotgunSound(resources->getSound("shotgun"));
     
     return shooter;
 }

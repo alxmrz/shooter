@@ -116,6 +116,14 @@ void Resources::loadSounds()
     }
     jumpSound = new sf::Sound;
     jumpSound->setBuffer(*jumpSoundBuffer);
+    
+    shotgunSoundBuffer = new sf::SoundBuffer;
+    if (!shotgunSoundBuffer->loadFromFile("resources/audio/shotgun_sound.wav")) {
+        std::cout << "Audio resources/audio/shotgun_sound.wav not found!";
+        throw;
+    }
+    shotgunSound = new sf::Sound;
+    shotgunSound->setBuffer(*shotgunSoundBuffer);
 }
 
 sf::Texture* Resources::getTexture(std::string type)
@@ -154,6 +162,8 @@ sf::Sound* Resources::getSound(std::string type)
         return backgroundSound;
     } else if (type == "jump") {
         return jumpSound;
+    } else if (type == "shotgun") {
+        return shotgunSound;
     }
     std::cout << "Not found sound buffer type " + type;
     throw;

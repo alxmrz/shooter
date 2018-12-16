@@ -47,6 +47,8 @@ private:
     
     sf::SoundBuffer* jumpSoundBuffer;
     sf::Sound* jumpSound;
+    sf::SoundBuffer* shotgunSoundBuffer;
+    sf::Sound* shotgunSound;
     
     void loadTextures();
     void loadFonts();
