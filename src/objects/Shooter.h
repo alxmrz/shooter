@@ -202,6 +202,7 @@ private:
     };
     
     std::multimap<std::string, std::vector<float>> operations;
+    bool collectCollidedCrystal(float x, float y);
 };
 
 #endif /* SHOOTER_H */

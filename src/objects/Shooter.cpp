@@ -42,6 +42,7 @@ Shooter::~Shooter()
 bool Shooter::move(float x, float y)
 {
     if (!collideObjectAfterMove(x, y) && !this->y + y < 600) {
+        collectCollidedCrystal(x, y);
         this->x += x;
         this->y += y;
         this->sprite->setPosition(this->x, this->y);
@@ -214,6 +215,30 @@ void Shooter::runOperations()
     }
    
 }
+
+bool Shooter::collectCollidedCrystal(float x, float y)
+{
+    for (unsigned i = 0; i < go->crystals.size(); i++) {
+        auto* obj = go->crystals[i];
+        CObject* collider = new CObject(
+                getX() + x,
+                getY() + y,
+                getWidth(),
+                getHeight()
+                );
+        if (collider->collideRect(obj)) {
+            crystals++;
+            go->crystals.erase(go->crystals.begin() + i);
+            delete collider;
+            return true;
+        }
+
+        delete collider;
+    }
+
+    return false;
+}
+
 
 void Shooter::setMainTexture(sf::Texture* texture)
 {
