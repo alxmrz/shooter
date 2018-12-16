@@ -41,6 +41,12 @@ public:
     float maxVelocity = 5.f;
     float currentJumpHeight = 0.f;
     
+
+    float gravityPower = 0.1f;    
+    float gravitationalVelocity = 0.f;
+    float gravitationalAcceleration = 0.5f;
+    
+    
     /**
      * sf::Drawable is required by Window 
      * to display simple SFML object on the screen
@@ -69,6 +75,7 @@ public:
     void jump();
     void stopJumping();
     void stopMoving();
+    void gravitate();
     /**
      * Make a fire (it creates Bullet instance)
      */
@@ -79,7 +86,7 @@ public:
     
  
     bool isMoving();
-    bool isJump();
+    bool isJumping();
     bool isDead();
     bool isNeedToDie();
     bool isFalling();

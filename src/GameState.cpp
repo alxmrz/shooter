@@ -1,6 +1,3 @@
-#include <iostream>
-#include <string>
-#include <unistd.h>
 #include <SFML/Graphics.hpp>
 #include "GameState.h"
 #include "GameObjects.h"
@@ -24,46 +21,43 @@ GameState::GameState(Application* app)
 
 GameState::~GameState()
 {
-    delete backgroundLoop;
     objects->reset();
+    delete backgroundLoop;
     delete objects;
 }
 
 void GameState::update()
 {
     if (isGameStarted && !isGamePaused) {
-        sf::Time elapsed = this->clock.getElapsedTime();
-        float dt = elapsed.asMilliseconds() / 1000.f;
-        elapsedTime += dt;
-        
-        gravity();
-
-        //deletes bullets when they should die. Must be moved in separate method (or class?)
-        for (unsigned i = 0; i < objects->bullets.size(); i++) {
-            Bullet* bullet = (Bullet*) objects->bullets[i];
-            if (!bullet->move(10.f, 0.f)) {
-                objects->bullets.erase(objects->bullets.begin() + i);
-                break;
-            }
-        }   
+        incrementDelayedTime();
+        updateBulletsState();
+        causeGravity();
     }
 }
 
-void GameState::gravity()
+void GameState::incrementDelayedTime()
 {
-    if (!objects->player->jumping) {
-        float y = 0.f;
-        y += elapsedTime * (velocity + elapsedTime * acceleration / 2.f);
-        
-        if (objects->player->move(0.f, y) || objects->player->move(0.f, 2.f)) {
-            velocity += elapsedTime * acceleration;
-        } else {
-            objects->player->currentJumpHeight = 0.0;
-            velocity = 0.0;
-            elapsedTime = 0.0;
-        }
+    sf::Time elapsed = this->clock.getElapsedTime();
+    float dt = elapsed.asMilliseconds() / 1000.f;
+    elapsedTime += dt;
+}
+
+void GameState::causeGravity()
+{
+    if (!objects->player->isJumping()) {
+        objects->player->gravitate();
     }
-    
+}
+
+void GameState::updateBulletsState()
+{
+    for (unsigned i = 0; i < objects->bullets.size(); i++) {
+        Bullet* bullet = static_cast<Bullet*>(objects->bullets[i]);
+        if (!bullet->move(10.f, 0.f)) {
+            objects->bullets.erase(objects->bullets.begin() + i);
+            break;
+        }
+    }   
 }
 
 void GameState::playBackgroundSound()

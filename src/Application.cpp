@@ -25,8 +25,7 @@ int Application::run()
 {
     window->setFramerateLimit(fps);
     scene->initMainMenu();
-    /*gameState->isGameStarted = true;
-    scene->initNewGame();*/
+    /*gameState->startNewGame*/
 
     while (window->isOpen()) {
         event->handle();

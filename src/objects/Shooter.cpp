@@ -225,6 +225,20 @@ void Shooter::stopMoving()
     velocity = 0.f;
 }
 
+void Shooter::gravitate()
+{
+    float y = 0.f;
+    y += elapsedTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f);
+
+    if (move(0.f, y) || move(0.f, 2.f)) {
+        gravitationalVelocity += elapsedTime * gravitationalAcceleration;
+    } else {
+        currentJumpHeight = 0.0;
+        gravitationalVelocity = 0.0;
+        elapsedTime = 0.0;
+    }
+}
+
 bool Shooter::collectCollidedCrystal(float x, float y)
 {
     for (unsigned i = 0; i < go->crystals.size(); i++) {
@@ -255,7 +269,7 @@ bool Shooter::isMoving()
     return moving;
 }
 
-bool Shooter::isJump()
+bool Shooter::isJumping()
 {
     return jumping;
 }
