@@ -31,17 +31,17 @@ void Event::handle()
         if (event.type == sf::Event::Closed) {
             app->close();
         } else if (event.type == sf::Event::KeyPressed) {
-            handleMainKeys(&event);
+            handleMainKeys(event);
         } else if (event.type == sf::Event::KeyReleased) {
-            handleArrowKeysReleased(&event);
+            handleArrowKeysReleased(event);
         } else  if (event.type == sf::Event::MouseWheelScrolled) { 
-            handleMouseEvents(&event);
+            handleMouseEvents(event);
         } else if (event.type == sf::Event::MouseButtonPressed) {
             if (event.mouseButton.button == sf::Mouse::Left) {
-                handleUiButtonsClick(&event);
+                handleUiButtonsClick(event);
             }
         } else if (event.type == sf::Event::MouseMoved) {
-            handleUiButtonsHover(&event);
+            handleUiButtonsHover(event);
         }
     }
     if (gameState->isGameStarted) {
@@ -49,34 +49,34 @@ void Event::handle()
     }   
 }
 
-void Event::handleMainKeys(sf::Event* event)
+void Event::handleMainKeys(sf::Event& event)
 {
-    if (event->key.code == sf::Keyboard::Escape) {
+    if (event.key.code == sf::Keyboard::Escape) {
         app->close();
     } 
 }
 
-void Event::handleArrowKeysReleased(sf::Event* event)
+void Event::handleArrowKeysReleased(sf::Event& event)
 {
-    if (event->key.code == sf::Keyboard::Up) {
+    if (event.key.code == sf::Keyboard::Up) {
             player->stopJumping();
-    } else if (event->key.code == sf::Keyboard::Left) {
+    } else if (event.key.code == sf::Keyboard::Left) {
          player->stopMoving();
-    } else if (event->key.code == sf::Keyboard::Right) {
+    } else if (event.key.code == sf::Keyboard::Right) {
          player->stopMoving();
     }
 }
 
-void Event::handleMouseEvents(sf::Event* event)
+void Event::handleMouseEvents(sf::Event& event)
 {
     if (gameState->isGameStarted) {
-        if (event->mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
-            if (event->mouseWheelScroll.delta == -1) {
+        if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
+            if (event.mouseWheelScroll.delta == -1) {
                 gameState->view->zoom(1.5);
             } else {
                 gameState->view->zoom(0.5);
             }
-        } else if (event->mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel) {
+        } else if (event.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel) {
             gameState->view->zoom(-1.f);
         } else {
             std::cout << "wheel type: unknown" << std::endl;
@@ -84,12 +84,12 @@ void Event::handleMouseEvents(sf::Event* event)
     }
 }
 
-void Event::handleUiButtonsClick(sf::Event* event)
+void Event::handleUiButtonsClick(sf::Event& event)
 {
     for (unsigned i = 0; i < gameState->objects->buttons.size(); i++) {
-        Button* button = (Button*) gameState->objects->buttons[i];
+        Button* button = static_cast<Button*>(gameState->objects->buttons[i]);
         
-        bool isHovered = button->collidePoint(event->mouseButton.x, event->mouseButton.y);
+        bool isHovered = button->collidePoint(event.mouseButton.x, event.mouseButton.y);
         if (isHovered) {
             button->clicked();
             
@@ -105,12 +105,12 @@ void Event::handleUiButtonsClick(sf::Event* event)
     }
 }
 
-void Event::handleUiButtonsHover(sf::Event* event)
+void Event::handleUiButtonsHover(sf::Event& event)
 {
     for (unsigned i = 0; i < gameState->objects->buttons.size(); i++) {
-        Button* button = (Button*) gameState->objects->buttons[i];
+        Button* button = static_cast<Button*>(gameState->objects->buttons[i]);
 
-        bool isHovered = button->collidePoint(event->mouseMove.x, event->mouseMove.y);
+        bool isHovered = button->collidePoint(event.mouseMove.x, event.mouseMove.y);
         if (isHovered) {
             button->hovered();
         } else {

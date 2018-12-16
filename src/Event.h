@@ -27,7 +27,7 @@ private:
      * 
      * @param event
      */
-    void handleMainKeys(sf::Event* event);
+    void handleMainKeys(sf::Event& event);
     
     /**
      * Handle arrow keys events
@@ -35,21 +35,21 @@ private:
      * @param event
      */
     void handleArrowKeys();
-    void handleArrowKeysReleased(sf::Event* event);
+    void handleArrowKeysReleased(sf::Event& event);
     
     /**
      * Handle mouse events
      * @param event
      */
-    void handleMouseEvents(sf::Event* event);
+    void handleMouseEvents(sf::Event& event);
     
     /**
      * Handle buttons events (click, hover)
      * 
      * @param event
      */
-    void handleUiButtonsClick(sf::Event* event);
-    void handleUiButtonsHover(sf::Event* event);
+    void handleUiButtonsClick(sf::Event& event);
+    void handleUiButtonsHover(sf::Event& event);
     void handleRealTimeKeyboardState();
 };
 
