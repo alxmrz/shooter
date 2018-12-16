@@ -7,6 +7,7 @@
 #include "Application.h"
 #include "Scene.h"
 #include "objects/Ground.h"
+#include "objects/Crystal.h"
 #include "objects/Shooter.h"
 #include "ui/Button.h"
 #include "Fabric.h"
@@ -50,15 +51,15 @@ void Scene::generateLevel()
 {
     std::string level =
             "                                     S       |"
-            "                    S             GGGGG      |"
+            "               C    S         C   GGGGG      |"
             "   S        GGGGGGGGGGGG                     |"
             "GGGGGGG                      GGGGG           |"
-            "                           S                 |"
+            "       C                   S                 |"
             "    GGGGGG               GGGGG               |"
-            " GGG                                       GG|"
+            " GGG          C                            GG|"
             " GG                 GGG                    G|"
-            " GGGGGGG                                    G|"
-            " GG           GGGG                          G|"
+            " GGGGGGG                            C       G|"
+            " GG   C       GGGG      C      C    C    C  G|"
             " GGP       S     S     S       S        S   G|"
             "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG|"
             ;
@@ -81,6 +82,11 @@ void Scene::generateLevel()
             } else if (c == 'S') {
                 Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
                 gameState->objects->playable.push_back(shooter);
+            } else if (c == 'C') {
+                gameState->objects->crystals.push_back(
+                    gameState->objects->fabric->createCrystal(x, y, 50, 50)
+                    //gameState->objects->fabric->createGround(x, y, 50, 50)
+                );
             }
             x += 50;
         }

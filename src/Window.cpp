@@ -60,6 +60,9 @@ void Window::drawAll(GameState* gameState)
     for (unsigned i = 0; i < gameState->objects->background.size(); i++) {
         gameState->objects->background[i]->draw(this, dt);
     }
+    for (unsigned i = 0; i < gameState->objects->crystals.size(); i++) {
+        gameState->objects->crystals[i]->draw(this, dt);
+    }
 
     for (unsigned i = 0; i < gameState->objects->bullets.size(); i++) {
         gameState->objects->bullets[i]->draw(this, dt);

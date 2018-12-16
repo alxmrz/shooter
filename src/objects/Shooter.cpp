@@ -7,6 +7,7 @@
 #include "../Window.h"
 #include "../GameObjects.h"
 #include "../Fabric.h"
+#include "../ui/Text.h"
 
 Shooter::Shooter()
 {
@@ -27,6 +28,11 @@ Shooter::Shooter(GameObjects* go, float x, float y, int width, int height)
     heartSprite->setScale(0.5f, 0.5f);
     heartSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
     heartSprite->setPosition(x, y);
+    
+    crystalSprite = new sf::Sprite();
+    crystalSprite->setScale(0.5f, 0.5f);
+    crystalSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    crystalSprite->setPosition(x, y);
 }
 
 Shooter::~Shooter()
@@ -134,6 +140,20 @@ void Shooter::draw(Window* window, float dt)
         }
         
     }
+    
+    if (isPlayer) {
+        sf::Vector2f cristalWindowCoords = window->mapPixelToCoords(sf::Vector2i(150, 50));
+        sf::Vector2f crystalCount = window->mapPixelToCoords(sf::Vector2i(180, 50));
+        
+        text->message->setString(std::to_string(crystals));
+        text->message->setPosition(crystalCount.x, crystalCount.y);
+        crystalSprite->setPosition(cristalWindowCoords.x, cristalWindowCoords.y);
+        
+        window->draw(*crystalSprite);
+        window->draw(*text->message);
+        
+    }
+    
     this->CObject::draw(window, dt);
     
 }
@@ -204,6 +224,10 @@ void Shooter::setHeartTexture(sf::Texture* texture)
 {
     heartSprite->setTexture(*texture);
 }
+void Shooter::setCrystalTexture(sf::Texture* texture)
+{
+    crystalSprite->setTexture(*texture);
+}
 
 void Shooter::setExplosionTexture(sf::Texture* texture)
 {
@@ -213,4 +237,9 @@ void Shooter::setExplosionTexture(sf::Texture* texture)
 void Shooter::setJumpSound(sf::Sound* jumpSound)
 {
     this->jumpSound = jumpSound;
+}
+
+void Shooter::setCrystalCountText(Text* text)
+{
+    this->text = text;
 }

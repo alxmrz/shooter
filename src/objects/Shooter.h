@@ -11,6 +11,7 @@
 
 struct GameObjects;
 class Window;
+class Text;
 
 class Shooter : public CObject {
 public:
@@ -33,6 +34,7 @@ public:
     bool isFalling = false;
     bool isPlayer = false;
     int health = 3;
+    int crystals = 0;
     float acceleration = 0.3f;
     float velocity = 0.f;
     float velocityHorizontal = 0.f;
@@ -74,8 +76,10 @@ public:
     void runOperations();
     void setMainTexture(sf::Texture* texture);
     void setHeartTexture(sf::Texture* texture);
+    void setCrystalTexture(sf::Texture* texture);
     void setExplosionTexture(sf::Texture* texture);
     void setJumpSound(sf::Sound* jumpSound);
+    void setCrystalCountText(Text* text);
 private:
     sf::Sound* jumpSound;
     /**
@@ -84,6 +88,7 @@ private:
     sf::Sprite* sprite;
     
     sf::Sprite* heartSprite;
+    sf::Sprite* crystalSprite;
     
     /**
      * Texture for sprite (Texture loads image). Sprite contains the texture
@@ -91,6 +96,7 @@ private:
     sf::Texture* texture;
     sf::Texture* explosion;
     
+    Text* text;
     /**
      * Direction of the object for sprite choose
      */

@@ -6,6 +6,7 @@
 #include "objects/Bullet.h"
 #include "objects/Shooter.h"
 #include "objects/Ground.h"
+#include "objects/Crystal.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 
@@ -37,7 +38,9 @@ Shooter* Fabric::createShooter(float x, float y, int width, int height)
     Shooter* shooter = new Shooter(go, x, y, width, height);
     shooter->setMainTexture( resources->getTexture("shooter")); 
     shooter->setHeartTexture( resources->getTexture("heart")); 
+    shooter->setCrystalTexture( resources->getTexture("crystal")); 
     shooter->setExplosionTexture( resources->getTexture("explosion"));
+    shooter->setCrystalCountText(createText("", x, y));
     shooter->setJumpSound(resources->getSound("jump"));
     
     return shooter;
@@ -46,6 +49,10 @@ Shooter* Fabric::createShooter(float x, float y, int width, int height)
 Ground* Fabric::createGround(float x, float y, int width, int height)
 {
     return new Ground(resources->getTexture("ground"), x, y, width, height);
+}
+Crystal* Fabric::createCrystal(float x, float y, int width, int height)
+{
+    return new Crystal(resources->getTexture("crystal"), x, y, width, height);
 }
 
 Text* Fabric::createText(std::string text, int x, int y)

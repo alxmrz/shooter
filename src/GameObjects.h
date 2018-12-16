@@ -14,6 +14,8 @@ struct GameObjects {
     std::vector<CObject*> background;
     std::vector<CObject*> bullets;
     std::vector<CObject*> playable;
+    std::vector<CObject*> crystals;
+    
     Shooter* player;
     Fabric* fabric;
 

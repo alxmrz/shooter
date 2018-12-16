@@ -71,7 +71,13 @@ void Resources::loadTextures()
     
     heartTexture = new sf::Texture();
     if (!heartTexture->loadFromFile("resources/images/heart.png")) {
-        std::cout << "Image images/ground.jpeg is not found" << std::endl;
+        std::cout << "Image images/heart.png is not found" << std::endl;
+        throw;
+    }
+    
+    crystalTexture = new sf::Texture();
+    if (!crystalTexture->loadFromFile("resources/images/crystal.png")) {
+        std::cout << "Image images/cristal.png is not found" << std::endl;
         throw;
     }
 }
@@ -124,6 +130,8 @@ sf::Texture* Resources::getTexture(std::string type)
         return groundTexture;
     } else if (type == "heart") {
         return heartTexture;
+    } else if (type == "crystal") {
+        return crystalTexture;
     }
     std::cout << "Not found texture type " + type;
     throw;

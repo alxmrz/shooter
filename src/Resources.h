@@ -35,6 +35,7 @@ private:
     sf::Texture* explosionTexture;
     sf::Texture* groundTexture;
     sf::Texture* heartTexture;
+    sf::Texture* crystalTexture;
     
     sf::Font* arialFont;
     
