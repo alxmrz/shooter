@@ -30,13 +30,11 @@ Scene::~Scene()
 void Scene::initMainMenu()
 {
     this->gameState->objects->buttons.push_back(
-        //new Button("start", "Start", 100, 100, 100, 30)
         gameState->objects->fabric->createButton("start", "Start", 100, 100, 100, 30)
             
     );
 
     this->gameState->objects->buttons.push_back(
-        //new Button("exit", "Exit", 100, 150, 100, 30)
         gameState->objects->fabric->createButton("exit", "Exit", 100, 150, 100, 30)
     );
 }
@@ -76,7 +74,7 @@ void Scene::generateLevel()
                 );
             } else if (c == 'P') {
                 Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
-                shooter->isPlayer = true;
+                shooter->main = true;
                 gameState->objects->player = shooter;
                 gameState->objects->playable.push_back(shooter);
             } else if (c == 'S') {
@@ -85,7 +83,6 @@ void Scene::generateLevel()
             } else if (c == 'C') {
                 gameState->objects->crystals.push_back(
                     gameState->objects->fabric->createCrystal(x, y, 50, 50)
-                    //gameState->objects->fabric->createGround(x, y, 50, 50)
                 );
             }
             x += 50;

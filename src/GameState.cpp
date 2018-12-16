@@ -6,6 +6,7 @@
 #include "GameObjects.h"
 #include "Application.h"
 #include "CObject.h"
+#include "Scene.h"
 #include "objects/Shooter.h"
 #include "objects/Bullet.h"
 #include "Fabric.h"
@@ -45,14 +46,12 @@ void GameState::update()
                 break;
             }
         }   
-        
-        objects->player->runOperations();
     }
 }
 
 void GameState::gravity()
 {
-    if (!objects->player->isJump) {
+    if (!objects->player->jumping) {
         float y = 0.f;
         y += elapsedTime * (velocity + elapsedTime * acceleration / 2.f);
         
@@ -77,4 +76,11 @@ void GameState::stopBackgroundSound()
 {
     backgroundLoop->setLoop(false);
     backgroundLoop->stop();
+}
+
+void GameState::startNewGame()
+{
+    isGameStarted = true;
+    playBackgroundSound();
+    app->scene->initNewGame();
 }

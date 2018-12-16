@@ -23,16 +23,16 @@ public:
     /**
      * @var is current object moving
      */
-    bool isMoving = false;
+    bool moving = false;
     
     /**
      * @var is current object jumping
      */
-    bool isJump = false;
-    bool isDead = false;
-    bool isNeedToDie = false;
-    bool isFalling = false;
-    bool isPlayer = false;
+    bool jumping = false;
+    bool dead = false;
+    bool mustBeDeleted = false;
+    bool falling = false;
+    bool main = false;
     int health = 3;
     int crystals = 0;
     float acceleration = 0.3f;
@@ -65,15 +65,34 @@ public:
      * @return is moving done successfully
      */
     bool move(float x, float y);
-    bool move();
-    
+    bool move(std::string direction);
+    void jump();
+    void stopJumping();
+    void stopMoving();
     /**
      * Make a fire (it creates Bullet instance)
      */
     void fire();
     
-    void jump();
-    void runOperations();
+
+    
+    
+ 
+    bool isMoving();
+    bool isJump();
+    bool isDead();
+    bool isNeedToDie();
+    bool isFalling();
+    bool isPlayer();
+    int getHealth();
+    int getCrystals();
+    float getAcceleration();
+    float getVelocity();
+    float getVelocityHorizontal();
+    float getMaxVelocity();
+    float getCurrentJumpHeight();
+    
+    
     void setMainTexture(sf::Texture* texture);
     void setHeartTexture(sf::Texture* texture);
     void setCrystalTexture(sf::Texture* texture);

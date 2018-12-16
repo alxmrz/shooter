@@ -40,6 +40,7 @@ public:
     bool isGamePaused = false;
     void playBackgroundSound();
     void stopBackgroundSound();
+    void startNewGame();
 private:
     /**
      * @var current application instance

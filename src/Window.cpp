@@ -70,7 +70,7 @@ void Window::drawAll(GameState* gameState)
     
     for (unsigned i = 0; i < gameState->objects->playable.size(); i++) {
         gameState->objects->playable[i]->draw(this, dt);
-        if (((Shooter*)gameState->objects->playable[i])->isNeedToDie) {
+        if (((Shooter*)gameState->objects->playable[i])->mustBeDeleted) {
             gameState->objects->playable.erase(gameState->objects->playable.begin() + i);
         }
         
