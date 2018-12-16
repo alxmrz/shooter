@@ -43,6 +43,7 @@ Shooter* Fabric::createShooter(float x, float y, int width, int height)
     shooter->setCrystalCountText(createText("", x, y));
     shooter->setJumpSound(resources->getSound("jump"));
     shooter->setShotgunSound(resources->getSound("shotgun"));
+    shooter->setCrystalSound(resources->getSound("crystal"));
     
     return shooter;
 }

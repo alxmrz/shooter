@@ -124,6 +124,14 @@ void Resources::loadSounds()
     }
     shotgunSound = new sf::Sound;
     shotgunSound->setBuffer(*shotgunSoundBuffer);
+    
+    crystalSoundBuffer = new sf::SoundBuffer;
+    if (!crystalSoundBuffer->loadFromFile("resources/audio/collecting_crystal.wav")) {
+        std::cout << "Audio resources/audio/collecting_crystal.wav not found!";
+        throw;
+    }
+    crystalSound = new sf::Sound;
+    crystalSound->setBuffer(*crystalSoundBuffer);
 }
 
 sf::Texture* Resources::getTexture(std::string type)
@@ -164,6 +172,8 @@ sf::Sound* Resources::getSound(std::string type)
         return jumpSound;
     } else if (type == "shotgun") {
         return shotgunSound;
+    } else if (type == "crystal") {
+        return crystalSound;
     }
     std::cout << "Not found sound buffer type " + type;
     throw;

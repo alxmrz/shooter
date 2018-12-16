@@ -229,6 +229,7 @@ bool Shooter::collectCollidedCrystal(float x, float y)
                 );
         if (collider->collideRect(obj)) {
             crystals++;
+            crystalSound->play();
             go->crystals.erase(go->crystals.begin() + i);
             delete collider;
             return true;
@@ -263,6 +264,11 @@ void Shooter::setExplosionTexture(sf::Texture* texture)
 void Shooter::setJumpSound(sf::Sound* jumpSound)
 {
     this->jumpSound = jumpSound;
+}
+
+void Shooter::setCrystalSound(sf::Sound* crystalSound)
+{
+    this->crystalSound = crystalSound;
 }
 
 void Shooter::setShotgunSound(sf::Sound* shotgunSound)

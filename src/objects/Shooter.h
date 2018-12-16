@@ -79,11 +79,13 @@ public:
     void setCrystalTexture(sf::Texture* texture);
     void setExplosionTexture(sf::Texture* texture);
     void setJumpSound(sf::Sound* jumpSound);
+    void setCrystalSound(sf::Sound* jumpSound);
     void setShotgunSound(sf::Sound* jumpSound);
     void setCrystalCountText(Text* text);
 private:
     sf::Sound* jumpSound;
     sf::Sound* shotgunSound;
+    sf::Sound* crystalSound;
     /**
      * @var Sprite for drawing
      */
