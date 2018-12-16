@@ -1,3 +1,4 @@
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include "GameState.h"
 #include "GameObjects.h"
@@ -29,25 +30,12 @@ GameState::~GameState()
 void GameState::update()
 {
     if (isGameStarted && !isGamePaused) {
-        incrementDelayedTime();
         updateBulletsState();
         causeGravity();
+        resetElapsedTime();
     }
 }
 
-void GameState::incrementDelayedTime()
-{
-    sf::Time elapsed = this->clock.getElapsedTime();
-    float dt = elapsed.asMilliseconds() / 1000.f;
-    elapsedTime += dt;
-}
-
-void GameState::causeGravity()
-{
-    if (!objects->player->isJumping()) {
-        objects->player->gravitate();
-    }
-}
 
 void GameState::updateBulletsState()
 {
@@ -58,6 +46,19 @@ void GameState::updateBulletsState()
             break;
         }
     }   
+}
+
+void GameState::causeGravity()
+{
+    if (!objects->player->isJumping()) {
+        objects->player->gravitate();
+    }
+}
+
+void GameState::resetElapsedTime()
+{
+    sf::Time elapsed = this->clock.getElapsedTime();
+    elapsedTime = elapsed.asMilliseconds() / 1000.f;
 }
 
 void GameState::playBackgroundSound()
@@ -78,3 +79,9 @@ void GameState::startNewGame()
     playBackgroundSound();
     app->scene->initNewGame();
 }
+
+float GameState::getElapsedTime()
+{
+    return elapsedTime;
+}
+

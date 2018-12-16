@@ -1,5 +1,6 @@
 #include <string>
 #include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
 #include "Fabric.h"
 #include "GameObjects.h"
 #include "Resources.h"
@@ -36,10 +37,10 @@ Bullet* Fabric::createBullet(float x, float y, int width, int height)
 Shooter* Fabric::createShooter(float x, float y, int width, int height)
 {
     Shooter* shooter = new Shooter(go, x, y, width, height);
-    shooter->setMainTexture( resources->getTexture("shooter")); 
-    shooter->setHeartTexture( resources->getTexture("heart")); 
-    shooter->setCrystalTexture( resources->getTexture("crystal")); 
-    shooter->setExplosionTexture( resources->getTexture("explosion"));
+    shooter->setMainTexture(resources->getTexture("shooter"));
+    shooter->setHeartTexture(resources->getTexture("heart"));
+    shooter->setCrystalTexture(resources->getTexture("crystal"));
+    shooter->setExplosionTexture(resources->getTexture("explosion"));
     shooter->setCrystalCountText(createText("", x, y));
     shooter->setJumpSound(resources->getSound("jump"));
     shooter->setShotgunSound(resources->getSound("shotgun"));
@@ -60,6 +61,15 @@ Crystal* Fabric::createCrystal(float x, float y, int width, int height)
 Text* Fabric::createText(std::string text, int x, int y)
 {
     return new Text(text, resources->getFont("arial"), x, y);
+}
+
+sf::Sprite* Fabric::createSprite(std::string type, float x, float y)
+{
+    sf::Sprite* sprite = new sf::Sprite();
+    sprite->setPosition(x, y);
+    sprite->setTexture(*resources->getTexture(type));
+    
+    return sprite;
 }
 
 Button* Fabric::createButton(std::string id, std::string text, float x, float y, int width, int height)

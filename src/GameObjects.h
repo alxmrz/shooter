@@ -2,14 +2,17 @@
 #define GAMEOBJECTS_H
 
 #include <vector>
+#include <SFML/Graphics.hpp>
 
 class Shooter;
 class CObject;
 class Fabric;
+class Window;
 
 struct GameObjects {
     GameObjects();
-
+    virtual ~GameObjects();
+    
     std::vector<CObject*> buttons;
     std::vector<CObject*> background;
     std::vector<CObject*> bullets;
@@ -18,8 +21,16 @@ struct GameObjects {
     
     Shooter* player;
     Fabric* fabric;
-
-    virtual ~GameObjects();
+    
+    /**
+     * @var Sprite for drawing
+     */
+    sf::Sprite* backgroundSprite;
+    
+    /**
+     * Texture for sprite (Texture loads image). Sprite contains the texture
+     */
+    sf::Texture* texture;
     
     /**
      * Get all objects of the game.
@@ -35,6 +46,9 @@ struct GameObjects {
      * Delete all game objects
      */
     void reset();
+    
+    void draw(Window* window, float dt);
+    void correctBackgroundSprite();
 };
 
 

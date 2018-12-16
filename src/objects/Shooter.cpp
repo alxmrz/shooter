@@ -41,6 +41,7 @@ Shooter::~Shooter()
 
 bool Shooter::move(float x, float y)
 {
+    //TODO: very heavy and slow method. Need to make it faster.
     if (!collideObjectAfterMove(x, y) && !this->y + y < 600) {
         collectCollidedCrystal(x, y);
         this->x += x;
@@ -101,7 +102,7 @@ sf::Drawable* Shooter::getDrawForm()
 void Shooter::draw(Window* window, float dt)
 {
     if (!dead) {
-        // TODO: seems it can be simplified
+        // TODO: Need to simplify
         if (moving && !jumping && !falling && elapsedTime >= animationTime) {
             std::vector<int> current = this->runSprites[direction][currentFrame];
             sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
@@ -113,7 +114,7 @@ void Shooter::draw(Window* window, float dt)
         } else if ((falling || jumping) && !moving) {
             std::vector<int> current = this->jumpSprites[direction];
             sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
-        } else if (!moving && !falling && !jumping && elapsedTime >= animationTime) {
+        } else if (!moving && !falling && !jumping) {
             std::vector<int> current = this->noMotionSprites[direction];
             sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
         }
@@ -132,7 +133,10 @@ void Shooter::draw(Window* window, float dt)
     }
     
     elapsedTime += dt;
+   
+    //TODO: in theory fireTime should not be increased in the function. 
     fireTime += dt;
+    gravitationalTime += dt;
     
     if (health > 0) {
         if (!main) {
@@ -228,14 +232,14 @@ void Shooter::stopMoving()
 void Shooter::gravitate()
 {
     float y = 0.f;
-    y += elapsedTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f);
+    y += gravitationalTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f);
 
     if (move(0.f, y) || move(0.f, 2.f)) {
-        gravitationalVelocity += elapsedTime * gravitationalAcceleration;
+        gravitationalVelocity += gravitationalTime * gravitationalAcceleration;
     } else {
         currentJumpHeight = 0.0;
         gravitationalVelocity = 0.0;
-        elapsedTime = 0.0;
+        gravitationalTime = 0.0;
     }
 }
 

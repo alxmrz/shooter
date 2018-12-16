@@ -146,6 +146,7 @@ private:
      * @var time passed after new sprite choose
      */
     float elapsedTime = 0.0;
+    float gravitationalTime = 0.0;
     
     float fireTime = 0.f;
 

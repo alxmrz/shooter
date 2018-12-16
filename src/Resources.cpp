@@ -80,6 +80,12 @@ void Resources::loadTextures()
         std::cout << "Image images/cristal.png is not found" << std::endl;
         throw;
     }
+    
+    backgroundTexture = new sf::Texture();
+    if (!backgroundTexture->loadFromFile("resources/images/background.png")) {
+        std::cout << "Image resources/images/background.png is not found" << std::endl;
+        throw;
+    }
 }
 
 void Resources::loadFonts()
@@ -148,6 +154,8 @@ sf::Texture* Resources::getTexture(std::string type)
         return heartTexture;
     } else if (type == "crystal") {
         return crystalTexture;
+    } else if (type == "background") {
+        return backgroundTexture;
     }
     std::cout << "Not found texture type " + type;
     throw;

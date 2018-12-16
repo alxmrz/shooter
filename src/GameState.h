@@ -41,6 +41,8 @@ public:
     void playBackgroundSound();
     void stopBackgroundSound();
     void startNewGame();
+    float getElapsedTime();
+    void resetElapsedTime();
 private:
     /**
      * @var current application instance
@@ -49,7 +51,7 @@ private:
     
     sf::Sound* backgroundLoop;
     float elapsedTime = 0.0;
-    void incrementDelayedTime();
+
     /**
      * Current realization of gravity, that makes player falls down. Not good one
      */

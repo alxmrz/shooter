@@ -30,7 +30,7 @@ int Application::run()
     while (window->isOpen()) {
         event->handle();
         gameState->update();
-        window->drawAll(gameState);
+        window->draw(gameState);
     }
 
     return 0;
