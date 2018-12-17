@@ -1,4 +1,5 @@
 #include <vector>
+#include <cmath>
 #include "CObject.h"
 #include "GameObjects.h"
 #include "Window.h"
@@ -32,14 +33,14 @@ bool CObject::collideRect(CObject* obj)
 {
     //TODO: is there more elegant and more easy way?
     
-    std::vector<std::vector<int>> objPoints = obj->getBorderPoints();
+    std::vector<std::vector<float>> objPoints = obj->getBorderPoints();
     for (unsigned i = 0; i < objPoints.size(); i++) {
         if (this->collidePoint(objPoints[i][0], objPoints[i][1])) {
             return true;
         }
     }
 
-    std::vector<std::vector<int>> thisPoints = this->getBorderPoints();
+    std::vector<std::vector<float>> thisPoints = this->getBorderPoints();
     for (unsigned i = 0; i < thisPoints.size(); i++) {
         if (obj->collidePoint(thisPoints[i][0], thisPoints[i][1])) {
             return true;
@@ -62,12 +63,12 @@ sf::Drawable* CObject::getDrawForm()
     return NULL;
 }
 
-int CObject::getX()
+float CObject::getX()
 {
     return this->x;
 }
 
-int CObject::getY()
+float CObject::getY()
 {
     return this->y;
 }
@@ -82,19 +83,19 @@ int CObject::getHeight()
     return this->height;
 }
 
-std::vector<std::vector<int>> CObject::getBorderPoints()
+std::vector<std::vector<float>> CObject::getBorderPoints()
 {
-    std::vector<std::vector<int>> points;
+    std::vector<std::vector<float>> points;
     // TODO: dirty and complicated view, need to refactor
-    std::vector<int> first = {getX(), getY()};
-    std::vector<int> second = {getX() + getWidth(), getY() + getHeight()};
-    std::vector<int> third = {getX(), getY() + getHeight()};
-    std::vector<int> fourth = {getX() + getWidth(), getY()};
+    std::vector<float> first = {getX(), getY()};
+    std::vector<float> second = {getX() + getWidth(), getY() + getHeight()};
+    std::vector<float> third = {getX(), getY() + getHeight()};
+    std::vector<float> fourth = {getX() + getWidth(), getY()};
 
-    std::vector<int> fifth = {getX() + getWidth() / 2, getY()};
-    std::vector<int> sixth = {getX(), getY() + getHeight() / 2};
-    std::vector<int> seventh = {getX() + getWidth() / 2, getY() + getHeight()};
-    std::vector<int> eight = {getX() + getWidth(), getY() + getWidth() / 2};
+    std::vector<float> fifth = {getX() + getWidth() / 2, getY()};
+    std::vector<float> sixth = {getX(), getY() + getHeight() / 2};
+    std::vector<float> seventh = {getX() + getWidth() / 2, getY() + getHeight()};
+    std::vector<float> eight = {getX() + getWidth(), getY() + getWidth() / 2};
 
     points.push_back(first);
     points.push_back(second);
@@ -114,8 +115,10 @@ void CObject::draw(Window* window, float dt)
     window->draw(*getDrawForm());
 }
 
-bool CObject::collideObjectAfterMove(int x, int y)
+bool CObject::collideObjectAfterMove(float x, float y)
 {
+    x = std::ceil(x);
+    y = std::ceil(y);
     // TODO: this check only for background, are other objects required?
     for (auto* obj : go->background) {
         CObject* collider = new CObject(

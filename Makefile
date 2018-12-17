@@ -1,6 +1,6 @@
 CC=g++ 
-CFLAGS=-c -Wall -g
-LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system
+CFLAGS=-c -Wall -g -std=c++11
+LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 SOURCES= \
 main.cpp \
@@ -11,7 +11,10 @@ src/GameObjects.cpp \
 src/GameState.cpp \
 src/Scene.cpp \
 src/Window.cpp \
+src/Fabric.cpp \
+src/Resources.cpp \
 src/objects/Ground.cpp \
+src/objects/Crystal.cpp \
 src/objects/Shooter.cpp \
 src/objects/Bullet.cpp \
 src/ui/Button.cpp \
@@ -39,7 +42,7 @@ build/%.o : %.cpp
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o ./run build/*.o build/src/*.o
+	rm -rf *.o ./run build/*.o build/src/*.o build/src/objects/*.o build/src/ui/*.o
 	
 ex:
 	echo $(DIR_OBJECTS)

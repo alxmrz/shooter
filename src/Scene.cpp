@@ -7,8 +7,10 @@
 #include "Application.h"
 #include "Scene.h"
 #include "objects/Ground.h"
+#include "objects/Crystal.h"
 #include "objects/Shooter.h"
 #include "ui/Button.h"
+#include "Fabric.h"
 
 Scene::Scene()
 {
@@ -27,53 +29,61 @@ Scene::~Scene()
 
 void Scene::initMainMenu()
 {
-    this->gameState->objects.buttons.push_back(
-        new Button("start", "Start", 100, 100, 100, 30)
+    this->gameState->objects->buttons.push_back(
+        gameState->objects->fabric->createButton("start", "Start", 100, 100, 100, 30)
+            
     );
 
-    this->gameState->objects.buttons.push_back(
-        new Button("exit", "Exit", 100, 150, 100, 30)
+    this->gameState->objects->buttons.push_back(
+        gameState->objects->fabric->createButton("exit", "Exit", 100, 150, 100, 30)
     );
 }
 
 void Scene::initNewGame()
 {
-    gameState->objects.reset();
+    gameState->objects->reset();
     generateLevel();
 }
 
 void Scene::generateLevel()
 {
     std::string level =
-            "GGGGGGGGGGGGGGGGGG|"
-            "G                G|"
-            "G                G|"
-            "GS               G|"
-            "GGGGG            G|"
-            "G    G         S G|"
-            "G  P          SGGG|"
-            "G GG         G   G|"
-            "G GG        S    G|"
-            "G GG      GGG    G|"
-            "G GG           S G|"
-            "GGGGGGGGGGGGGGGGGG|"
+            "                                     S       |"
+            "               C    S         C   GGGGG      |"
+            "   S        GGGGGGGGGGGG                     |"
+            "GGGGGGG                      GGGGG           |"
+            "       C                   S                 |"
+            "    GGGGGG               GGGGG               |"
+            " GGG          C                            GG|"
+            " GG                 GGG                    G|"
+            " GGGGGGG                            C       G|"
+            " GG   C       GGGG      C      C    C    C  G|"
+            " GGP       S     S     S       S        S   G|"
+            "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG|"
             ;
     std::vector<std::string> lines;
     boost::split(lines, level, boost::algorithm::is_any_of("|"), boost::token_compress_on);
-    int x = 0;
-    int y = 0;
+    float x = 0;
+    float y = 0;
     for (std::string line : lines) {
         x = 0;
         for (char c : line) {
             if (c == 'G') {
-                gameState->objects.background.push_back(new Ground(x, y, 50, 50));
+                gameState->objects->background.push_back(
+                    gameState->objects->fabric->createGround(x, y, 50, 50)
+                );
             } else if (c == 'P') {
-                Shooter* shooter = new Shooter(&gameState->objects, x, y, 50, 50);
-                gameState->objects.player = shooter;
-                gameState->objects.playable.push_back(shooter);
+                Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
+                shooter->main = true;
+                gameState->objects->player = shooter;
+                gameState->objects->playable.push_back(shooter);
             } else if (c == 'S') {
-                Shooter* shooter = new Shooter(&gameState->objects, x, y, 50, 50);
-                gameState->objects.playable.push_back(shooter);
+                Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
+                gameState->objects->playable.push_back(shooter);
+            } else if (c == 'C') {
+                gameState->objects->crystals.push_back(
+                    gameState->objects->fabric->createCrystal(x, y, 50, 50)
+                );
             }
             x += 50;
         }

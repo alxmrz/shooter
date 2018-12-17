@@ -19,9 +19,9 @@ public:
      * 
      * @param 
      */
-    void drawAll(GameState*);
+    void draw(GameState*);
 private:
-
+    void updateView(GameState* gameState);
 };
 
 #endif /* WINDOW_H */

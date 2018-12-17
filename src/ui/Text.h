@@ -7,19 +7,8 @@
 class Text {
 public:
     Text();
-    Text(std::string text, int x, int y, int fontSize = 20, sf::Color = sf::Color::Black);
+    Text(std::string text, sf::Font* font, int x, int y, int fontSize = 15, sf::Color = sf::Color::Black);
     virtual ~Text();
-
-    /**
-     * Creates instance of sf::Text, contained current text message
-     * 
-     * @param str current text
-     * @param x
-     * @param y
-     * 
-     * @return sf::Text* pointer to text object 
-     */
-    sf::Text* makeText(std::string str, int x, int y);
     
     /**
      * sf::Drawable is required by Window 

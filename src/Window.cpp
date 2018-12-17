@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "GameState.h"
 #include "CObject.h"
+#include "objects/Shooter.h"
 
 Window::Window(sf::VideoMode mode,
         const sf::String& title,
@@ -13,34 +14,38 @@ Window::Window(sf::VideoMode mode,
 {
 }
 
-void Window::drawAll(GameState* gameState)
+void Window::draw(GameState* gameState)
 {
-    // set game camera. Need to update every frame
-    setView(*gameState->view);
-
-    sf::Time elapsed = gameState->clock.getElapsedTime();
-    float dt = elapsed.asMilliseconds() / 1000.f;
-
+    if (gameState->isGameStarted) {       
+        updateView(gameState);
+    }
+    
     clear(sf::Color::White);
-
-
-    // TODO: this is a bad realization. Need to refactor and simplify
-    for (unsigned i = 0; i < gameState->objects.buttons.size(); i++) {
-        gameState->objects.buttons[i]->draw(this, dt);
-    }
-
-    for (unsigned i = 0; i < gameState->objects.playable.size(); i++) {
-        gameState->objects.playable[i]->draw(this, dt);
-    }
-
-    for (unsigned i = 0; i < gameState->objects.background.size(); i++) {
-        gameState->objects.background[i]->draw(this, dt);
-    }
-
-    for (unsigned i = 0; i < gameState->objects.bullets.size(); i++) {
-        gameState->objects.bullets[i]->draw(this, dt);
-    }
-
+    gameState->objects->draw(this, gameState->getElapsedTime());
+    
+    /**
+     * TODO: Need to fix the bug with the time animation. 
+     * If the line is replaced lower objects animation will be much slower
+     * Key game process must not depend on this
+     * The same problem with gameState::resetElapsedTime() call in gameState::update()
+     */
     gameState->clock.restart();
+    
     display();
+    
+    
+}
+
+void Window::updateView(GameState* gameState)
+{
+    sf::Vector2i playerWindowCoords = mapCoordsToPixel(sf::Vector2f(
+            (float) gameState->objects->player->getX(),
+            (float) gameState->objects->player->getY())
+            );
+    if (playerWindowCoords.x >= 800) {
+        gameState->view->move(600.f, 0.f);
+    } else if (playerWindowCoords.x <= 50) {
+        gameState->view->move(-600.f, 0.f);
+    }
+    setView(*gameState->view);
 }

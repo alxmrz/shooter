@@ -2,6 +2,8 @@
 #define BULLET_H
 
 #include <string>
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include "../CObject.h"
 
 namespace sf {
@@ -13,7 +15,7 @@ class GameObjects;
 class Bullet : public CObject {
 public:
     Bullet();
-    Bullet(GameObjects* go, int x, int y, int width, int height);
+    Bullet(GameObjects* go, sf::Texture* texture, int x, int y, int width, int height);
     Bullet(const Bullet& orig);
     virtual ~Bullet();
 
@@ -32,7 +34,7 @@ public:
      * @param y
      * @return is moving done successfully
      */
-    bool move(int x, int y);
+    bool move(float x, float y);
     
     /**
      * Set direction the objects will be moving
@@ -40,11 +42,14 @@ public:
      * @param direction
      */
     void setDirection(std::string direction);
+    
+    sf::Sound* explosionSound;
+    void setExplosionSound(sf::Sound* sound);
 private:
     /**
-     * @var shape Shape to draw in Window
+     * @var Sprite for drawing
      */
-    sf::CircleShape* shape;
+    sf::Sprite* sprite;
     
     /**
      * @var direction Direction of the object to move 
@@ -63,7 +68,7 @@ private:
      * @param y
      * @return bool
      */
-    bool collidePlayableAfterMove(int x, int y);
+    bool collidePlayableAfterMove(float x, float y);
 };
 
 #endif /* BULLET_H */

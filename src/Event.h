@@ -5,6 +5,7 @@
 
 class Application;
 class GameState;
+class Shooter;
 
 class Event {
 public:
@@ -19,33 +20,37 @@ public:
 private:
     Application* app;
     GameState* gameState;
+    Shooter* player;
 
     /**
      * Handle events of usual keys
      * 
      * @param event
      */
-    void handleKeys(sf::Event* event);
+    void handleMainKeys(sf::Event& event);
     
     /**
      * Handle arrow keys events
      * 
      * @param event
      */
-    void handelArrowKeys(sf::Event* event);
+    void handleArrowKeys();
+    void handleArrowKeysReleased(sf::Event& event);
     
     /**
      * Handle mouse events
      * @param event
      */
-    void handleMouseKeys(sf::Event* event);
+    void handleMouseEvents(sf::Event& event);
     
     /**
      * Handle buttons events (click, hover)
      * 
      * @param event
      */
-    void handleUiButtonsEvents(sf::Event* event);
+    void handleUiButtonsClick(sf::Event& event);
+    void handleUiButtonsHover(sf::Event& event);
+    void handleRealTimeKeyboardState();
 };
 
 #endif /* EVENT_H */

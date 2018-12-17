@@ -4,26 +4,12 @@
 #include <string>
 #include <vector>
 #include <SFML/Graphics.hpp>
-#include "GameObjects.h"
+#include <SFML/Audio.hpp>
 #include <vector>
 
 class Application;
 class CObject;
 class GameObjects;
-
-/*struct GameObjects 
-{
-    GameObjects();
-    
-    std::vector<CObject*> buttons;
-    std::vector<CObject*> background;
-    std::vector<CObject*> playable;
-    Shooter* player;
-    
-    virtual ~GameObjects();
-    std::vector<CObject*>* all();
-    void reset();
-};*/
 
 class GameState {
 public:
@@ -40,7 +26,7 @@ public:
     /**
      * @var game objects container
      */
-    GameObjects objects;
+    GameObjects* objects;
 
     GameState();
     GameState(Application* app);
@@ -51,23 +37,26 @@ public:
      */
     void update();
     bool isGameStarted = false;
+    bool isGamePaused = false;
+    void playBackgroundSound();
+    void stopBackgroundSound();
+    void startNewGame();
+    float getElapsedTime();
+    void resetElapsedTime();
 private:
     /**
      * @var current application instance
      */
     Application* app;
     
-    /**
-     * @var Done for rule the gravity in the game. Not used yet.
-     * TODO: need to make real gravity simulation
-     */
-    int gravityPower = 0;
-    
+    sf::Sound* backgroundLoop;
+    float elapsedTime = 0.0;
+
     /**
      * Current realization of gravity, that makes player falls down. Not good one
      */
-    void gravity();
-
+    void causeGravity();
+    void updateBulletsState();
 };
 
 #endif
