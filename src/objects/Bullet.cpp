@@ -81,7 +81,7 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
             explosionSound->play();
             ((Shooter*)go->playable[i])->health--;
             if (((Shooter*)go->playable[i])->health == 0) {
-                ((Shooter*)go->playable[i])->isDead = true;
+                ((Shooter*)go->playable[i])->dead = true;
             } 
             
             delete collider;

@@ -33,7 +33,7 @@ public:
      * @return execution status 
      */
     int run();
-    
+    void close();
 private:
     /**
      * @var fps of the app we are needed

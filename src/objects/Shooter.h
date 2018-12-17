@@ -23,16 +23,16 @@ public:
     /**
      * @var is current object moving
      */
-    bool isMoving = false;
+    bool moving = false;
     
     /**
      * @var is current object jumping
      */
-    bool isJump = false;
-    bool isDead = false;
-    bool isNeedToDie = false;
-    bool isFalling = false;
-    bool isPlayer = false;
+    bool jumping = false;
+    bool dead = false;
+    bool mustBeDeleted = false;
+    bool falling = false;
+    bool main = false;
     int health = 3;
     int crystals = 0;
     float acceleration = 0.3f;
@@ -40,6 +40,12 @@ public:
     float velocityHorizontal = 0.f;
     float maxVelocity = 5.f;
     float currentJumpHeight = 0.f;
+    
+
+    float gravityPower = 0.1f;    
+    float gravitationalVelocity = 0.f;
+    float gravitationalAcceleration = 0.5f;
+    
     
     /**
      * sf::Drawable is required by Window 
@@ -65,19 +71,34 @@ public:
      * @return is moving done successfully
      */
     bool move(float x, float y);
-    bool move();
-    
+    bool move(std::string direction);
+    void jump();
+    void stopJumping();
+    void stopMoving();
+    void gravitate();
     /**
      * Make a fire (it creates Bullet instance)
      */
     void fire();
+ 
+    bool isMoving();
+    bool isJumping();
+    bool isDead();
+    bool isNeedToDie();
+    bool isFalling();
+    bool isPlayer();
+    int getHealth();
+    int getCrystals();
+    float getAcceleration();
+    float getVelocity();
+    float getVelocityHorizontal();
+    float getMaxVelocity();
+    float getCurrentJumpHeight();
     
-    void jump();
-    void runOperations();
-    void setMainTexture(sf::Texture* texture);
-    void setHeartTexture(sf::Texture* texture);
-    void setCrystalTexture(sf::Texture* texture);
-    void setExplosionTexture(sf::Texture* texture);
+    
+    void setMainSprite(sf::Sprite* mainSprite);
+    void setHeartSprite(sf::Sprite* heartSprite);
+    void setExplosionSprite(sf::Sprite* explosionSprite);
     void setJumpSound(sf::Sound* jumpSound);
     void setCrystalSound(sf::Sound* jumpSound);
     void setShotgunSound(sf::Sound* jumpSound);
@@ -90,17 +111,9 @@ private:
      * @var Sprite for drawing
      */
     sf::Sprite* sprite;
-    
     sf::Sprite* heartSprite;
-    sf::Sprite* crystalSprite;
+    sf::Sprite* explosionSprite;
     
-    /**
-     * Texture for sprite (Texture loads image). Sprite contains the texture
-     */
-    sf::Texture* texture;
-    sf::Texture* explosion;
-    
-    Text* text;
     /**
      * Direction of the object for sprite choose
      */
@@ -120,6 +133,7 @@ private:
      * @var time passed after new sprite choose
      */
     float elapsedTime = 0.0;
+    float gravitationalTime = 0.0;
     
     float fireTime = 0.f;
 

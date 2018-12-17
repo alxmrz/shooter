@@ -40,28 +40,23 @@ public:
     bool isGamePaused = false;
     void playBackgroundSound();
     void stopBackgroundSound();
+    void startNewGame();
+    float getElapsedTime();
+    void resetElapsedTime();
 private:
     /**
      * @var current application instance
      */
     Application* app;
     
-    /**
-     * @var Done for rule the gravity in the game. Not used yet.
-     * TODO: need to make real gravity simulation
-     */
-    float gravityPower = 0.1f;
-    
+    sf::Sound* backgroundLoop;
     float elapsedTime = 0.0;
-    float velocity = 0.f;
-    float acceleration = 0.5f;
-    
+
     /**
      * Current realization of gravity, that makes player falls down. Not good one
      */
-    void gravity();
-    sf::Sound* backgroundLoop;
-
+    void causeGravity();
+    void updateBulletsState();
 };
 
 #endif

@@ -19,17 +19,9 @@ public:
      * 
      * @param 
      */
-    void drawAll(GameState*);
+    void draw(GameState*);
 private:
-    /**
-     * @var Sprite for drawing
-     */
-    sf::Sprite* sprite;
-    
-    /**
-     * Texture for sprite (Texture loads image). Sprite contains the texture
-     */
-    sf::Texture* texture;
+    void updateView(GameState* gameState);
 };
 
 #endif /* WINDOW_H */

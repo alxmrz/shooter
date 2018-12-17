@@ -25,14 +25,21 @@ int Application::run()
 {
     window->setFramerateLimit(fps);
     scene->initMainMenu();
-    /*gameState->isGameStarted = true;
-    scene->initNewGame();*/
+    /*gameState->startNewGame*/
 
     while (window->isOpen()) {
         event->handle();
         gameState->update();
-        window->drawAll(gameState);
+        window->draw(gameState);
     }
 
     return 0;
+}
+
+void Application::close()
+{
+    if (gameState->isGameStarted) {
+        gameState->stopBackgroundSound();
+    }
+    window->close();
 }
