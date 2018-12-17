@@ -20,19 +20,7 @@ Shooter::Shooter(const Shooter& orig)
 Shooter::Shooter(GameObjects* go, float x, float y, int width, int height) 
 : CObject(go, x, y, width, height)
 {
-    sprite = new sf::Sprite();
-    sprite->setTextureRect(sf::IntRect(24, 143, 50, 50));
-    sprite->setPosition(x, y);
     
-    heartSprite = new sf::Sprite();
-    heartSprite->setScale(0.5f, 0.5f);
-    heartSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
-    heartSprite->setPosition(x, y);
-    
-    crystalSprite = new sf::Sprite();
-    crystalSprite->setScale(0.5f, 0.5f);
-    crystalSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
-    crystalSprite->setPosition(x, y);
 }
 
 Shooter::~Shooter()
@@ -101,8 +89,8 @@ sf::Drawable* Shooter::getDrawForm()
 
 void Shooter::draw(Window* window, float dt)
 {
+    // TODO: Need to refactor and simplify
     if (!dead) {
-        // TODO: Need to simplify
         if (moving && !jumping && !falling && elapsedTime >= animationTime) {
             std::vector<int> current = this->runSprites[direction][currentFrame];
             sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
@@ -119,7 +107,7 @@ void Shooter::draw(Window* window, float dt)
             sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
         }
     }  else if (elapsedTime >= animationTime){
-        sprite->setTexture(*explosion);
+        sprite = explosionSprite;
         sprite->setScale(0.5f, 0.5f);
         std::vector<int> current = this->explosionSprites[currentFrame];
         sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
@@ -138,35 +126,12 @@ void Shooter::draw(Window* window, float dt)
     fireTime += dt;
     gravitationalTime += dt;
     
-    if (health > 0) {
-        if (!main) {
-           for (int x=this->x,i=0; i < health; i++) {
-                heartSprite->setPosition(x, y-25);
-                window->draw(*heartSprite);
-                x+=20;
-            } 
-        } else {
-            sf::Vector2f windowCoords = window->mapPixelToCoords(sf::Vector2i(50, 50));
-            for (int i=0; i < health; i++) {
-                heartSprite->setPosition(windowCoords.x, windowCoords.y);
-                window->draw(*heartSprite);
-                windowCoords.x += 20;
-            }
-        }
-        
-    }
-    
-    if (main) {
-        sf::Vector2f cristalWindowCoords = window->mapPixelToCoords(sf::Vector2i(150, 50));
-        sf::Vector2f crystalCount = window->mapPixelToCoords(sf::Vector2i(180, 50));
-        
-        text->message->setString(std::to_string(crystals));
-        text->message->setPosition(crystalCount.x, crystalCount.y);
-        crystalSprite->setPosition(cristalWindowCoords.x, cristalWindowCoords.y);
-        
-        window->draw(*crystalSprite);
-        window->draw(*text->message);
-        
+    if (health > 0 && !main) {
+        for (int x = this->x, i = 0; i < health; i++) {
+            heartSprite->setPosition(x, y - 25);
+            window->draw(*heartSprite);
+            x += 20;
+        }  
     }
     
     this->CObject::draw(window, dt);
@@ -335,23 +300,20 @@ float Shooter::getCurrentJumpHeight()
 
 
 
-void Shooter::setMainTexture(sf::Texture* texture)
+void Shooter::setMainSprite(sf::Sprite* mainSprite)
 {
-    sprite->setTexture(*texture);
+    sprite = mainSprite;
 }
 
-void Shooter::setHeartTexture(sf::Texture* texture)
+void Shooter::setHeartSprite(sf::Sprite* heartSprite)
 {
-    heartSprite->setTexture(*texture);
-}
-void Shooter::setCrystalTexture(sf::Texture* texture)
-{
-    crystalSprite->setTexture(*texture);
+    this->heartSprite = heartSprite;
 }
 
-void Shooter::setExplosionTexture(sf::Texture* texture)
+
+void Shooter::setExplosionSprite(sf::Sprite* explosionSprite)
 {
-    explosion = texture;
+    this->explosionSprite = explosionSprite;
 }
 
 void Shooter::setJumpSound(sf::Sound* jumpSound)
@@ -367,9 +329,4 @@ void Shooter::setCrystalSound(sf::Sound* crystalSound)
 void Shooter::setShotgunSound(sf::Sound* shotgunSound)
 {
     this->shotgunSound = shotgunSound;
-}
-
-void Shooter::setCrystalCountText(Text* text)
-{
-    this->text = text;
 }

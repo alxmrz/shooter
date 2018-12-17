@@ -37,11 +37,14 @@ Bullet* Fabric::createBullet(float x, float y, int width, int height)
 Shooter* Fabric::createShooter(float x, float y, int width, int height)
 {
     Shooter* shooter = new Shooter(go, x, y, width, height);
-    shooter->setMainTexture(resources->getTexture("shooter"));
-    shooter->setHeartTexture(resources->getTexture("heart"));
-    shooter->setCrystalTexture(resources->getTexture("crystal"));
-    shooter->setExplosionTexture(resources->getTexture("explosion"));
-    shooter->setCrystalCountText(createText("", x, y));
+    
+    sf::Sprite* heartSprite = createSprite("heart", x, y);
+    heartSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    heartSprite->setScale(0.5f, 0.5f);
+
+    shooter->setMainSprite(createSprite("shooter", x, y));
+    shooter->setHeartSprite(heartSprite);
+    shooter->setExplosionSprite(createSprite("explosion", x, y));
     shooter->setJumpSound(resources->getSound("jump"));
     shooter->setShotgunSound(resources->getSound("shotgun"));
     shooter->setCrystalSound(resources->getSound("crystal"));

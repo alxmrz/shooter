@@ -16,7 +16,7 @@ GameState::GameState()
 GameState::GameState(Application* app)
 {
     this->app = app;
-    objects = new GameObjects();
+    objects = new GameObjects(this);
     backgroundLoop = objects->fabric->getBackgroundSound();
 }
 

@@ -80,10 +80,6 @@ public:
      * Make a fire (it creates Bullet instance)
      */
     void fire();
-    
-
-    
-    
  
     bool isMoving();
     bool isJumping();
@@ -100,10 +96,9 @@ public:
     float getCurrentJumpHeight();
     
     
-    void setMainTexture(sf::Texture* texture);
-    void setHeartTexture(sf::Texture* texture);
-    void setCrystalTexture(sf::Texture* texture);
-    void setExplosionTexture(sf::Texture* texture);
+    void setMainSprite(sf::Sprite* mainSprite);
+    void setHeartSprite(sf::Sprite* heartSprite);
+    void setExplosionSprite(sf::Sprite* explosionSprite);
     void setJumpSound(sf::Sound* jumpSound);
     void setCrystalSound(sf::Sound* jumpSound);
     void setShotgunSound(sf::Sound* jumpSound);
@@ -116,17 +111,9 @@ private:
      * @var Sprite for drawing
      */
     sf::Sprite* sprite;
-    
     sf::Sprite* heartSprite;
-    sf::Sprite* crystalSprite;
+    sf::Sprite* explosionSprite;
     
-    /**
-     * Texture for sprite (Texture loads image). Sprite contains the texture
-     */
-    sf::Texture* texture;
-    sf::Texture* explosion;
-    
-    Text* text;
     /**
      * Direction of the object for sprite choose
      */

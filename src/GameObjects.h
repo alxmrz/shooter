@@ -8,9 +8,11 @@ class Shooter;
 class CObject;
 class Fabric;
 class Window;
+class Text;
+class GameState;
 
 struct GameObjects {
-    GameObjects();
+    GameObjects(GameState* gs);
     virtual ~GameObjects();
     
     std::vector<CObject*> buttons;
@@ -19,14 +21,14 @@ struct GameObjects {
     std::vector<CObject*> playable;
     std::vector<CObject*> crystals;
     
+    GameState* gs;
     Shooter* player;
     Fabric* fabric;
     
-    /**
-     * @var Sprite for drawing
-     */
     sf::Sprite* backgroundSprite;
-    
+    sf::Sprite* heartSprite;
+    sf::Sprite* crystalSprite;
+    Text* text;
     /**
      * Texture for sprite (Texture loads image). Sprite contains the texture
      */
@@ -49,6 +51,7 @@ struct GameObjects {
     
     void draw(Window* window, float dt);
     void correctBackgroundSprite();
+    void drawPlayerUi(Window* window);
 };
 
 
