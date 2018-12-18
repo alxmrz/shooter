@@ -2,6 +2,8 @@
 #define RESOURCES_H
 
 #include <exception>
+#include <map>
+#include <string>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
@@ -29,31 +31,30 @@ public:
     sf::Sound* getSound(std::string type);
     
     void load();
-private:
-    sf::Texture* bulletTexture;
-    sf::Texture* shooterTexture;
-    sf::Texture* explosionTexture;
-    sf::Texture* groundTexture;
-    sf::Texture* heartTexture;
-    sf::Texture* crystalTexture;
-    sf::Texture* backgroundTexture;
+private: 
+    std::map<std::string, std::string> texturesLoadQueue {
+        {"bullet", "resources/images/shell.png"},
+        {"shooter", "resources/images/OpenGunnerHeroVer2.png"},
+        {"explosion", "resources/images/oneshot.png"},
+        {"ground", "resources/images/ground.jpeg"},
+        {"heart", "resources/images/heart.png"},
+        {"crystal", "resources/images/crystal.png"},
+        {"background", "resources/images/background.png"},
+    };
+    std::map<std::string, std::string> fontsLoadQueue = {
+        {"arial", "resources/fonts/arial.ttf"},
+    };
+    std::map<std::string, std::string> soundsLoadQueue = {
+        {"explosion", "resources/audio/explosion_sound.wav"},
+        {"background", "resources/audio/background_loop.wav"},
+        {"jump", "resources/audio/jump_sound.wav"},
+        {"shotgun", "resources/audio/shotgun_sound.wav"},
+        {"crystal", "resources/audio/collecting_crystal.wav"},
+    };
     
-    sf::Font* arialFont;
-    
-    sf::SoundBuffer* explosionSoundBuffer;
-    sf::Sound* explosionSound;
-    
-    sf::SoundBuffer* backgroundSoundBuffer;
-    sf::Sound* backgroundSound;
-    
-    sf::SoundBuffer* jumpSoundBuffer;
-    sf::Sound* jumpSound;
-    
-    sf::SoundBuffer* shotgunSoundBuffer;
-    sf::Sound* shotgunSound;
-    
-    sf::SoundBuffer* crystalSoundBuffer;
-    sf::Sound* crystalSound;
+    std::map<std::string, sf::Texture*> textures;
+    std::map<std::string, sf::Font*> fonts;
+    std::map<std::string, sf::Sound*> sounds;
     
     void loadTextures();
     void loadFonts();
