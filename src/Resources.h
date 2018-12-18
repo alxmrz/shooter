@@ -7,20 +7,45 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
-class NotLoadedTexture: public std::exception
+class ResourceNotLoaded : public std::exception 
 {
 public:
-    NotLoadedTexture(std::string message);
+
+    ResourceNotLoaded(std::string const &message) : message(message) 
+    {
+    }
+
+    virtual char const *what() const noexcept 
+    {
+        return message.c_str();
+    }
+
+
+private:
+    std::string message;
 };
 
-class TypeNotFound: public std::exception
+class ResourceTypeNotFound : public std::exception 
 {
 public:
-    TypeNotFound(std::string message);
+
+    ResourceTypeNotFound(std::string const &message) : message(message) 
+    {
+    }
+
+    virtual char const *what() const noexcept 
+    {
+        return message.c_str();
+    }
+
+
+private:
+    std::string message;
 };
 
 
-class Resources {
+class Resources 
+{
 public:
     Resources();
     Resources(const Resources& orig);

@@ -31,10 +31,8 @@ void Resources::loadTextures()
     sf::Texture* texture;
     for (auto it = texturesLoadQueue.begin(); it != texturesLoadQueue.end(); it++) {
         texture = new sf::Texture();
-        std::cout <<it->second << std::endl;
         if (!texture->loadFromFile(it->second)) {
-            std::cout << "Texture" + it->second + " is not found" << std::endl;
-            throw;
+            throw ResourceNotLoaded("Texture " + it->second + " is not found");
         }
         
         textures[it->first] = texture;
@@ -47,8 +45,7 @@ void Resources::loadFonts()
     for (auto it = fontsLoadQueue.begin(); it != fontsLoadQueue.end(); it++) {
         font = new sf::Font();
         if (!font->loadFromFile(it->second)) {
-            std::cout << "Texture" + it->second + " is not found" << std::endl;
-            throw;
+            throw ResourceNotLoaded("Font " + it->second + " is not found");
         }
         
         fonts[it->first] = font;
@@ -62,8 +59,7 @@ void Resources::loadSounds()
     for (auto it = soundsLoadQueue.begin(); it != soundsLoadQueue.end(); it++) {
         soundBuffer = new sf::SoundBuffer();
         if (!soundBuffer->loadFromFile(it->second)) {
-            std::cout << "Texture" + it->second + " is not found" << std::endl;
-            throw;
+             throw ResourceNotLoaded("Sound  " + it->second + " is not found");
         }
         sound = new sf::Sound;
         sound->setBuffer(*soundBuffer);
@@ -77,8 +73,7 @@ sf::Texture* Resources::getTexture(std::string type)
     if (textures.find(type) != textures.end()) {
         return textures[type];
     } else {
-        std::cout << "Not found texture type " + type;
-        throw;
+        throw ResourceTypeNotFound("Not found texture type: " + type);
     }
 }
 
@@ -87,8 +82,7 @@ sf::Font* Resources::getFont(std::string type)
     if (fonts.find(type) != fonts.end()) {
         return fonts[type];
     } else {
-        std::cout << "Not found texture type " + type;
-        throw;
+        throw ResourceTypeNotFound("Not found font type: " + type);
     }
 }
 
@@ -97,8 +91,7 @@ sf::Sound* Resources::getSound(std::string type)
     if (sounds.find(type) != sounds.end()) {
         return sounds[type];
     } else {
-        std::cout << "Not found texture type " + type;
-        throw;
+        throw ResourceTypeNotFound("Not found sound type: " + type);
     }
 }
 
