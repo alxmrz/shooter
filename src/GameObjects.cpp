@@ -78,7 +78,7 @@ void GameObjects::draw(Window* window, float dt)
 
         for (unsigned i = 0; i < playable.size(); i++) {
             playable[i]->draw(window, dt);
-            if (((Shooter*)playable[i])->mustBeDeleted) {
+            if (((Shooter*)playable[i])->remove()) {
                 playable.erase(playable.begin() + i);
             }
         }

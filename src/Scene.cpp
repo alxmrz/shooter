@@ -74,7 +74,7 @@ void Scene::generateLevel()
                 );
             } else if (c == 'P') {
                 Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
-                shooter->main = true;
+                shooter->setMain(true);
                 gameState->objects->player = shooter;
                 gameState->objects->playable.push_back(shooter);
             } else if (c == 'S') {

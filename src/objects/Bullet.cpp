@@ -70,18 +70,19 @@ void Bullet::setDirection(std::string dir)
 bool Bullet::collidePlayableAfterMove(float x, float y)
 {
     for (unsigned i = 0; i < go->playable.size(); i++) {
-        auto* obj = go->playable[i];
+        Shooter* shooter = static_cast<Shooter*>(go->playable[i]); 
         CObject* collider = new CObject(
                 getX() + x,
                 getY() + y,
                 getWidth(),
                 getHeight()
                 );
-        if (collider->collideRect(obj)) {
+        if (collider->collideRect(shooter)) {
             explosionSound->play();
-            ((Shooter*)go->playable[i])->health--;
-            if (((Shooter*)go->playable[i])->health == 0) {
-                ((Shooter*)go->playable[i])->dead = true;
+            
+            shooter->decreaseHealth();
+            if (shooter->getHealth() == 0) {
+                shooter->setDead(true);
             } 
             
             delete collider;

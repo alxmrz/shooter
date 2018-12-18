@@ -21,33 +21,6 @@ public:
     virtual ~Shooter();
     
     /**
-     * @var is current object moving
-     */
-    bool moving = false;
-    
-    /**
-     * @var is current object jumping
-     */
-    bool jumping = false;
-    bool dead = false;
-    bool mustBeDeleted = false;
-    bool falling = false;
-    bool main = false;
-    int health = 3;
-    int crystals = 0;
-    float acceleration = 0.3f;
-    float velocity = 0.f;
-    float velocityHorizontal = 0.f;
-    float maxVelocity = 5.f;
-    float currentJumpHeight = 0.f;
-    
-
-    float gravityPower = 0.1f;    
-    float gravitationalVelocity = 0.f;
-    float gravitationalAcceleration = 0.5f;
-    
-    
-    /**
      * sf::Drawable is required by Window 
      * to display simple SFML object on the screen
      * 
@@ -84,9 +57,10 @@ public:
     bool isMoving();
     bool isJumping();
     bool isDead();
-    bool isNeedToDie();
+    bool remove();
     bool isFalling();
     bool isPlayer();
+    
     int getHealth();
     int getCrystals();
     float getAcceleration();
@@ -95,6 +69,10 @@ public:
     float getMaxVelocity();
     float getCurrentJumpHeight();
     
+    void decreaseHealth();
+    
+    void setMain(bool main);
+    void setDead(bool dead);
     
     void setMainSprite(sf::Sprite* mainSprite);
     void setHeartSprite(sf::Sprite* heartSprite);
@@ -104,6 +82,33 @@ public:
     void setShotgunSound(sf::Sound* jumpSound);
     void setCrystalCountText(Text* text);
 private:
+    /**
+     * @var is current object moving
+     */
+    bool moving = false;
+    
+    /**
+     * @var is current object jumping
+     */
+    bool jumping = false;
+    bool dead = false;
+    bool mustBeDeleted = false;
+    bool falling = false;
+    bool main = false;
+    int health = 3;
+    int crystals = 0;
+    float acceleration = 0.3f;
+    float velocity = 0.f;
+    float velocityHorizontal = 0.f;
+    float maxVelocity = 5.f;
+    float currentJumpHeight = 0.f;
+    
+
+    float gravityPower = 0.1f;    
+    float gravitationalVelocity = 0.f;
+    float gravitationalAcceleration = 0.5f;
+    
+    
     sf::Sound* jumpSound;
     sf::Sound* shotgunSound;
     sf::Sound* crystalSound;

@@ -248,7 +248,7 @@ bool Shooter::isDead()
     return dead;
 }
 
-bool Shooter::isNeedToDie()
+bool Shooter::remove()
 {
     return mustBeDeleted;
 }
@@ -298,7 +298,20 @@ float Shooter::getCurrentJumpHeight()
     return currentJumpHeight;
 }
 
+void Shooter::setMain(bool main)
+{
+    this->main = main;
+}
 
+void Shooter::setDead(bool dead)
+{
+    this->dead = dead;
+}
+
+void Shooter::decreaseHealth()
+{
+    health--;
+}
 
 void Shooter::setMainSprite(sf::Sprite* mainSprite)
 {
