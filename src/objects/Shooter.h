@@ -73,7 +73,10 @@ public:
     
     void setMain(bool main);
     void setDead(bool dead);
-    
+    bool collideObjectAfterMove(float x, float y) override;
+    CObject* getNearObjects(float x, float y);
+    int nearTopLeft(float current);
+    int nearDownRight(int current);
     void setMainSprite(sf::Sprite* mainSprite);
     void setHeartSprite(sf::Sprite* heartSprite);
     void setExplosionSprite(sf::Sprite* explosionSprite);

@@ -1,7 +1,9 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include <SFML/Graphics.hpp>
 #include "Shooter.h"
+#include "Crystal.h"
 #include "Bullet.h"
 #include "../CObject.h"
 #include "../Window.h"
@@ -30,12 +32,12 @@ Shooter::~Shooter()
 bool Shooter::move(float x, float y)
 {
     //TODO: very heavy and slow method. Need to make it faster.
-    if (!collideObjectAfterMove(x, y) && !this->y + y < 600) {
-        collectCollidedCrystal(x, y);
+    if (!collideObjectAfterMove(x, y) && this->y + y < 600) {
+        
         this->x += x;
         this->y += y;
         this->sprite->setPosition(this->x, this->y);
-        
+        collectCollidedCrystal(x, y);
         if (y != 0.f) {
             if (y < 0) {
                 jumping = true;
@@ -64,6 +66,23 @@ bool Shooter::move(float x, float y)
         falling = false;
     }
     
+    return false;
+}
+
+bool Shooter::collectCollidedCrystal(float x, float y)
+{
+    for (unsigned i = 0; i < go->crystals.size(); i++) {
+        Crystal* obj = static_cast<Crystal*>(go->crystals[i]);
+
+        if (collideRect(obj)) {
+            crystals++;
+            crystalSound->play();
+            go->crystals.erase(go->crystals.begin() + i);
+
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -199,7 +218,7 @@ void Shooter::gravitate()
     float y = 0.f;
     y += gravitationalTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f);
 
-    if (move(0.f, y) || move(0.f, 2.f)) {
+    if (move(0.f, y)) {
         gravitationalVelocity += gravitationalTime * gravitationalAcceleration;
     } else {
         currentJumpHeight = 0.0;
@@ -208,30 +227,67 @@ void Shooter::gravitate()
     }
 }
 
-bool Shooter::collectCollidedCrystal(float x, float y)
+
+bool Shooter::collideObjectAfterMove(float x, float y)
 {
-    for (unsigned i = 0; i < go->crystals.size(); i++) {
-        auto* obj = go->crystals[i];
-        CObject* collider = new CObject(
+    x = std::ceil(x);
+    y = std::ceil(y);
+    float nearX;
+    float nearY;
+    if (x <= 0.f ) {
+         nearX = nearTopLeft(this->x + x);  
+    } else if (x > 0.f) {
+         nearX = nearDownRight(this->x + x);      
+    } 
+    
+    if (y <= 0.f) {
+        nearY = nearTopLeft(this->y + y);
+    } else if (y > 0.f) {
+        nearY = nearDownRight(this->y + y);
+    }
+
+    if (go->backgrounds[nearX][nearY] != nullptr) {
+        CObject* nearest = go->backgrounds[nearX][nearY];
+
+        CObject collider = CObject(
                 getX() + x,
                 getY() + y,
                 getWidth(),
                 getHeight()
                 );
-        if (collider->collideRect(obj)) {
-            crystals++;
-            crystalSound->play();
-            go->crystals.erase(go->crystals.begin() + i);
-            delete collider;
+        if (collider.collideRect(nearest)) {
             return true;
-        }
-
-        delete collider;
+        }       
     }
 
     return false;
 }
 
+int Shooter::nearTopLeft(float current)
+{
+    int decimalResidue = std::floor(current / 10.f) * 10; // 270
+    if (decimalResidue % 50 != 0) {
+        int hundredPart = std::floor(current / 100.f) * 100; // 200
+        int diff = decimalResidue - hundredPart; //70
+        if (diff >= 50) {
+            return hundredPart + 50;
+        } else {
+            return hundredPart;
+        }
+    } else {
+        return decimalResidue;
+    }
+}
+
+int Shooter::nearDownRight(int current)
+{
+    int decimalResidue = current % 100;
+    if (decimalResidue > 50) {
+        return std::ceil(current / 100.f) * 100; // 200
+    } else {
+        return std::floor(current / 100.f) * 100 + 50;
+    }
+}
 
 bool Shooter::isMoving()
 {

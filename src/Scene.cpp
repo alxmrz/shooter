@@ -65,13 +65,14 @@ void Scene::generateLevel()
     boost::split(lines, level, boost::algorithm::is_any_of("|"), boost::token_compress_on);
     float x = 0;
     float y = 0;
+    Ground* g;
     for (std::string line : lines) {
         x = 0;
         for (char c : line) {
             if (c == 'G') {
-                gameState->objects->background.push_back(
-                    gameState->objects->fabric->createGround(x, y, 50, 50)
-                );
+                g = gameState->objects->fabric->createGround(x, y, 50, 50);
+                gameState->objects->background.push_back(g);
+                gameState->objects->backgrounds[x][y] = g;
             } else if (c == 'P') {
                 Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
                 shooter->setMain(true);
