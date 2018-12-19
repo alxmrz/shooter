@@ -70,7 +70,7 @@ void Scene::generateLevel()
         x = 0;
         for (char c : line) {
             if (c == 'G') {
-                g = gameState->objects->fabric->createGround(x, y, 50, 50);
+                g = gameState->objects->fabric->createGround(x, y, 50, 50);            
                 gameState->objects->background.push_back(g);
                 gameState->objects->backgrounds[x][y] = g;
             } else if (c == 'P') {

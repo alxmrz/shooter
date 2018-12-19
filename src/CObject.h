@@ -76,6 +76,9 @@ protected:
     float y;
     int width;
     int height;
+    
+    int nearTopLeft(int current);
+    int nearDownRight(int current);
 };
 
 #endif /* COBJECT_H */

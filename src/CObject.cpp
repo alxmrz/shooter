@@ -119,20 +119,59 @@ bool CObject::collideObjectAfterMove(float x, float y)
 {
     x = std::ceil(x);
     y = std::ceil(y);
-    // TODO: this check only for background, are other objects required?
-    for (auto* obj : go->background) {
-        CObject* collider = new CObject(
+    float nearX;
+    float nearY;
+    if (x <= 0.f ) {
+         nearX = nearTopLeft(this->x + x);  
+    } else if (x > 0.f) {
+         nearX = nearDownRight(this->x + x);      
+    } 
+    
+    if (y <= 0.f) {
+        nearY = nearTopLeft(this->y + y);
+    } else if (y > 0.f) {
+        nearY = nearDownRight(this->y + y);
+    }
+
+    if (go->backgrounds[nearX][nearY] != nullptr) {
+        CObject* nearest = go->backgrounds[nearX][nearY];
+        
+        CObject collider = CObject(
                 getX() + x,
                 getY() + y,
                 getWidth(),
                 getHeight()
                 );
-        if (collider->collideRect(obj)) {
+        if (collider.collideRect(nearest)) {
             return true;
-            break;
-        }
-        delete collider;
+        }       
     }
 
     return false;
+}
+
+int CObject::nearTopLeft(int current)
+{
+    int decimalResidue = std::floor(current / 10) * 10; // 270
+    if (decimalResidue % 50 != 0) {
+        int hundredPart = std::floor(current / 100) * 100; // 200
+        int diff = decimalResidue - hundredPart; //70
+        if (diff >= 50) {
+            return hundredPart + 50;
+        } else {
+            return hundredPart;
+        }
+    } else {
+        return decimalResidue;
+    }
+}
+
+int CObject::nearDownRight(int current)
+{
+    int decimalResidue = current % 100;
+    if (decimalResidue > 50) {
+        return std::ceil(current / 100.f) * 100; // 200
+    } else {
+        return std::floor(current / 100.f) * 100 + 50;
+    }
 }

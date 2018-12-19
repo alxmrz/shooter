@@ -5,6 +5,7 @@
 #include "GameObjects.h"
 #include "CObject.h"
 #include "objects/Shooter.h"
+#include "objects/Ground.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 #include "Fabric.h"
@@ -46,6 +47,7 @@ void GameObjects::reset()
     buttons.clear();
     playable.clear();
     background.clear();
+    backgrounds.clear();
     crystals.clear();
     bullets.clear();
     player = NULL;
@@ -63,11 +65,10 @@ void GameObjects::draw(Window* window, float dt)
         buttons[i]->draw(window, dt);
     }
     if (gs->isGameStarted) {
-
-
         for (unsigned i = 0; i < background.size(); i++) {
             background[i]->draw(window, dt);
-        }
+        }   
+        
         for (unsigned i = 0; i < crystals.size(); i++) {
             crystals[i]->draw(window, dt);
         }
