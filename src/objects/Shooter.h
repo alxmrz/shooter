@@ -146,33 +146,33 @@ private:
     /**
      * Sprites for showing run images depending on direction (left, right)
      */
-    std::map<std::string, std::vector<std::vector<int>>> runSprites
+    std::map<std::string, std::vector<sf::IntRect>> runSprites
     {
         {
             "left",
             {
-                std::vector<int>{26, 375, 50, 50},
-                std::vector<int>{76, 375, 50, 50},
-                std::vector<int>{126, 375, 50, 50},
-                std::vector<int>{176, 375, 50, 50},
-                std::vector<int>{226, 375, 50, 50},
-                std::vector<int>{276, 375, 50, 50},
-                std::vector<int>{326, 375, 50, 50},
-                std::vector<int>{376, 375, 50, 50}
+                sf::IntRect(26, 375, 50, 50),
+                sf::IntRect(76, 375, 50, 50),
+                sf::IntRect(126, 375, 50, 50),
+                sf::IntRect(176, 375, 50, 50),
+                sf::IntRect(226, 375, 50, 50),
+                sf::IntRect(276, 375, 50, 50),
+                sf::IntRect(326, 375, 50, 50),
+                sf::IntRect(376, 375, 50, 50)
             },
         },
 
         {
             "right",
             {
-                std::vector<int>{26, 315, 50, 50},
-                std::vector<int>{76, 315, 50, 50},
-                std::vector<int>{126, 315, 50, 50},
-                std::vector<int>{176, 315, 50, 50},
-                std::vector<int>{226, 315, 50, 50},
-                std::vector<int>{276, 315, 50, 50},
-                std::vector<int>{326, 315, 50, 50},
-                std::vector<int>{376, 315, 50, 50}
+                sf::IntRect(26, 315, 50, 50),
+                sf::IntRect(76, 315, 50, 50),
+                sf::IntRect(126, 315, 50, 50),
+                sf::IntRect(176, 315, 50, 50),
+                sf::IntRect(226, 315, 50, 50),
+                sf::IntRect(276, 315, 50, 50),
+                sf::IntRect(326, 315, 50, 50),
+                sf::IntRect(376, 315, 50, 50)
             },
 
         },
@@ -181,52 +181,37 @@ private:
     /**
      * @var sprite for jump action
      */
-    std::map<std::string, std::vector<int>> jumpSprites
+    std::map<std::string, sf::IntRect> jumpSprites
     {
-        {
-            "left",
-            {
-                124, 200, 50, 50
-            }
-        },
-        {
-            "right",
-            {
-                124, 144, 50, 50
-            }
-        }
+        {"left",sf::IntRect(124, 200, 50, 50)},
+        {"right", sf::IntRect(124, 144, 50, 50)}
     };
 
     /**
      * @var Sprites when object does not move
      */
-    std::map<std::string, std::vector<int>> noMotionSprites
+    std::map<std::string, sf::IntRect> noMotionSprites
     {
-        {
-            "left",
-            {
-                24, 200, 50, 50
-            }
-        },
-        {
-            "right",
-            {
-                24, 144, 50, 50
-            }
-        }
+        {"left", sf::IntRect(24, 200, 50, 50) },
+        {"right",sf::IntRect(24, 144, 50, 50) }
     };
     
-    std::vector<std::vector<int>> explosionSprites = {
-        {2,0,80, 75},
-        {80,0,80, 75},
-        {160,0,80, 75},
-        {240,0,80, 75},
-        {320,0,75, 75},
-        {400,0,0, 75},
+    std::vector<sf::IntRect> explosionSprites 
+    {
+        sf::IntRect(2,0,80, 75),
+        sf::IntRect(80,0,80, 75),
+        sf::IntRect(160,0,80, 75),
+        sf::IntRect(240,0,80, 75),
+        sf::IntRect(320,0,75, 75),
+        sf::IntRect(400,0,0, 75),
     };
     
     std::multimap<std::string, std::vector<float>> operations;
     bool collectCollidedCrystal();
+    
+    void animateRun();
+    void animateExplosion();
+    void drawHearts(Window* window);
 };
 
 #endif /* SHOOTER_H */

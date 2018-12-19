@@ -98,58 +98,70 @@ void Shooter::jump()
 
 sf::Drawable* Shooter::getDrawForm()
 {
-    return sprite;
+    if (!dead) {
+        return sprite;
+    } else {
+        return explosionSprite;
+    }
 }
 
 void Shooter::draw(Window* window, float dt)
 {
-    // TODO: Need to refactor and simplify
+    bool showNextFrame = elapsedTime >= animationTime;
     if (!dead) {
-        if (moving && !jumping && !falling && elapsedTime >= animationTime) {
-            std::vector<int> current = this->runSprites[direction][currentFrame];
-            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
-            currentFrame++;
-            if (currentFrame >= this->runSprites[direction].size()) {
-                currentFrame = 0;
-            }
-            elapsedTime = 0.0;
-        } else if (falling || jumping) {
-            std::vector<int> current = this->jumpSprites[direction];
-            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
+        if (falling || jumping) {
+            sprite->setTextureRect(this->jumpSprites[direction]);
+        } else if (moving && showNextFrame) {
+            animateRun();
         } else if (!moving && !falling && !jumping) {
-            std::vector<int> current = this->noMotionSprites[direction];
-            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
+            sprite->setTextureRect(this->noMotionSprites[direction]);
         }
-    }  else if (elapsedTime >= animationTime){
-        sprite = explosionSprite;
-        sprite->setScale(0.5f, 0.5f);
-        std::vector<int> current = this->explosionSprites[currentFrame];
-        sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
-        currentFrame++;
-        if (currentFrame >= this->explosionSprites.size()) {
-            currentFrame = 0;
-            mustBeDeleted = true;
-        }
-        
-        elapsedTime = 0.0;      
+    }  else if (showNextFrame){
+        animateExplosion();
     }
     
     elapsedTime += dt;
-   
-    //TODO: in theory fireTime should not be increased in the function. 
     fireTime += dt;
     gravitationalTime += dt;
     
-    if (health > 0 && !main) {
-        for (int x = this->x, i = 0; i < health; i++) {
-            heartSprite->setPosition(x, y - 25);
-            window->draw(*heartSprite);
-            x += 20;
-        }  
+    bool aliveNPC = health > 0 && !main;
+    if (aliveNPC) {
+        drawHearts(window);
     }
     
     this->CObject::draw(window, dt);
     
+}
+
+void Shooter::animateRun()
+{
+    sprite->setTextureRect(this->runSprites[direction][currentFrame]);
+    currentFrame++;
+    if (currentFrame >= this->runSprites[direction].size()) {
+        currentFrame = 0;
+    }
+    elapsedTime = 0.0;
+}
+
+void Shooter::animateExplosion()
+{
+    explosionSprite->setTextureRect(this->explosionSprites[currentFrame]);
+    currentFrame++;
+    if (currentFrame >= this->explosionSprites.size()) {
+        currentFrame = 0;
+        mustBeDeleted = true;
+    }
+
+    elapsedTime = 0.0;
+}
+
+void Shooter::drawHearts(Window* window)
+{
+    for (int x = this->x, i = 0; i < health; i++) {
+        heartSprite->setPosition(x, y - 25);
+        window->draw(*heartSprite);
+        x += 20;
+    }
 }
 
 void Shooter::fire()
@@ -157,18 +169,17 @@ void Shooter::fire()
     if (fireTime >= 0.5f) {
         shotgunSound->play();
         fireTime = 0.f;
-        // TODO: dry
+        Bullet* bullet;
+        std::vector<float> coords;
         if (direction == "right") {
-            std::vector<float> coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
-            Bullet* bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
-            bullet->setDirection("right");
-            go->bullets.push_back(bullet);
+            coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
+            bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
         } else {
-            std::vector<float> coords = {getX() - 20.f, getY() + 20.f, 10, 10};
-            Bullet* bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
-            bullet->setDirection("left");
-            go->bullets.push_back(bullet);
+            coords = {getX() - 20.f, getY() + 20.f, 10, 10};
+            bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
         }
+        bullet->setDirection(direction); 
+        go->bullets.push_back(bullet);
     }
 }
 
@@ -300,6 +311,7 @@ void Shooter::setHeartSprite(sf::Sprite* heartSprite)
 void Shooter::setExplosionSprite(sf::Sprite* explosionSprite)
 {
     this->explosionSprite = explosionSprite;
+    this->explosionSprite->setScale(0.5f, 0.5f);
 }
 
 void Shooter::setJumpSound(sf::Sound* jumpSound)
