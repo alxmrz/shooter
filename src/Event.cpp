@@ -129,8 +129,10 @@ void Event::handleRealTimeKeyboardState()
 
 void Event::handleArrowKeys()
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {       
-        player->jump();
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        if (!player->isFalling()) {
+            player->jump();
+        }
     } 
     
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {

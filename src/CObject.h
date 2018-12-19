@@ -55,7 +55,7 @@ public:
      * @param y
      * @return 
      */
-    bool collideObjectAfterMove(float x, float y);
+    virtual bool collideObjectAfterMove(float x, float y);
     
     /**
      * Get border points of the rectangle of the object
@@ -76,6 +76,34 @@ protected:
     float y;
     int width;
     int height;
+    
+    /**
+     * Get the nearest coords when jumping or moving left, that: nearest%50 = 0
+     * For example: 
+     * nearTopLeft(1) = 0
+     * nearTopLeft(40) = 0
+     * nearTopLeft(55) = 50
+     * nearTopLeft(99) = 50
+     * nearTopLeft(102) = 100
+     * 
+     * @param current current value of any scale (X, Y)
+     * @return the nearest coords in px
+     */
+    int nearTopLeft(int current);
+    
+    /**
+     * Get the nearest coords when falling or moving right, that: nearest%50 = 0
+     * For example: 
+     * nearTopLeft(1) = 50
+     * nearTopLeft(40) = 50
+     * nearTopLeft(55) = 100
+     * nearTopLeft(99) = 100
+     * nearTopLeft(102) = 150
+     * 
+     * @param current current value of any scale (X, Y)
+     * @return the nearest coords in px
+     */
+    int nearDownRight(int current);
 };
 
 #endif /* COBJECT_H */

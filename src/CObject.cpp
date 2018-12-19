@@ -117,22 +117,67 @@ void CObject::draw(Window* window, float dt)
 
 bool CObject::collideObjectAfterMove(float x, float y)
 {
+    /**
+     * TODO: need to fix a bug.
+     * When a user coords is, for exmp, (140, 450) it will not see 
+     * an object in (150, 400) while jumping, because for collision will be
+     * taken object in (100, 400), but it is wrong, 
+     * when from the left of a ground none of objects exists
+     * 
+     *       [shooter] <---- in the position groundObject will not be collided
+     * [nullptr][groundObject]
+     *       [shooter] <---- in the position groundObject will not be collided 
+     * Also the game has sigmentation fault when returns an object with coords (0 - x or y)
+     */
     x = std::ceil(x);
     y = std::ceil(y);
-    // TODO: this check only for background, are other objects required?
-    for (auto* obj : go->background) {
-        CObject* collider = new CObject(
+    float nearX;
+    float nearY;
+    if (x <= 0.f ) {
+         nearX = nearTopLeft(this->x + x);  
+    } else if (x > 0.f) {
+         nearX = nearDownRight(this->x + x);      
+    } 
+    
+    if (y <= 0.f) {
+        nearY = nearTopLeft(this->y + y);
+    } else if (y > 0.f) {
+        nearY = nearDownRight(this->y + y);
+    }
+    
+    if (go->backgrounds[nearX][nearY] != nullptr) {
+        CObject* nearest = go->backgrounds[nearX][nearY];
+        
+        CObject collider = CObject(
                 getX() + x,
                 getY() + y,
                 getWidth(),
                 getHeight()
                 );
-        if (collider->collideRect(obj)) {
+        if (collider.collideRect(nearest)) {
             return true;
-            break;
-        }
-        delete collider;
+        }       
     }
 
     return false;
+}
+
+int CObject::nearTopLeft(int current)
+{
+    int decimalResidue = current % 100;
+    if (decimalResidue >= 50) {
+        return std::ceil(current / 100.f) * 100 - 50;
+    } else {
+        return std::floor(current / 100.f) * 100;
+    }
+}
+
+int CObject::nearDownRight(int current)
+{
+    int decimalResidue = current % 100;
+    if (decimalResidue > 50) {
+        return std::ceil(current / 100.f) * 100;
+    } else {
+        return std::floor(current / 100.f) * 100 + 50;
+    }
 }
