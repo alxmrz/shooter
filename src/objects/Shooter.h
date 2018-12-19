@@ -73,6 +73,7 @@ public:
     
     void setMain(bool main);
     void setDead(bool dead);
+    void setDirection(std::string direction);
 
     void setMainSprite(sf::Sprite* mainSprite);
     void setHeartSprite(sf::Sprite* heartSprite);
@@ -225,7 +226,7 @@ private:
     };
     
     std::multimap<std::string, std::vector<float>> operations;
-    bool collectCollidedCrystal(float x, float y);
+    bool collectCollidedCrystal();
 };
 
 #endif /* SHOOTER_H */
