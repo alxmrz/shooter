@@ -41,14 +41,30 @@ public:
      * 
      * @param x
      * @param y
-     * @return is moving done successfully
+     * @return is object moved
      */
     bool move(float x, float y);
+    /**
+     * Main moving method
+     * 
+     * @param direction direction of the object (left, right)
+     * @return is object moved
+     */
     bool move(std::string direction);
+    /**
+     * Shift coordinates on the Y scale
+     */
     void jump();
+    
     void stopJumping();
     void stopMoving();
+    
+    /**
+     *  Shift coordinates on the Y scale when gravitation is called
+     *  Used by GameState::causeGravity()
+     */
     void gravitate();
+    
     /**
      * Make a fire (it creates Bullet instance)
      */
@@ -57,9 +73,12 @@ public:
     bool isMoving();
     bool isJumping();
     bool isDead();
-    bool remove();
     bool isFalling();
     bool isPlayer();
+    
+    /* need to remove the current object? */
+    bool remove();
+
     
     int getHealth();
     int getCrystals();
@@ -83,25 +102,30 @@ public:
     void setShotgunSound(sf::Sound* jumpSound);
     void setCrystalCountText(Text* text);
 private:
-    /**
-     * @var is current object moving
-     */
+    /* is current object moving */
     bool moving = false;
     
-    /**
-     * @var is current object jumping
-     */
+    /* @var is current object jumping */
     bool jumping = false;
+    
+    /* is the current object dead*/
     bool dead = false;
+    /* must the current object be deleted */
     bool mustBeDeleted = false;
+    /* is current object falling */
     bool falling = false;
+    /* is current object controlled by Player*/
     bool main = false;
     int health = 3;
     int crystals = 0;
     float acceleration = 0.3f;
+    /* Velocity when object is moving left or right*/
     float velocity = 0.f;
+    /* Velocity when jump*/
     float velocityHorizontal = 0.f;
+    /* Max object velocity while moving*/
     float maxVelocity = 5.f;
+    /* When object jump, it can not jump higher than the value of the variable */
     float currentJumpHeight = 0.f;
     
 
@@ -113,39 +137,28 @@ private:
     sf::Sound* jumpSound;
     sf::Sound* shotgunSound;
     sf::Sound* crystalSound;
-    /**
-     * @var Sprite for drawing
-     */
-    sf::Sprite* sprite;
+
+    sf::Sprite* shooterSprite;
     sf::Sprite* heartSprite;
     sf::Sprite* explosionSprite;
     
-    /**
-     * Direction of the object for sprite choose
-     */
+    /* Direction of the object for sprite choose*/
     std::string direction = "right";
     
-    /**
-     * @var current frame for sprite choose
-     */
+    /*  @var current frame for sprite choose */
     unsigned int currentFrame = 0;
     
-    /**
-     * Time to show new sprite
-     */
+    /* Time to show new sprite */
     float animationTime = 0.08;
     
-    /**
-     * @var time passed after new sprite choose
-     */
+    /* time passed after new sprite choose */
     float elapsedTime = 0.0;
+    /* Time for gravitational formula*/
     float gravitationalTime = 0.0;
-    
+    /* Time after last fire call */
     float fireTime = 0.f;
 
-    /**
-     * Sprites for showing run images depending on direction (left, right)
-     */
+    /* Sprites map for showing run images depending on direction (left, right) */
     std::map<std::string, std::vector<sf::IntRect>> runSprites
     {
         {
@@ -178,24 +191,21 @@ private:
         },
     };
 
-    /**
-     * @var sprite for jump action
-     */
+    /* sprite map for jump action */
     std::map<std::string, sf::IntRect> jumpSprites
     {
         {"left",sf::IntRect(124, 200, 50, 50)},
         {"right", sf::IntRect(124, 144, 50, 50)}
     };
 
-    /**
-     * @var Sprites when object does not move
-     */
+    /* Sprites map when object does not move */
     std::map<std::string, sf::IntRect> noMotionSprites
     {
         {"left", sf::IntRect(24, 200, 50, 50) },
         {"right",sf::IntRect(24, 144, 50, 50) }
     };
     
+    /* Sprites map for explosion animation */
     std::vector<sf::IntRect> explosionSprites 
     {
         sf::IntRect(2,0,80, 75),
@@ -206,7 +216,11 @@ private:
         sf::IntRect(400,0,0, 75),
     };
     
-    std::multimap<std::string, std::vector<float>> operations;
+    /**
+     * If a crystall collide it will be collected and deleted
+     * 
+     * @return is crystal collected
+     */
     bool collectCollidedCrystal();
     
     void animateRun();

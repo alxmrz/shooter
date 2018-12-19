@@ -38,24 +38,28 @@ public:
     void update();
     bool isGameStarted = false;
     bool isGamePaused = false;
-    void playBackgroundSound();
-    void stopBackgroundSound();
+    void playBackgroundMusic();
+    void stopBackgroundMusic();
     void startNewGame();
     float getElapsedTime();
     void resetElapsedTime();
 private:
-    /**
-     * @var current application instance
-     */
+    /* @var current application instance */
     Application* app;
     
-    sf::Sound* backgroundLoop;
+    sf::Sound* backgroundMusic;
+    
+    /* Elapsed time from list frame*/
     float elapsedTime = 0.0;
 
     /**
-     * Current realization of gravity, that makes player falls down. Not good one
+     * Call gravity for objects
      */
     void causeGravity();
+    
+    /**
+     * Move all bullets and deleted if the are ready
+     */
     void updateBulletsState();
 };
 

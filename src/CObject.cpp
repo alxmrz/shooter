@@ -117,6 +117,17 @@ void CObject::draw(Window* window, float dt)
 
 bool CObject::collideObjectAfterMove(float x, float y)
 {
+    /**
+     * TODO: need to fix a bug.
+     * When a user coords is, for exmp, (140, 450) it will not see 
+     * an object in (150, 400) while jumping, because for collision will be
+     * taken object in (100, 400), but it is wrong, 
+     * when from the left of a ground none of objects exists
+     * 
+     *       [shooter] <---- in the position groundObject will not be collided
+     * [nullptr][groundObject]
+     *       [shooter] <---- in the position groundObject will not be collided 
+     */
     x = std::ceil(x);
     y = std::ceil(y);
     float nearX;
@@ -132,7 +143,7 @@ bool CObject::collideObjectAfterMove(float x, float y)
     } else if (y > 0.f) {
         nearY = nearDownRight(this->y + y);
     }
-
+    
     if (go->backgrounds[nearX][nearY] != nullptr) {
         CObject* nearest = go->backgrounds[nearX][nearY];
         
@@ -152,17 +163,11 @@ bool CObject::collideObjectAfterMove(float x, float y)
 
 int CObject::nearTopLeft(int current)
 {
-    int decimalResidue = std::floor(current / 10) * 10; // 270
-    if (decimalResidue % 50 != 0) {
-        int hundredPart = std::floor(current / 100) * 100; // 200
-        int diff = decimalResidue - hundredPart; //70
-        if (diff >= 50) {
-            return hundredPart + 50;
-        } else {
-            return hundredPart;
-        }
+    int decimalResidue = current % 100;
+    if (decimalResidue >= 50) {
+        return std::ceil(current / 100.f) * 100 - 50;
     } else {
-        return decimalResidue;
+        return std::floor(current / 100.f) * 100;
     }
 }
 
@@ -170,7 +175,7 @@ int CObject::nearDownRight(int current)
 {
     int decimalResidue = current % 100;
     if (decimalResidue > 50) {
-        return std::ceil(current / 100.f) * 100; // 200
+        return std::ceil(current / 100.f) * 100;
     } else {
         return std::floor(current / 100.f) * 100 + 50;
     }

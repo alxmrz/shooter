@@ -34,7 +34,7 @@ bool Shooter::move(float x, float y)
     if (!collideObjectAfterMove(x, y) && this->y + y < 600) {
         this->x += x;
         this->y += y;
-        this->sprite->setPosition(this->x, this->y);
+        this->shooterSprite->setPosition(this->x, this->y);
         collectCollidedCrystal();
         
         return true;
@@ -99,7 +99,7 @@ void Shooter::jump()
 sf::Drawable* Shooter::getDrawForm()
 {
     if (!dead) {
-        return sprite;
+        return shooterSprite;
     } else {
         return explosionSprite;
     }
@@ -110,11 +110,11 @@ void Shooter::draw(Window* window, float dt)
     bool showNextFrame = elapsedTime >= animationTime;
     if (!dead) {
         if (falling || jumping) {
-            sprite->setTextureRect(this->jumpSprites[direction]);
+            shooterSprite->setTextureRect(this->jumpSprites[direction]);
         } else if (moving && showNextFrame) {
             animateRun();
         } else if (!moving && !falling && !jumping) {
-            sprite->setTextureRect(this->noMotionSprites[direction]);
+            shooterSprite->setTextureRect(this->noMotionSprites[direction]);
         }
     }  else if (showNextFrame){
         animateExplosion();
@@ -124,7 +124,7 @@ void Shooter::draw(Window* window, float dt)
     fireTime += dt;
     gravitationalTime += dt;
     
-    bool aliveNPC = health > 0 && !main;
+    bool aliveNPC = health > 0 && !isPlayer();
     if (aliveNPC) {
         drawHearts(window);
     }
@@ -135,7 +135,7 @@ void Shooter::draw(Window* window, float dt)
 
 void Shooter::animateRun()
 {
-    sprite->setTextureRect(this->runSprites[direction][currentFrame]);
+    shooterSprite->setTextureRect(this->runSprites[direction][currentFrame]);
     currentFrame++;
     if (currentFrame >= this->runSprites[direction].size()) {
         currentFrame = 0;
@@ -299,7 +299,7 @@ void Shooter::decreaseHealth()
 
 void Shooter::setMainSprite(sf::Sprite* mainSprite)
 {
-    sprite = mainSprite;
+    shooterSprite = mainSprite;
 }
 
 void Shooter::setHeartSprite(sf::Sprite* heartSprite)

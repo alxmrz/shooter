@@ -39,7 +39,7 @@ int Application::run()
 void Application::close()
 {
     if (gameState->isGameStarted) {
-        gameState->stopBackgroundSound();
+        gameState->stopBackgroundMusic();
     }
     window->close();
 }

@@ -19,8 +19,6 @@ public:
     {
         return message.c_str();
     }
-
-
 private:
     std::string message;
 };
@@ -37,8 +35,6 @@ public:
     {
         return message.c_str();
     }
-
-
 private:
     std::string message;
 };
@@ -66,9 +62,11 @@ private:
         {"crystal", "resources/images/crystal.png"},
         {"background", "resources/images/background.png"},
     };
+    
     std::map<std::string, std::string> fontsLoadQueue = {
         {"arial", "resources/fonts/arial.ttf"},
     };
+    
     std::map<std::string, std::string> soundsLoadQueue = {
         {"explosion", "resources/audio/explosion_sound.wav"},
         {"background", "resources/audio/background_loop.wav"},
