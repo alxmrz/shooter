@@ -127,6 +127,7 @@ bool CObject::collideObjectAfterMove(float x, float y)
      *       [shooter] <---- in the position groundObject will not be collided
      * [nullptr][groundObject]
      *       [shooter] <---- in the position groundObject will not be collided 
+     * Also the game has sigmentation fault when returns an object with coords (0 - x or y)
      */
     x = std::ceil(x);
     y = std::ceil(y);
