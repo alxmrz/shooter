@@ -50,16 +50,12 @@ void GameState::updateBulletsState()
 
 void GameState::causeGravity()
 {
-    /*for (auto* obj: objects->playable) {
+    for (auto* obj: objects->playable) {
         Shooter* shooter = static_cast<Shooter*>(obj);
         if (!shooter->isJumping()) {
             shooter->gravitate();
         } 
-    }*/
-    if (!objects->player->isJumping()) {
-            objects->player->gravitate();
-        } 
-    
+    }
 }
 
 void GameState::resetElapsedTime()
