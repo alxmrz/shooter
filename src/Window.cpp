@@ -42,10 +42,14 @@ void Window::updateView(GameState* gameState)
             (float) gameState->objects->player->getX(),
             (float) gameState->objects->player->getY())
             );
-    if (playerWindowCoords.x >= 800) {
+    /*if (playerWindowCoords.x >= 800) {
         gameState->view->move(600.f, 0.f);
     } else if (playerWindowCoords.x <= 50) {
         gameState->view->move(-600.f, 0.f);
-    }
+    }*/
+    gameState->view->setCenter(
+            gameState->objects->player->getX(),
+            gameState->objects->player->getY()
+    );
     setView(*gameState->view);
 }

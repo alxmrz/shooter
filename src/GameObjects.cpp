@@ -31,6 +31,13 @@ GameObjects::GameObjects(GameState* gs)
 
 GameObjects::~GameObjects()
 {
+    for (auto vec: backgrounds) {
+        for (auto* obj: vec) {
+            delete obj;
+        }
+        vec.clear();
+    }
+    backgrounds.clear();
 }
 
 std::vector<CObject*>* GameObjects::all()

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include "../include/tinyxml/tinyxml2.h"
 #include "GameState.h"
 #include "Application.h"
 #include "Scene.h"
@@ -42,7 +43,7 @@ void Scene::initMainMenu()
 void Scene::initNewGame()
 {
     gameState->objects->reset();
-    generateLevel();
+    generateLevelNew();
 }
 
 void Scene::generateLevel()
@@ -89,5 +90,76 @@ void Scene::generateLevel()
             x += 50;
         }
         y += 50;
+    }
+}
+
+void Scene::generateLevelNew()
+{
+    tinyxml2::XMLDocument doc;
+    doc.LoadFile("resources/levels/test.xml");
+    const char* str = doc.FirstChildElement("map")->FirstChildElement("layer")->FirstChildElement("data")->GetText();
+    generateBackground(str);
+    generatePlayable();
+}
+
+void Scene::generateBackground(std::string data)
+{
+    std::vector<std::string> lines;
+    std::vector<std::string> lineChars;
+    
+    boost::split(lines, data, boost::algorithm::is_any_of("\n"), boost::token_compress_on);
+    float x = 0;
+    float y = 0;
+    //Ground* g;
+    for (std::string line : lines) {
+        x = 0;
+        boost::split(lineChars, line, boost::algorithm::is_any_of(","), boost::token_compress_on);
+        for (auto c : lineChars) {
+            if (c == "9") {
+                Ground* g = gameState->objects->fabric->createGround(x, y, 50, 50);            
+                gameState->objects->background.push_back(g);
+                
+                if (gameState->objects->backgrounds[x][y] == nullptr) {
+                    gameState->objects->backgrounds[x][y] = g;
+                }
+            } 
+            x += 50;
+        }
+        y += 50;
+    }
+}
+
+void Scene::generatePlayable()
+{
+    tinyxml2::XMLDocument doc;
+    doc.LoadFile("resources/levels/test.xml");
+    tinyxml2::XMLElement* objectgroup = doc.FirstChildElement("map")->FirstChildElement("objectgroup");
+
+    if (objectgroup) {
+        std::string type;
+        tinyxml2::XMLElement* object;
+        for (tinyxml2::XMLNode* node = objectgroup->FirstChildElement("object"); 
+            node; 
+            node = node->NextSibling()
+            ) {
+            object = node->ToElement();
+            
+            type = object->Attribute("type");
+            std::cout << type << std::endl;
+            if (type == "Shooter") {
+                Shooter* shooter = gameState->objects->fabric->createShooter(atoi(object->Attribute("x")), atoi(object->Attribute("y")), 50, 50);
+                std::string name = object->Attribute("name");
+                if (name == "Player") {
+                   shooter->setMain(true); 
+                   gameState->objects->player = shooter;
+                }
+
+                gameState->objects->playable.push_back(shooter);  
+            } else if (type == "Crystal") {
+            gameState->objects->crystals.push_back(
+                    gameState->objects->fabric->createCrystal(atoi(object->Attribute("x")), atoi(object->Attribute("y")), 50, 50)
+                );
+            }
+        }
     }
 }

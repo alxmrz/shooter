@@ -25,6 +25,7 @@ public:
      * count of levels is one
      */
     void generateLevel();
+    void generateLevelNew();
 private:
     /**
      * Current instance of the application
@@ -35,6 +36,8 @@ private:
      * Current game state instance
      */
     GameState* gameState;
+    void generateBackground(std::string data);
+    void generatePlayable();
 };
 
 #endif /* SCENE_H */
