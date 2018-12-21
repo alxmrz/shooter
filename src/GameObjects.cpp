@@ -31,13 +31,6 @@ GameObjects::GameObjects(GameState* gs)
 
 GameObjects::~GameObjects()
 {
-    for (auto vec: backgrounds) {
-        for (auto* obj: vec) {
-            delete obj;
-        }
-        vec.clear();
-    }
-    backgrounds.clear();
 }
 
 std::vector<CObject*>* GameObjects::all()
@@ -54,7 +47,6 @@ void GameObjects::reset()
     buttons.clear();
     playable.clear();
     background.clear();
-    //backgrounds.clear();
     crystals.clear();
     bullets.clear();
     player = NULL;

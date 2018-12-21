@@ -143,23 +143,3 @@ bool CObject::collideObjectAfterMove(float x, float y)
 
     return false;
 }
-
-int CObject::nearTopLeft(int current)
-{
-    int decimalResidue = current % 100;
-    if (decimalResidue >= 50) {
-        return std::ceil(current / 100.f) * 100 - 50;
-    } else {
-        return std::floor(current / 100.f) * 100;
-    }
-}
-
-int CObject::nearDownRight(int current)
-{
-    int decimalResidue = current % 100;
-    if (decimalResidue > 50) {
-        return std::ceil(current / 100.f) * 100;
-    } else {
-        return std::floor(current / 100.f) * 100 + 50;
-    }
-}

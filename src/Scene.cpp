@@ -69,19 +69,15 @@ void Scene::generateBackground(std::string data)
     boost::split(lines, data, boost::algorithm::is_any_of("\n"), boost::token_compress_on);
     float x = 0;
     float y = 0;
-    //Ground* g;
      
     for (std::string line : lines) {
         x = 0;
         boost::split(lineChars, line, boost::algorithm::is_any_of(","), boost::token_compress_on);
         for (auto c : lineChars) {
             if (c == "9") {
-                Ground* g = gameState->objects->fabric->createGround(x, y, 50, 50);            
-                gameState->objects->background.push_back(g);
-                
-                if (gameState->objects->backgrounds[x][y] == nullptr) {
-                    gameState->objects->backgrounds[x][y] = g;
-                }
+                gameState->objects->background.push_back(
+                        gameState->objects->fabric->createGround(x, y, 50, 50)
+                        );
             } 
             x += 50;
         }
@@ -92,17 +88,14 @@ void Scene::generateBackground(std::string data)
 void Scene::generatePlayable(tinyxml2::XMLElement* map)
 {
     std::string type;
-    tinyxml2::XMLElement* object;
     for (tinyxml2::XMLElement* objectgroup = map->FirstChildElement("objectgroup");
             objectgroup != NULL;
             objectgroup = objectgroup->NextSiblingElement()) {
         
-        for (tinyxml2::XMLNode* node = objectgroup->FirstChildElement("object");
-                node;
-                node = node->NextSibling()
+        for (tinyxml2::XMLElement* object = objectgroup->FirstChildElement("object");
+                object;
+                object = object->NextSiblingElement()
                 ) {
-            object = node->ToElement();
-
             type = object->Attribute("type");
 
             if (type == "Shooter") {
