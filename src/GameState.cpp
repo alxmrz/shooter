@@ -50,8 +50,11 @@ void GameState::updateBulletsState()
 
 void GameState::causeGravity()
 {
-    if (!objects->player->isJumping()) {
-        objects->player->gravitate();
+    for (auto* obj: objects->playable) {
+        Shooter* shooter = static_cast<Shooter*>(obj);
+        if (!shooter->isJumping()) {
+            shooter->gravitate();
+        } 
     }
 }
 

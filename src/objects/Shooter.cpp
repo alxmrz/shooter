@@ -31,11 +31,12 @@ Shooter::~Shooter()
 
 bool Shooter::move(float x, float y)
 {
-    bool isMapEnd = this->x+x <= 0 || this->y + y >= 550 || this->y + y <= 0;
+    bool isMapEnd = this->x+x <= 0 || this->y + y <= 0;
     if (!isMapEnd && !collideObjectAfterMove(x, y)) {
         this->x += x;
         this->y += y;
         this->shooterSprite->setPosition(this->x, this->y);
+        this->explosionSprite->setPosition(this->x, this->y);
         collectCollidedCrystal();
         
         return true;

@@ -61,6 +61,11 @@ Crystal* Fabric::createCrystal(float x, float y, int width, int height)
     return new Crystal(resources->getTexture("crystal"), x, y, width, height);
 }
 
+CObject* Fabric::createBorder(float x, float y, int width, int height)
+{
+    return new CObject(go, x, y, width, height);
+}
+
 Text* Fabric::createText(std::string text, int x, int y)
 {
     return new Text(text, resources->getFont("arial"), x, y);
