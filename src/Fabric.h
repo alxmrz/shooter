@@ -11,6 +11,7 @@ class Resources;
 class Shooter;
 class Ground;
 class Crystal;
+class CObject;
 class Button;
 class Text;
 
@@ -24,6 +25,7 @@ public:
     Shooter* createShooter(float x, float y, int width, int height);
     Ground* createGround(float x, float y, int width, int height);
     Crystal* createCrystal(float x, float y, int width, int height);
+    CObject* createBorder(float x, float y, int width, int height);
     Text* createText(std::string text, int x, int y);
     Button* createButton(std::string id, std::string text, float x, float y, int width, int height);
     sf::Sprite* createSprite(std::string type, float x, float y);

@@ -1,5 +1,6 @@
 #include <vector>
 #include <cmath>
+#include <iostream>
 #include "CObject.h"
 #include "GameObjects.h"
 #include "Window.h"
@@ -95,7 +96,7 @@ std::vector<std::vector<float>> CObject::getBorderPoints()
     std::vector<float> fifth = {getX() + getWidth() / 2, getY()};
     std::vector<float> sixth = {getX(), getY() + getHeight() / 2};
     std::vector<float> seventh = {getX() + getWidth() / 2, getY() + getHeight()};
-    std::vector<float> eight = {getX() + getWidth(), getY() + getWidth() / 2};
+    std::vector<float> eight = {getX() + getWidth(), getY() + getHeight() / 2};
 
     points.push_back(first);
     points.push_back(second);
@@ -117,46 +118,27 @@ void CObject::draw(Window* window, float dt)
 
 bool CObject::collideObjectAfterMove(float x, float y)
 {
-    /**
-     * TODO: need to fix a bug.
-     * When a user coords is, for exmp, (140, 450) it will not see 
-     * an object in (150, 400) while jumping, because for collision will be
-     * taken object in (100, 400), but it is wrong, 
-     * when from the left of a ground none of objects exists
-     * 
-     *       [shooter] <---- in the position groundObject will not be collided
-     * [nullptr][groundObject]
-     *       [shooter] <---- in the position groundObject will not be collided 
-     * Also the game has sigmentation fault when returns an object with coords (0 - x or y)
-     */
     x = std::ceil(x);
     y = std::ceil(y);
-    float nearX;
-    float nearY;
-    if (x <= 0.f ) {
-         nearX = nearTopLeft(this->x + x);  
-    } else if (x > 0.f) {
-         nearX = nearDownRight(this->x + x);      
-    } 
-    
-    if (y <= 0.f) {
-        nearY = nearTopLeft(this->y + y);
-    } else if (y > 0.f) {
-        nearY = nearDownRight(this->y + y);
+    CObject collider = CObject(
+            getX() + x,
+            getY() + y,
+            getWidth(),
+            getHeight()
+            );
+    int checkPoint = 0;
+    if (x < 0 || y < 0 || y > 0) {
+        checkPoint = collider.getX();
+    } else if ( x > 0) {
+        checkPoint = collider.getX() + collider.getWidth();
     }
     
-    if (go->backgrounds[nearX][nearY] != nullptr) {
-        CObject* nearest = go->backgrounds[nearX][nearY];
-        
-        CObject collider = CObject(
-                getX() + x,
-                getY() + y,
-                getWidth(),
-                getHeight()
-                );
-        if (collider.collideRect(nearest)) {
-            return true;
-        }       
+    for (auto it = go->borders.begin(); it != go->borders.end(); it++) {
+        bool collideX = (checkPoint >= it->first && checkPoint < it->first + it->second->getWidth()) ||
+        (checkPoint + collider.getWidth() > it->first && checkPoint + collider.getWidth() < it->first + it->second->getWidth());
+        if (collideX && collider.collideRect(it->second)) {
+            return true;      
+        }
     }
 
     return false;
