@@ -1,6 +1,11 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+
+namespace tinyxml2 {
+    class XMLElement;
+}
+
 class Application;
 class GameState;
 
@@ -37,7 +42,7 @@ private:
      */
     GameState* gameState;
     void generateBackground(std::string data);
-    void generatePlayable();
+    void generatePlayable(tinyxml2::XMLElement* objectgroup);
 };
 
 #endif /* SCENE_H */

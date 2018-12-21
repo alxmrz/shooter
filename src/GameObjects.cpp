@@ -54,7 +54,7 @@ void GameObjects::reset()
     buttons.clear();
     playable.clear();
     background.clear();
-    backgrounds.clear();
+    //backgrounds.clear();
     crystals.clear();
     bullets.clear();
     player = NULL;

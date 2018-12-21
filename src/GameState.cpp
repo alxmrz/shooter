@@ -31,7 +31,7 @@ void GameState::update()
 {
     if (isGameStarted && !isGamePaused) {
         updateBulletsState();
-        //causeGravity();
+        causeGravity();
         resetElapsedTime();
     }
 }
