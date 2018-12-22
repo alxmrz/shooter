@@ -1,6 +1,6 @@
 CC=g++ 
 CFLAGS=-c -Wall -g -std=c++11
-LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+LDFLAGS= -L/home/alexandr/libraries/SFML-2.5.1/lib/ -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 SOURCES= \
 main.cpp \

@@ -14,6 +14,10 @@ Window::Window(sf::VideoMode mode,
 {
 }
 
+Window::Window(): sf::RenderWindow()
+{
+}
+
 void Window::draw(GameState* gameState)
 {
     if (gameState->isGameStarted) {       
@@ -38,18 +42,32 @@ void Window::draw(GameState* gameState)
 
 void Window::updateView(GameState* gameState)
 {
-    sf::Vector2i playerWindowCoords = mapCoordsToPixel(sf::Vector2f(
-            (float) gameState->objects->player->getX(),
-            (float) gameState->objects->player->getY())
-            );
-    /*if (playerWindowCoords.x >= 800) {
-        gameState->view->move(600.f, 0.f);
-    } else if (playerWindowCoords.x <= 50) {
-        gameState->view->move(-600.f, 0.f);
-    }*/
+    /*sf::Vector2i playerWindowCoords = mapCoordsToPixel(sf::Vector2f(
+            gameState->objects->player->getX(),
+            gameState->objects->player->getY())
+            );*/
     gameState->view->setCenter(
             gameState->objects->player->getX(),
-            gameState->objects->player->getY()
+            gameState->objects->player->getY()-200
     );
     setView(*gameState->view);
+}
+
+void Window::init()
+{
+    create(sf::VideoMode(900, 600), "Shooter");
+    setFramerateLimit(fps);
+}
+
+void Window::changeFullScreenMode()
+{
+    close();
+    if (isFullScreen) {
+        isFullScreen = false;
+        create(sf::VideoMode(900, 600), "Shooter");
+    } else {
+        isFullScreen = true;
+        create(sf::VideoMode::getDesktopMode(), "Shooter", sf::Style::Fullscreen);
+    }      
+    setFramerateLimit(fps);
 }
