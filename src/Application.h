@@ -36,11 +36,6 @@ public:
     void close();
 private:
     /**
-     * @var fps of the app we are needed
-     */
-    int fps = 120;
-    
-    /**
      * @var current game state
      */
     GameState* gameState;

@@ -53,7 +53,9 @@ void Event::handleMainKeys(sf::Event& event)
 {
     if (event.key.code == sf::Keyboard::Escape) {
         app->close();
-    } 
+    } else if (event.key.code == sf::Keyboard::F) {
+        app->window->changeFullScreenMode();
+    }
 }
 
 void Event::handleArrowKeysReleased(sf::Event& event)

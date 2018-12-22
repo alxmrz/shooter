@@ -11,7 +11,7 @@ Application::Application()
 {
     gameState = new GameState(this);
 
-    window = new Window(sf::VideoMode(900, 600), "Shooter");
+    window = new Window();
 
     event = new Event(this, gameState);
     scene = new Scene(this, gameState);
@@ -23,7 +23,7 @@ Application::~Application()
 
 int Application::run()
 {
-    window->setFramerateLimit(fps);
+    window->init();
     scene->initMainMenu();
     /*gameState->startNewGame*/
 

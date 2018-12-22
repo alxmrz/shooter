@@ -9,6 +9,7 @@ class Window : public sf::RenderWindow {
 public:
     using sf::RenderTarget::draw;
 
+    Window();
     Window(sf::VideoMode mode,
             const sf::String& title,
             sf::Uint32 style = sf::Style::Default,
@@ -20,7 +21,14 @@ public:
      * @param 
      */
     void draw(GameState*);
+    void init();
+    void changeFullScreenMode();
 private:
+    bool isFullScreen = false;
+    /**
+     * @var fps of the app we are needed
+     */
+    int fps = 120;
     void updateView(GameState* gameState);
 };
 
