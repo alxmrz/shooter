@@ -53,6 +53,7 @@ void GameState::causeGravity()
     for (auto* obj: objects->playable) {
         Shooter* shooter = static_cast<Shooter*>(obj);
         if (!shooter->isJumping()) {
+            shooter->think();
             shooter->gravitate();
         } 
     }

@@ -33,7 +33,7 @@ CObject::~CObject()
 bool CObject::collideRect(CObject* obj)
 {
     //TODO: is there more elegant and more easy way?
-    
+
     std::vector<std::vector<float>> objPoints = obj->getBorderPoints();
     for (unsigned i = 0; i < objPoints.size(); i++) {
         if (this->collidePoint(objPoints[i][0], objPoints[i][1])) {
@@ -118,8 +118,9 @@ void CObject::draw(Window* window, float dt)
 
 bool CObject::collideObjectAfterMove(float x, float y)
 {
-    x = std::ceil(x);
-    y = std::ceil(y);
+    x = x < 0? std::floor(x) : std::ceil(x);
+    std::ceil(y);
+    
     CObject collider = CObject(
             getX() + x,
             getY() + y,
@@ -127,17 +128,17 @@ bool CObject::collideObjectAfterMove(float x, float y)
             getHeight()
             );
     int checkPoint = 0;
-    if (x < 0 || y < 0 || y > 0) {
+    if (x <= 0 || y < 0 || y > 0) {
         checkPoint = collider.getX();
     } else if ( x > 0) {
         checkPoint = collider.getX() + collider.getWidth();
     }
-    
+
     for (auto it = go->borders.begin(); it != go->borders.end(); it++) {
-        bool collideX = (checkPoint >= it->first && checkPoint < it->first + it->second->getWidth()) ||
+        bool collideX = (checkPoint >= it->first && checkPoint < it->first + it->second->getWidth()-1) ||
         (checkPoint + collider.getWidth() > it->first && checkPoint + collider.getWidth() < it->first + it->second->getWidth());
         if (collideX && collider.collideRect(it->second)) {
-            return true;      
+            return true;
         }
     }
 

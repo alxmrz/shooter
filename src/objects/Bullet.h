@@ -10,12 +10,12 @@ namespace sf {
     class Drawable;
 }
 class GameObjects;
-
+class Shooter;
 
 class Bullet : public CObject {
 public:
     Bullet();
-    Bullet(GameObjects* go, sf::Texture* texture, int x, int y, int width, int height);
+    Bullet(Shooter* shooter, GameObjects* go, int x, int y, int width, int height);
     Bullet(const Bullet& orig);
     virtual ~Bullet();
 
@@ -45,20 +45,17 @@ public:
     
     sf::Sound* explosionSound;
     void setExplosionSound(sf::Sound* sound);
+    void setMainTexture(sf::Texture* texture);
 private:
-    /**
-     * @var Sprite for drawing
-     */
+    /** Shooter, that did the bullet */
+    Shooter* shooter;
+    /**  Sprite for drawing */
     sf::Sprite* sprite;
     
-    /**
-     * @var direction Direction of the object to move 
-     */
+    /** Direction of the object to move */
     std::string direction;
     
-    /**
-     * @var endPosition When the object will be at this position the object will be deleted
-     */
+    /** When the object will be at this position the object will be deleted */
     std::vector<int> endPosition;
 
     /**

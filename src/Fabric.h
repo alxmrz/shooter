@@ -21,7 +21,7 @@ public:
     Fabric(const Fabric& orig);
     virtual ~Fabric();
 
-    Bullet* createBullet(float x, float y, int width, int height);
+    Bullet* createBullet(Shooter* shooter, float x, float y, int width, int height);
     Shooter* createShooter(float x, float y, int width, int height);
     Ground* createGround(float x, float y, int width, int height);
     Crystal* createCrystal(float x, float y, int width, int height);

@@ -69,6 +69,7 @@ public:
      * Make a fire (it creates Bullet instance)
      */
     void fire();
+    void think();
  
     bool isMoving();
     bool isJumping();
@@ -216,6 +217,9 @@ private:
         sf::IntRect(400,0,0, 75),
     };
     
+    bool isMoveRight = true;
+    bool isMoveLeft = false;
+    
     /**
      * If a crystall collide it will be collected and deleted
      * 
@@ -223,6 +227,7 @@ private:
      */
     bool collectCollidedCrystal();
     
+    bool isNextFalling(std::string direction);
     void animateRun();
     void animateExplosion();
     void drawHearts(Window* window);

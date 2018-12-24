@@ -27,9 +27,10 @@ Fabric::~Fabric()
 {
 }
 
-Bullet* Fabric::createBullet(float x, float y, int width, int height)
+Bullet* Fabric::createBullet(Shooter* shooter, float x, float y, int width, int height)
 {
-    Bullet* bullet = new Bullet(go, resources->getTexture("bullet"), x, y, width, height);
+    Bullet* bullet = new Bullet(shooter, go, x, y, width, height);
+    bullet->setMainTexture(resources->getTexture("bullet"));
     bullet->setExplosionSound(resources->getSound("explosion"));
     return bullet;
 }
