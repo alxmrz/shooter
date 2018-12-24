@@ -2,23 +2,46 @@
 #define RESOURCES_H
 
 #include <exception>
+#include <map>
+#include <string>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
-class NotLoadedTexture: public std::exception
+class ResourceNotLoaded : public std::exception 
 {
 public:
-    NotLoadedTexture(std::string message);
+
+    ResourceNotLoaded(std::string const &message) : message(message) 
+    {
+    }
+
+    virtual char const *what() const noexcept 
+    {
+        return message.c_str();
+    }
+private:
+    std::string message;
 };
 
-class TypeNotFound: public std::exception
+class ResourceTypeNotFound : public std::exception 
 {
 public:
-    TypeNotFound(std::string message);
+
+    ResourceTypeNotFound(std::string const &message) : message(message) 
+    {
+    }
+
+    virtual char const *what() const noexcept 
+    {
+        return message.c_str();
+    }
+private:
+    std::string message;
 };
 
 
-class Resources {
+class Resources 
+{
 public:
     Resources();
     Resources(const Resources& orig);
@@ -29,31 +52,32 @@ public:
     sf::Sound* getSound(std::string type);
     
     void load();
-private:
-    sf::Texture* bulletTexture;
-    sf::Texture* shooterTexture;
-    sf::Texture* explosionTexture;
-    sf::Texture* groundTexture;
-    sf::Texture* heartTexture;
-    sf::Texture* crystalTexture;
-    sf::Texture* backgroundTexture;
+private: 
+    std::map<std::string, std::string> texturesLoadQueue {
+        {"bullet", "resources/images/shell.png"},
+        {"shooter", "resources/images/OpenGunnerHeroVer2.png"},
+        {"explosion", "resources/images/oneshot.png"},
+        {"ground", "resources/images/ground.jpeg"},
+        {"heart", "resources/images/heart.png"},
+        {"crystal", "resources/images/crystal.png"},
+        {"background", "resources/images/background.png"},
+    };
     
-    sf::Font* arialFont;
+    std::map<std::string, std::string> fontsLoadQueue = {
+        {"arial", "resources/fonts/arial.ttf"},
+    };
     
-    sf::SoundBuffer* explosionSoundBuffer;
-    sf::Sound* explosionSound;
+    std::map<std::string, std::string> soundsLoadQueue = {
+        {"explosion", "resources/audio/explosion_sound.wav"},
+        {"background", "resources/audio/background_loop.wav"},
+        {"jump", "resources/audio/jump_sound.wav"},
+        {"shotgun", "resources/audio/shotgun_sound.wav"},
+        {"crystal", "resources/audio/collecting_crystal.wav"},
+    };
     
-    sf::SoundBuffer* backgroundSoundBuffer;
-    sf::Sound* backgroundSound;
-    
-    sf::SoundBuffer* jumpSoundBuffer;
-    sf::Sound* jumpSound;
-    
-    sf::SoundBuffer* shotgunSoundBuffer;
-    sf::Sound* shotgunSound;
-    
-    sf::SoundBuffer* crystalSoundBuffer;
-    sf::Sound* crystalSound;
+    std::map<std::string, sf::Texture*> textures;
+    std::map<std::string, sf::Font*> fonts;
+    std::map<std::string, sf::Sound*> sounds;
     
     void loadTextures();
     void loadFonts();

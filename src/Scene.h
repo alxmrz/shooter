@@ -1,6 +1,11 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+
+namespace tinyxml2 {
+    class XMLElement;
+}
+
 class Application;
 class GameState;
 
@@ -25,6 +30,7 @@ public:
      * count of levels is one
      */
     void generateLevel();
+    void generateLevelNew();
 private:
     /**
      * Current instance of the application
@@ -35,6 +41,8 @@ private:
      * Current game state instance
      */
     GameState* gameState;
+    void generateBackground(std::string data);
+    void generatePlayable(tinyxml2::XMLElement* objectgroup);
 };
 
 #endif /* SCENE_H */

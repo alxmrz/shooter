@@ -27,9 +27,10 @@ Fabric::~Fabric()
 {
 }
 
-Bullet* Fabric::createBullet(float x, float y, int width, int height)
+Bullet* Fabric::createBullet(Shooter* shooter, float x, float y, int width, int height)
 {
-    Bullet* bullet = new Bullet(go, resources->getTexture("bullet"), x, y, width, height);
+    Bullet* bullet = new Bullet(shooter, go, x, y, width, height);
+    bullet->setMainTexture(resources->getTexture("bullet"));
     bullet->setExplosionSound(resources->getSound("explosion"));
     return bullet;
 }
@@ -59,6 +60,11 @@ Ground* Fabric::createGround(float x, float y, int width, int height)
 Crystal* Fabric::createCrystal(float x, float y, int width, int height)
 {
     return new Crystal(resources->getTexture("crystal"), x, y, width, height);
+}
+
+CObject* Fabric::createBorder(float x, float y, int width, int height)
+{
+    return new CObject(go, x, y, width, height);
 }
 
 Text* Fabric::createText(std::string text, int x, int y)

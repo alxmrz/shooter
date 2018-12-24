@@ -2,7 +2,9 @@
 #include <vector>
 #include <iostream>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include "../include/tinyxml/tinyxml2.h"
 #include "GameState.h"
 #include "Application.h"
 #include "Scene.h"
@@ -47,46 +49,78 @@ void Scene::initNewGame()
 
 void Scene::generateLevel()
 {
-    std::string level =
-            "                                     S       |"
-            "               C    S         C   GGGGG      |"
-            "   S        GGGGGGGGGGGG                     |"
-            "GGGGGGG                      GGGGG           |"
-            "       C                   S                 |"
-            "    GGGGGG               GGGGG               |"
-            " GGG          C                            GG|"
-            " GG                 GGG                    G|"
-            " GGGGGGG                            C       G|"
-            " GG   C       GGGG      C      C    C    C  G|"
-            " GGP       S     S     S       S        S   G|"
-            "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG|"
-            ;
+    tinyxml2::XMLDocument doc;
+    doc.LoadFile("resources/levels/test.xml");
+    const char* str = doc.FirstChildElement("map")
+                        ->FirstChildElement("layer")
+                        ->FirstChildElement("data")
+                        ->GetText();
+    tinyxml2::XMLElement* map = doc.FirstChildElement("map");
+    
+    generateBackground(str);
+    generatePlayable(map);
+}
+
+void Scene::generateBackground(std::string data)
+{
     std::vector<std::string> lines;
-    boost::split(lines, level, boost::algorithm::is_any_of("|"), boost::token_compress_on);
+    std::vector<std::string> lineChars;
+    boost::trim(data);
+    boost::split(lines, data, boost::algorithm::is_any_of("\n"), boost::token_compress_on);
     float x = 0;
     float y = 0;
+     
     for (std::string line : lines) {
         x = 0;
-        for (char c : line) {
-            if (c == 'G') {
+        boost::split(lineChars, line, boost::algorithm::is_any_of(","), boost::token_compress_on);
+        for (auto c : lineChars) {
+            if (c == "9") {
                 gameState->objects->background.push_back(
-                    gameState->objects->fabric->createGround(x, y, 50, 50)
-                );
-            } else if (c == 'P') {
-                Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
-                shooter->main = true;
-                gameState->objects->player = shooter;
-                gameState->objects->playable.push_back(shooter);
-            } else if (c == 'S') {
-                Shooter* shooter = gameState->objects->fabric->createShooter(x, y, 50, 50);
-                gameState->objects->playable.push_back(shooter);
-            } else if (c == 'C') {
-                gameState->objects->crystals.push_back(
-                    gameState->objects->fabric->createCrystal(x, y, 50, 50)
-                );
-            }
+                        gameState->objects->fabric->createGround(x, y, 50, 50)
+                        );
+            } 
             x += 50;
         }
         y += 50;
+    }
+}
+
+void Scene::generatePlayable(tinyxml2::XMLElement* map)
+{
+    std::string type;
+    for (tinyxml2::XMLElement* objectgroup = map->FirstChildElement("objectgroup");
+            objectgroup != NULL;
+            objectgroup = objectgroup->NextSiblingElement()) {
+        
+        for (tinyxml2::XMLElement* object = objectgroup->FirstChildElement("object");
+                object;
+                object = object->NextSiblingElement()
+                ) {
+            type = object->Attribute("type");
+
+            if (type == "Shooter") {
+                Shooter* shooter = gameState->objects->fabric->createShooter(atoi(object->Attribute("x")), atoi(object->Attribute("y")), 50, 50);
+                std::string name = object->Attribute("name");
+                if (name == "Player") {
+                    shooter->setMain(true);
+                    gameState->objects->player = shooter;
+                }
+
+                gameState->objects->playable.push_back(shooter);
+            } else if (type == "Crystal") {
+                gameState->objects->crystals.push_back(
+                        gameState->objects->fabric->createCrystal(atoi(object->Attribute("x")), atoi(object->Attribute("y")), 50, 50)
+                        );
+            } else if (type == "Border") {
+                gameState->objects->borders.insert({atoi(object->Attribute("x")),
+                    gameState->objects->fabric->createBorder(
+                        atoi(object->Attribute("x")), 
+                        atoi(object->Attribute("y")), 
+                        atoi(object->Attribute("width")), 
+                        atoi(object->Attribute("height"))
+                        )}
+                );
+            }
+        }
     }
 }

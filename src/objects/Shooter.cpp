@@ -1,7 +1,9 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include <SFML/Graphics.hpp>
 #include "Shooter.h"
+#include "Crystal.h"
 #include "Bullet.h"
 #include "../CObject.h"
 #include "../Window.h"
@@ -29,41 +31,37 @@ Shooter::~Shooter()
 
 bool Shooter::move(float x, float y)
 {
-    //TODO: very heavy and slow method. Need to make it faster.
-    if (!collideObjectAfterMove(x, y) && !this->y + y < 600) {
-        collectCollidedCrystal(x, y);
+    bool isMapEnd = this->x+x <= 0 || this->y + y <= 0;
+    if (!isMapEnd && !collideObjectAfterMove(x, y) == true) {
         this->x += x;
         this->y += y;
-        this->sprite->setPosition(this->x, this->y);
+        this->shooterSprite->setPosition(this->x, this->y);
+        this->explosionSprite->setPosition(this->x, this->y);
+        collectCollidedCrystal();
         
-        if (y != 0.f) {
-            if (y < 0) {
-                jumping = true;
-                falling = false;
-            } else {
-                jumping = false;
-                falling = true;
-            }
-            moving = false;
-        } else if (x < 0) {
-            direction = "left";
-            moving = true;
-        } else if (x > 0) {
-            direction = "right";
-            moving = true;
-        }
-
         return true;
-    } 
-    if (x != 0.f) {
-        moving = false;
-    }
-    if (y < 0) {
-        jumping = false;
-    } else if (y > 0) {
-        falling = false;
+    } else if (y == 0.f) {
+        velocity = 0;
     }
     
+    return false;
+}
+
+bool Shooter::collectCollidedCrystal()
+{
+    if (isPlayer()) {
+        for (unsigned i = 0; i < go->crystals.size(); i++) {
+            Crystal* obj = static_cast<Crystal*> (go->crystals[i]);
+
+            if (collideRect(obj)) {
+                crystals++;
+                crystalSound->play();
+                go->crystals.erase(go->crystals.begin() + i);
+
+                return true;
+            }
+        }   
+    }
     return false;
 }
 
@@ -78,64 +76,97 @@ bool Shooter::move(std::string direction)
             velocity += acceleration;
         }
     }
+    setDirection(direction);
+
+    moving = move(velocity, 0.f);
     
-    return move(velocity, 0.f);
+    return moving;
+}
+
+void Shooter::jump()
+{
+    if (velocityHorizontal > -maxVelocity) {
+        velocityHorizontal -= acceleration;
+    }
+
+    if (currentJumpHeight == 0.f) {
+        jumpSound->play();
+        currentJumpHeight = this->y - 125.f;
+    }
+
+    if (this->y > currentJumpHeight && move(0.f, velocityHorizontal)) {
+        jumping = true;
+    } else {
+        stopJumping();
+    }
 }
 
 sf::Drawable* Shooter::getDrawForm()
 {
-    return sprite;
+    if (!dead) {
+        return shooterSprite;
+    } else {
+        return explosionSprite;
+    }
 }
 
 void Shooter::draw(Window* window, float dt)
 {
-    // TODO: Need to refactor and simplify
+    bool showNextFrame = elapsedTime >= animationTime;
     if (!dead) {
-        if (moving && !jumping && !falling && elapsedTime >= animationTime) {
-            std::vector<int> current = this->runSprites[direction][currentFrame];
-            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
-            currentFrame++;
-            if (currentFrame >= this->runSprites[direction].size()) {
-                currentFrame = 0;
-            }
-            elapsedTime = 0.0;
-        } else if ((falling || jumping) && !moving) {
-            std::vector<int> current = this->jumpSprites[direction];
-            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
+        if (falling || jumping) {
+            shooterSprite->setTextureRect(this->jumpSprites[direction]);
+        } else if (moving && showNextFrame) {
+            animateRun();
         } else if (!moving && !falling && !jumping) {
-            std::vector<int> current = this->noMotionSprites[direction];
-            sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
+            shooterSprite->setTextureRect(this->noMotionSprites[direction]);
         }
-    }  else if (elapsedTime >= animationTime){
-        sprite = explosionSprite;
-        sprite->setScale(0.5f, 0.5f);
-        std::vector<int> current = this->explosionSprites[currentFrame];
-        sprite->setTextureRect(sf::IntRect(current[0], current[1], current[2], current[3]));
-        currentFrame++;
-        if (currentFrame >= this->explosionSprites.size()) {
-            currentFrame = 0;
-            mustBeDeleted = true;
-        }
-        
-        elapsedTime = 0.0;      
+    }  else if (showNextFrame){
+        animateExplosion();
     }
     
     elapsedTime += dt;
-   
-    //TODO: in theory fireTime should not be increased in the function. 
     fireTime += dt;
     gravitationalTime += dt;
     
-    if (health > 0 && !main) {
-        for (int x = this->x, i = 0; i < health; i++) {
-            heartSprite->setPosition(x, y - 25);
-            window->draw(*heartSprite);
-            x += 20;
-        }  
+    bool aliveNPC = health > 0 && !isPlayer();
+    if (aliveNPC) {
+        drawHearts(window);
     }
     
     this->CObject::draw(window, dt);
     
+}
+
+void Shooter::animateRun()
+{
+    shooterSprite->setTextureRect(this->runSprites[direction][currentFrame]);
+    currentFrame++;
+    if (currentFrame >= this->runSprites[direction].size()) {
+        currentFrame = 0;
+    }
+    elapsedTime = 0.0;
+}
+
+void Shooter::animateExplosion()
+{
+    explosionSprite->setTextureRect(this->explosionSprites[currentFrame]);
+    currentFrame++;
+    if (currentFrame >= this->explosionSprites.size()) {
+        currentFrame = 0;
+        mustBeDeleted = true;
+    }
+
+    elapsedTime = 0.0;
+}
+
+void Shooter::drawHearts(Window* window)
+{
+    for (int x = this->x, i = 0; i < health; i++) {
+        heartSprite->setPosition(x, y - 25);
+        window->draw(*heartSprite);
+        x += 20;
+    }
 }
 
 void Shooter::fire()
@@ -143,43 +174,55 @@ void Shooter::fire()
     if (fireTime >= 0.5f) {
         shotgunSound->play();
         fireTime = 0.f;
-        // TODO: dry
+        Bullet* bullet;
+        std::vector<float> coords;
         if (direction == "right") {
-            std::vector<float> coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
-            Bullet* bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
-            bullet->setDirection("right");
-            go->bullets.push_back(bullet);
+            coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
+            bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
         } else {
-            std::vector<float> coords = {getX() - 20.f, getY() + 20.f, 10, 10};
-            Bullet* bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
-            bullet->setDirection("left");
-            go->bullets.push_back(bullet);
+            coords = {getX() - 20.f, getY() + 20.f, 10, 10};
+            bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
+        }
+        bullet->setDirection(direction); 
+        go->bullets.push_back(bullet);
+    }
+}
+
+void Shooter::think()
+{
+    if (!isPlayer() && !isDead()) {
+        if (isMoveRight) {
+            isMoveRight = move("right");
+            if (isMoveRight) {
+                isMoveRight = !isNextFalling("right");
+            }
+            fire();
+            isMoveLeft = !isMoveRight;
+        } else if (isMoveLeft) {
+            isMoveLeft = move("left");
+            if (isMoveLeft) {
+                isMoveLeft = !isNextFalling("left");
+            }
+            fire();
+            isMoveRight = !isMoveLeft;
         }
     }
 }
 
-void Shooter::jump()
+bool Shooter::isNextFalling(std::string direction)
 {
-    if (!isFalling()) {
-        if (getVelocityHorizontal() > -getMaxVelocity()) {
-            velocityHorizontal -= acceleration;
-        }
-
-        if (currentJumpHeight == 0.f) {
-            jumpSound->play();
-            currentJumpHeight = this->y - 125.f;
-        }
-        
-        jumping = true;
-
-        if (this->y > currentJumpHeight) {
-            move(0.f, velocityHorizontal);
-        } else {
-            falling = true;
-            jumping = false;
-            currentJumpHeight = 0.f;
-        }
+    int offsetX = 0;
+    if (direction == "left") {
+        offsetX = -25;
+    } else if (direction == "right") {
+        offsetX = 25;
     }
+    Shooter fake = Shooter(this->go, getX()+offsetX, getY(), getWidth(), getHeight());
+    if (!fake.collideObjectAfterMove(0.f, 5.f)) {
+        velocity = 0;
+        return true;
+    } 
+    return false;
 }
 
 void Shooter::stopJumping()
@@ -196,40 +239,18 @@ void Shooter::stopMoving()
 
 void Shooter::gravitate()
 {
-    float y = 0.f;
-    y += gravitationalTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f);
-
-    if (move(0.f, y) || move(0.f, 2.f)) {
+    float y = std::ceil(
+            gravitationalTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f)
+            );
+    
+    falling = y > 0 && move(0.f, y);
+    if (falling) {
         gravitationalVelocity += gravitationalTime * gravitationalAcceleration;
     } else {
         currentJumpHeight = 0.0;
         gravitationalVelocity = 0.0;
         gravitationalTime = 0.0;
     }
-}
-
-bool Shooter::collectCollidedCrystal(float x, float y)
-{
-    for (unsigned i = 0; i < go->crystals.size(); i++) {
-        auto* obj = go->crystals[i];
-        CObject* collider = new CObject(
-                getX() + x,
-                getY() + y,
-                getWidth(),
-                getHeight()
-                );
-        if (collider->collideRect(obj)) {
-            crystals++;
-            crystalSound->play();
-            go->crystals.erase(go->crystals.begin() + i);
-            delete collider;
-            return true;
-        }
-
-        delete collider;
-    }
-
-    return false;
 }
 
 
@@ -248,7 +269,7 @@ bool Shooter::isDead()
     return dead;
 }
 
-bool Shooter::isNeedToDie()
+bool Shooter::remove()
 {
     return mustBeDeleted;
 }
@@ -298,11 +319,29 @@ float Shooter::getCurrentJumpHeight()
     return currentJumpHeight;
 }
 
+void Shooter::setMain(bool main)
+{
+    this->main = main;
+}
 
+void Shooter::setDead(bool dead)
+{
+    this->dead = dead;
+}
+
+void Shooter::setDirection(std::string direction)
+{
+    this->direction = direction;
+}
+
+void Shooter::decreaseHealth()
+{
+    health--;
+}
 
 void Shooter::setMainSprite(sf::Sprite* mainSprite)
 {
-    sprite = mainSprite;
+    shooterSprite = mainSprite;
 }
 
 void Shooter::setHeartSprite(sf::Sprite* heartSprite)
@@ -314,6 +353,8 @@ void Shooter::setHeartSprite(sf::Sprite* heartSprite)
 void Shooter::setExplosionSprite(sf::Sprite* explosionSprite)
 {
     this->explosionSprite = explosionSprite;
+    this->explosionSprite->setScale(0.5f, 0.5f);
+    explosionSprite->setTextureRect(this->explosionSprites[0]);
 }
 
 void Shooter::setJumpSound(sf::Sound* jumpSound)

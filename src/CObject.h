@@ -55,7 +55,7 @@ public:
      * @param y
      * @return 
      */
-    bool collideObjectAfterMove(float x, float y);
+    virtual bool collideObjectAfterMove(float x, float y);
     
     /**
      * Get border points of the rectangle of the object

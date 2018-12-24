@@ -53,7 +53,9 @@ void Event::handleMainKeys(sf::Event& event)
 {
     if (event.key.code == sf::Keyboard::Escape) {
         app->close();
-    } 
+    } else if (event.key.code == sf::Keyboard::F) {
+        app->window->changeFullScreenMode();
+    }
 }
 
 void Event::handleArrowKeysReleased(sf::Event& event)
@@ -129,8 +131,10 @@ void Event::handleRealTimeKeyboardState()
 
 void Event::handleArrowKeys()
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {       
-        player->jump();
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        if (!player->isFalling()) {
+            player->jump();
+        }
     } 
     
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {

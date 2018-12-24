@@ -17,13 +17,13 @@ GameState::GameState(Application* app)
 {
     this->app = app;
     objects = new GameObjects(this);
-    backgroundLoop = objects->fabric->getBackgroundSound();
+    backgroundMusic = objects->fabric->getBackgroundSound();
 }
 
 GameState::~GameState()
 {
     objects->reset();
-    delete backgroundLoop;
+    delete backgroundMusic;
     delete objects;
 }
 
@@ -50,8 +50,12 @@ void GameState::updateBulletsState()
 
 void GameState::causeGravity()
 {
-    if (!objects->player->isJumping()) {
-        objects->player->gravitate();
+    for (auto* obj: objects->playable) {
+        Shooter* shooter = static_cast<Shooter*>(obj);
+        if (!shooter->isJumping()) {
+            shooter->think();
+            shooter->gravitate();
+        } 
     }
 }
 
@@ -61,22 +65,22 @@ void GameState::resetElapsedTime()
     elapsedTime = elapsed.asMilliseconds() / 1000.f;
 }
 
-void GameState::playBackgroundSound()
+void GameState::playBackgroundMusic()
 {
-    backgroundLoop->setLoop(true);
-    backgroundLoop->play();
+    backgroundMusic->setLoop(true);
+    backgroundMusic->play();
 }
 
-void GameState::stopBackgroundSound()
+void GameState::stopBackgroundMusic()
 {
-    backgroundLoop->setLoop(false);
-    backgroundLoop->stop();
+    backgroundMusic->setLoop(false);
+    backgroundMusic->stop();
 }
 
 void GameState::startNewGame()
 {
     isGameStarted = true;
-    playBackgroundSound();
+    playBackgroundMusic();
     app->scene->initNewGame();
 }
 

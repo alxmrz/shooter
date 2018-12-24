@@ -1,6 +1,6 @@
 CC=g++ 
 CFLAGS=-c -Wall -g -std=c++11
-LDFLAGS= -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+LDFLAGS= -L/home/alexandr/libraries/SFML-2.5.1/lib/ -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 SOURCES= \
 main.cpp \
@@ -19,8 +19,9 @@ src/objects/Shooter.cpp \
 src/objects/Bullet.cpp \
 src/ui/Button.cpp \
 src/ui/Text.cpp \
+include/tinyxml/tinyxml2.cpp
 
-DIRS = build build/src build/src/objects build/src/ui
+DIRS = build build/src build/src/objects build/src/ui build/include/tinyxml
 
 
 OBJECTS=$(SOURCES:.cpp=.o)
@@ -42,7 +43,7 @@ build/%.o : %.cpp
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o ./run build/*.o build/src/*.o build/src/objects/*.o build/src/ui/*.o
+	rm -rf *.o ./run build/*.o build/src/*.o build/src/objects/*.o build/src/ui/*.o build/include/tinyxml/*.o
 	
 ex:
 	echo $(DIR_OBJECTS)
