@@ -2,7 +2,7 @@
 
 This is not a real game, not now any way. This is just a prototype.
 
-![Game process gif](https://media.giphy.com/media/fMA8CGD5ixj8rrX1vZ/giphy.gif)  
+<img src="/resources/images/shooter_processv03.gif?raw=true" width=300>
 
 For linux users:  
 
