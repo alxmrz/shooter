@@ -2,7 +2,7 @@
 
 This is not a real game, not now any way. This is just a prototype.
 
-![Game process gif](https://media.giphy.com/media/RkLhvy1vySOMLEqSub/giphy.gif)
+![Game process gif](https://media.giphy.com/media/fMA8CGD5ixj8rrX1vZ/giphy.gif)  
 
 For linux users:  
 
