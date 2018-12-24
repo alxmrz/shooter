@@ -354,6 +354,7 @@ void Shooter::setExplosionSprite(sf::Sprite* explosionSprite)
 {
     this->explosionSprite = explosionSprite;
     this->explosionSprite->setScale(0.5f, 0.5f);
+    explosionSprite->setTextureRect(this->explosionSprites[0]);
 }
 
 void Shooter::setJumpSound(sf::Sound* jumpSound)

@@ -79,7 +79,10 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
     for (unsigned i = 0; i < go->playable.size(); i++) {
         Shooter* shooter = static_cast<Shooter*>(go->playable[i]); 
 
-        if ((shooter->isPlayer() || this->shooter->isPlayer()) && collider.collideRect(shooter)) { 
+        /** if the player is shot down or the player did the shot */
+        bool playerEnvolved = shooter->isPlayer() || this->shooter->isPlayer();
+        
+        if (playerEnvolved && collider.collideRect(shooter)) { 
             explosionSound->play();
 
             shooter->decreaseHealth();
