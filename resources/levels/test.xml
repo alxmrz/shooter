@@ -26,7 +26,7 @@
 </data>
  </layer>
  <objectgroup name="Shooters">
-  <object id="1" name="Player" type="Shooter" x="50" y="900" width="50.25" height="50"/>
+  <object id="1" name="Player" type="Shooter" x="2069" y="893.333" width="50.25" height="50"/>
   <object id="2" name="Shooter" type="Shooter" x="150.875" y="899.5" width="50.25" height="50"/>
   <object id="3" name="Shooter" type="Shooter" x="300.375" y="900" width="50.25" height="50"/>
   <object id="4" name="Shooter" type="Shooter" x="500.875" y="699.5" width="50.25" height="50"/>
@@ -34,7 +34,7 @@
   <object id="6" name="Shooter" type="Shooter" x="1300.88" y="798" width="50.25" height="50"/>
   <object id="7" name="Shooter" type="Shooter" x="1898.88" y="546" width="50.25" height="50"/>
   <object id="8" name="Shooter" type="Shooter" x="2252.88" y="899" width="50.25" height="50"/>
-  <object id="9" name="Shooter" type="Shooter" x="2393.88" y="905" width="50.25" height="50"/>
+  <object id="9" name="Shooter" type="Shooter" x="2399.88" y="898" width="50.25" height="50"/>
   <object id="10" name="Shooter" type="Shooter" x="2950.88" y="898" width="50.25" height="50"/>
   <object id="11" name="Shooter" type="Shooter" x="3301.88" y="898" width="50.25" height="50"/>
   <object id="12" name="Shooter" type="Shooter" x="3550.88" y="699" width="50.25" height="50"/>

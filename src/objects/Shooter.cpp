@@ -32,7 +32,7 @@ Shooter::~Shooter()
 bool Shooter::move(float x, float y)
 {
     bool isMapEnd = this->x+x <= 0 || this->y + y <= 0;
-    if (!isMapEnd && !collideObjectAfterMove(x, y)) {
+    if (!isMapEnd && !collideObjectAfterMove(x, y) == true) {
         this->x += x;
         this->y += y;
         this->shooterSprite->setPosition(this->x, this->y);
@@ -40,25 +40,28 @@ bool Shooter::move(float x, float y)
         collectCollidedCrystal();
         
         return true;
-    } 
+    } else if (y == 0.f) {
+        velocity = 0;
+    }
     
     return false;
 }
 
 bool Shooter::collectCollidedCrystal()
 {
-    for (unsigned i = 0; i < go->crystals.size(); i++) {
-        Crystal* obj = static_cast<Crystal*>(go->crystals[i]);
+    if (isPlayer()) {
+        for (unsigned i = 0; i < go->crystals.size(); i++) {
+            Crystal* obj = static_cast<Crystal*> (go->crystals[i]);
 
-        if (collideRect(obj)) {
-            crystals++;
-            crystalSound->play();
-            go->crystals.erase(go->crystals.begin() + i);
+            if (collideRect(obj)) {
+                crystals++;
+                crystalSound->play();
+                go->crystals.erase(go->crystals.begin() + i);
 
-            return true;
-        }
+                return true;
+            }
+        }   
     }
-
     return false;
 }
 
@@ -175,13 +178,28 @@ void Shooter::fire()
         std::vector<float> coords;
         if (direction == "right") {
             coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
-            bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
+            bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
         } else {
             coords = {getX() - 20.f, getY() + 20.f, 10, 10};
-            bullet = go->fabric->createBullet(coords[0], coords[1], coords[2], coords[3]);
+            bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
         }
         bullet->setDirection(direction); 
         go->bullets.push_back(bullet);
+    }
+}
+
+void Shooter::think()
+{
+    if (!isPlayer()) {
+        if (isMoveRight) {
+            isMoveRight = move("right");
+            //fire();
+            isMoveLeft = !isMoveRight;
+        } else if (isMoveLeft) {
+            isMoveLeft = move("left");
+            //fire();
+            isMoveRight = !isMoveLeft;
+        }
     }
 }
 
