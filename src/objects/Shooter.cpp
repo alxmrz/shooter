@@ -190,17 +190,39 @@ void Shooter::fire()
 
 void Shooter::think()
 {
-    if (!isPlayer()) {
+    if (!isPlayer() && !isDead()) {
         if (isMoveRight) {
             isMoveRight = move("right");
-            //fire();
+            if (isMoveRight) {
+                isMoveRight = !isNextFalling("right");
+            }
+            fire();
             isMoveLeft = !isMoveRight;
         } else if (isMoveLeft) {
             isMoveLeft = move("left");
-            //fire();
+            if (isMoveLeft) {
+                isMoveLeft = !isNextFalling("left");
+            }
+            fire();
             isMoveRight = !isMoveLeft;
         }
     }
+}
+
+bool Shooter::isNextFalling(std::string direction)
+{
+    int offsetX = 0;
+    if (direction == "left") {
+        offsetX = -25;
+    } else if (direction == "right") {
+        offsetX = 25;
+    }
+    Shooter fake = Shooter(this->go, getX()+offsetX, getY(), getWidth(), getHeight());
+    if (!fake.collideObjectAfterMove(0.f, 5.f)) {
+        velocity = 0;
+        return true;
+    } 
+    return false;
 }
 
 void Shooter::stopJumping()

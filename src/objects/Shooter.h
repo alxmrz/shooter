@@ -227,6 +227,7 @@ private:
      */
     bool collectCollidedCrystal();
     
+    bool isNextFalling(std::string direction);
     void animateRun();
     void animateExplosion();
     void drawHearts(Window* window);
