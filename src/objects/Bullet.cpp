@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "Bullet.h"
-#include "Shooter.h"
+#include "Unit.h"
 #include "../GameObjects.h"
 
 Bullet::Bullet()
@@ -19,7 +19,7 @@ Bullet::~Bullet()
     delete sprite;
 }
 
-Bullet::Bullet(Shooter* shooter, GameObjects* go, int x, int y, int width, int height)
+Bullet::Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int height)
 : CObject(go, x, y, width, height)
 {
     sprite = new sf::Sprite();
@@ -77,7 +77,7 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
         getHeight()
         );
     for (unsigned i = 0; i < go->playable.size(); i++) {
-        Shooter* shooter = static_cast<Shooter*>(go->playable[i]); 
+        Unit* shooter = static_cast<Unit*>(go->playable[i]); 
 
         /** if the player is shot down or the player did the shot */
         bool playerEnvolved = shooter->isPlayer() || this->shooter->isPlayer();

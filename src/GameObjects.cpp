@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "GameObjects.h"
 #include "CObject.h"
-#include "objects/Shooter.h"
+#include "objects/Unit.h"
 #include "objects/Ground.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
@@ -78,7 +78,7 @@ void GameObjects::draw(Window* window, float dt)
 
         for (unsigned i = 0; i < playable.size(); i++) {
             playable[i]->draw(window, dt);
-            if (((Shooter*)playable[i])->remove()) {
+            if (((Unit*)playable[i])->remove()) {
                 playable.erase(playable.begin() + i);
             }
         }

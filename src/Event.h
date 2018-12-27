@@ -5,7 +5,7 @@
 
 class Application;
 class GameState;
-class Shooter;
+class Unit;
 
 class Event {
 public:
@@ -20,7 +20,7 @@ public:
 private:
     Application* app;
     GameState* gameState;
-    Shooter* player;
+    Unit* player;
 
     /**
      * Handle events of usual keys

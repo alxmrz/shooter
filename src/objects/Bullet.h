@@ -10,12 +10,12 @@ namespace sf {
     class Drawable;
 }
 class GameObjects;
-class Shooter;
+class Unit;
 
 class Bullet : public CObject {
 public:
     Bullet();
-    Bullet(Shooter* shooter, GameObjects* go, int x, int y, int width, int height);
+    Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int height);
     Bullet(const Bullet& orig);
     virtual ~Bullet();
 
@@ -48,7 +48,7 @@ public:
     void setMainTexture(sf::Texture* texture);
 private:
     /** Shooter, that did the bullet */
-    Shooter* shooter;
+    Unit* shooter;
     /**  Sprite for drawing */
     sf::Sprite* sprite;
     

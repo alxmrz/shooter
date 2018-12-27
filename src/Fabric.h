@@ -8,6 +8,7 @@
 class Bullet;
 class GameObjects;
 class Resources;
+class Unit;
 class Shooter;
 class Ground;
 class Crystal;

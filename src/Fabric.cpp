@@ -5,6 +5,7 @@
 #include "GameObjects.h"
 #include "Resources.h"
 #include "objects/Bullet.h"
+#include "objects/Unit.h"
 #include "objects/Shooter.h"
 #include "objects/Ground.h"
 #include "objects/Crystal.h"
