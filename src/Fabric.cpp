@@ -6,6 +6,7 @@
 #include "Resources.h"
 #include "objects/Bullet.h"
 #include "objects/Unit.h"
+#include "objects/Shooter.h"
 #include "objects/Ground.h"
 #include "objects/Crystal.h"
 #include "ui/Button.h"
@@ -27,7 +28,7 @@ Fabric::~Fabric()
 {
 }
 
-Bullet* Fabric::createBullet(Unit* shooter, float x, float y, int width, int height)
+Bullet* Fabric::createBullet(Shooter* shooter, float x, float y, int width, int height)
 {
     Bullet* bullet = new Bullet(shooter, go, x, y, width, height);
     bullet->setMainTexture(resources->getTexture("bullet"));
@@ -35,9 +36,9 @@ Bullet* Fabric::createBullet(Unit* shooter, float x, float y, int width, int hei
     return bullet;
 }
 
-Unit* Fabric::createShooter(float x, float y, int width, int height)
+Shooter* Fabric::createShooter(float x, float y, int width, int height)
 {
-    Unit* shooter = new Unit(go, x, y, width, height);
+    Shooter* shooter = new Shooter(go, x, y, width, height);
     
     sf::Sprite* heartSprite = createSprite("heart", x, y);
     heartSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));

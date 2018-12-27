@@ -125,7 +125,7 @@ void Event::handleRealTimeKeyboardState()
 {
     handleArrowKeys();
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        player->fire();
+        player->attack();
     } 
 }
 

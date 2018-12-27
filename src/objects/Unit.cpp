@@ -47,91 +47,20 @@ bool Unit::collectCollidedCrystal()
     }
     return false;
 }
+void Unit::attack()
+{
+}
+
+void Unit::shiftSpritePositions()
+{
+}
 
 sf::Drawable* Unit::getDrawForm()
 {
     if (!dead) {
-        return shooterSprite;
+        return mainSprite;
     } else {
         return explosionSprite;
-    }
-}
-
-void Unit::draw(Window* window, float dt)
-{
-    bool showNextFrame = elapsedTime >= animationTime;
-    if (!dead) {
-        if (falling || jumping) {
-            shooterSprite->setTextureRect(this->jumpSprites[direction]);
-        } else if (moving && showNextFrame) {
-            animateRun();
-        } else if (!moving && !falling && !jumping) {
-            shooterSprite->setTextureRect(this->noMotionSprites[direction]);
-        }
-    }  else if (showNextFrame){
-        animateExplosion();
-    }
-    
-    elapsedTime += dt;
-    fireTime += dt;
-    gravitationalTime += dt;
-    
-    bool aliveNPC = health > 0 && !isPlayer();
-    if (aliveNPC) {
-        drawHearts(window);
-    }
-    
-    this->CObject::draw(window, dt);
-    
-}
-
-void Unit::animateRun()
-{
-    shooterSprite->setTextureRect(this->runSprites[direction][currentFrame]);
-    currentFrame++;
-    if (currentFrame >= this->runSprites[direction].size()) {
-        currentFrame = 0;
-    }
-    elapsedTime = 0.0;
-}
-
-void Unit::animateExplosion()
-{
-    explosionSprite->setTextureRect(this->explosionSprites[currentFrame]);
-    currentFrame++;
-    if (currentFrame >= this->explosionSprites.size()) {
-        currentFrame = 0;
-        mustBeDeleted = true;
-    }
-
-    elapsedTime = 0.0;
-}
-
-void Unit::drawHearts(Window* window)
-{
-    for (int x = this->x, i = 0; i < health; i++) {
-        heartSprite->setPosition(x, y - 25);
-        window->draw(*heartSprite);
-        x += 20;
-    }
-}
-
-void Unit::fire()
-{
-    if (fireTime >= 0.5f) {
-        shotgunSound->play();
-        fireTime = 0.f;
-        Bullet* bullet;
-        std::vector<float> coords;
-        if (direction == "right") {
-            coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
-            bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
-        } else {
-            coords = {getX() - 20.f, getY() + 20.f, 10, 10};
-            bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
-        }
-        bullet->setDirection(direction); 
-        go->bullets.push_back(bullet);
     }
 }
 
@@ -143,14 +72,14 @@ void Unit::think()
             if (isMoveRight) {
                 isMoveRight = !isNextFalling("right");
             }
-            fire();
+            attack();
             isMoveLeft = !isMoveRight;
         } else if (isMoveLeft) {
             isMoveLeft = move("left");
             if (isMoveLeft) {
                 isMoveLeft = !isNextFalling("left");
             }
-            fire();
+            attack();
             isMoveRight = !isMoveLeft;
         }
     }
@@ -182,12 +111,6 @@ bool Unit::move(float x, float y)
     }
     
     return false;
-}
-
-void Unit::shiftSpritePositions()
-{
-    this->shooterSprite->setPosition(this->x, this->y);
-    this->explosionSprite->setPosition(this->x, this->y);
 }
 
 void Unit::jump()
@@ -293,20 +216,12 @@ void Unit::decreaseHealth()
 
 void Unit::setMainSprite(sf::Sprite* mainSprite)
 {
-    shooterSprite = mainSprite;
+    this->mainSprite = mainSprite;
 }
 
 void Unit::setHeartSprite(sf::Sprite* heartSprite)
 {
     this->heartSprite = heartSprite;
-}
-
-
-void Unit::setExplosionSprite(sf::Sprite* explosionSprite)
-{
-    this->explosionSprite = explosionSprite;
-    this->explosionSprite->setScale(0.5f, 0.5f);
-    explosionSprite->setTextureRect(this->explosionSprites[0]);
 }
 
 void Unit::setJumpSound(sf::Sound* jumpSound)

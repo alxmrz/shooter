@@ -10,7 +10,7 @@
 #include "Scene.h"
 #include "objects/Ground.h"
 #include "objects/Crystal.h"
-#include "objects/Unit.h"
+#include "objects/Shooter.h"
 #include "ui/Button.h"
 #include "Fabric.h"
 
@@ -99,7 +99,7 @@ void Scene::generatePlayable(tinyxml2::XMLElement* map)
             type = object->Attribute("type");
 
             if (type == "Shooter") {
-                Unit* shooter = gameState->objects->fabric->createShooter(atoi(object->Attribute("x")), atoi(object->Attribute("y")), 50, 50);
+                Shooter* shooter = gameState->objects->fabric->createShooter(atoi(object->Attribute("x")), atoi(object->Attribute("y")), 50, 50);
                 std::string name = object->Attribute("name");
                 if (name == "Player") {
                     shooter->setMain(true);
