@@ -5,6 +5,7 @@
 #include "Shooter.h"
 #include "Crystal.h"
 #include "Bullet.h"
+#include "Movable.h"
 #include "../CObject.h"
 #include "../Window.h"
 #include "../GameObjects.h"
@@ -20,31 +21,13 @@ Shooter::Shooter(const Shooter& orig)
 }
 
 Shooter::Shooter(GameObjects* go, float x, float y, int width, int height) 
-: CObject(go, x, y, width, height)
+: Movable(go, x, y, width, height)
 {
     
 }
 
 Shooter::~Shooter()
 {
-}
-
-bool Shooter::move(float x, float y)
-{
-    bool isMapEnd = this->x+x <= 0 || this->y + y <= 0;
-    if (!isMapEnd && !collideObjectAfterMove(x, y) == true) {
-        this->x += x;
-        this->y += y;
-        this->shooterSprite->setPosition(this->x, this->y);
-        this->explosionSprite->setPosition(this->x, this->y);
-        collectCollidedCrystal();
-        
-        return true;
-    } else if (y == 0.f) {
-        velocity = 0;
-    }
-    
-    return false;
 }
 
 bool Shooter::collectCollidedCrystal()
@@ -63,42 +46,6 @@ bool Shooter::collectCollidedCrystal()
         }   
     }
     return false;
-}
-
-bool Shooter::move(std::string direction) 
-{
-    if (direction == "left") {
-        if (velocity > -maxVelocity) {
-            velocity -= acceleration;
-        }
-    } else if (direction == "right") {
-        if (velocity < maxVelocity) {
-            velocity += acceleration;
-        }
-    }
-    setDirection(direction);
-
-    moving = move(velocity, 0.f);
-    
-    return moving;
-}
-
-void Shooter::jump()
-{
-    if (velocityHorizontal > -maxVelocity) {
-        velocityHorizontal -= acceleration;
-    }
-
-    if (currentJumpHeight == 0.f) {
-        jumpSound->play();
-        currentJumpHeight = this->y - 125.f;
-    }
-
-    if (this->y > currentJumpHeight && move(0.f, velocityHorizontal)) {
-        jumping = true;
-    } else {
-        stopJumping();
-    }
 }
 
 sf::Drawable* Shooter::getDrawForm()
@@ -225,16 +172,40 @@ bool Shooter::isNextFalling(std::string direction)
     return false;
 }
 
-void Shooter::stopJumping()
+bool Shooter::move(float x, float y) 
 {
-    jumping = false;
-    velocityHorizontal = 0.f;
+    if (Movable::move(x, y)) {
+        shiftSpritePositions();
+        collectCollidedCrystal();
+        
+        return true;
+    }
+    
+    return false;
 }
 
-void Shooter::stopMoving()
+void Shooter::shiftSpritePositions()
 {
-    moving = false;
-    velocity = 0.f;
+    this->shooterSprite->setPosition(this->x, this->y);
+    this->explosionSprite->setPosition(this->x, this->y);
+}
+
+void Shooter::jump()
+{
+    if (velocityHorizontal > -maxVelocity) {
+        velocityHorizontal -= acceleration;
+    }
+
+    if (currentJumpHeight == 0.f) {
+        jumpSound->play();
+        currentJumpHeight = this->y - 125.f;
+    }
+
+    if (this->y > currentJumpHeight && move(0.f, velocityHorizontal)) {
+        jumping = true;
+    } else {
+        stopJumping();
+    }
 }
 
 void Shooter::gravitate()
@@ -253,16 +224,22 @@ void Shooter::gravitate()
     }
 }
 
-
-bool Shooter::isMoving()
-{
-    return moving;
-}
-
 bool Shooter::isJumping()
 {
     return jumping;
 }
+
+bool Shooter::isFalling()
+{
+    return falling;
+}
+
+void Shooter::stopJumping()
+{
+    jumping = false;
+    velocityHorizontal = 0.f;
+}
+
 
 bool Shooter::isDead()
 {
@@ -272,11 +249,6 @@ bool Shooter::isDead()
 bool Shooter::remove()
 {
     return mustBeDeleted;
-}
-
-bool Shooter::isFalling()
-{
-    return falling;
 }
 
 bool Shooter::isPlayer()
@@ -294,24 +266,9 @@ int Shooter::getCrystals()
     return crystals;
 }
 
-float Shooter::getAcceleration()
-{
-    return acceleration;
-}
-
-float Shooter::getVelocity()
-{
-    return velocity;
-}
-
 float Shooter::getVelocityHorizontal()
 {
     return velocityHorizontal;
-}
-
-float Shooter::getMaxVelocity()
-{
-    return maxVelocity;
 }
 
 float Shooter::getCurrentJumpHeight()
@@ -327,11 +284,6 @@ void Shooter::setMain(bool main)
 void Shooter::setDead(bool dead)
 {
     this->dead = dead;
-}
-
-void Shooter::setDirection(std::string direction)
-{
-    this->direction = direction;
 }
 
 void Shooter::decreaseHealth()

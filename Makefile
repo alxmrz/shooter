@@ -17,6 +17,7 @@ src/objects/Ground.cpp \
 src/objects/Crystal.cpp \
 src/objects/Shooter.cpp \
 src/objects/Bullet.cpp \
+src/objects/Movable.cpp \
 src/ui/Button.cpp \
 src/ui/Text.cpp \
 include/tinyxml/tinyxml2.cpp

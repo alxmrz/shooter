@@ -6,14 +6,14 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-#include "../CObject.h"
 #include "../GameObjects.h"
+#include "Movable.h"
 
 struct GameObjects;
 class Window;
 class Text;
 
-class Shooter : public CObject {
+class Shooter : public Movable {
 public:
     Shooter();
     Shooter(GameObjects* go, float x, float y, int width, int height);
@@ -37,27 +37,26 @@ public:
     void draw(Window* window, float dt) override;
     
     /**
-     * Shift object position on x and y
-     * 
-     * @param x
-     * @param y
-     * @return is object moved
+     * Make a fire (it creates Bullet instance)
      */
-    bool move(float x, float y);
-    /**
-     * Main moving method
-     * 
-     * @param direction direction of the object (left, right)
-     * @return is object moved
-     */
-    bool move(std::string direction);
+    void fire();
+    void think();
+    
+    bool isPlayer();
+    bool isDead();
+    /* need to remove the current object? */
+    bool remove();
+
+    using Movable::move;
+    
+    bool move(float x, float y) override;
+    
+    void shiftSpritePositions();
+    
     /**
      * Shift coordinates on the Y scale
      */
     void jump();
-    
-    void stopJumping();
-    void stopMoving();
     
     /**
      *  Shift coordinates on the Y scale when gravitation is called
@@ -65,35 +64,21 @@ public:
      */
     void gravitate();
     
-    /**
-     * Make a fire (it creates Bullet instance)
-     */
-    void fire();
-    void think();
- 
-    bool isMoving();
-    bool isJumping();
-    bool isDead();
-    bool isFalling();
-    bool isPlayer();
-    
-    /* need to remove the current object? */
-    bool remove();
+    void stopJumping();
 
-    
+    float getCurrentJumpHeight();
+    float getVelocityHorizontal();
+
+    bool isFalling();
+    bool isJumping();
     int getHealth();
     int getCrystals();
-    float getAcceleration();
-    float getVelocity();
-    float getVelocityHorizontal();
-    float getMaxVelocity();
-    float getCurrentJumpHeight();
     
     void decreaseHealth();
     
     void setMain(bool main);
     void setDead(bool dead);
-    void setDirection(std::string direction);
+
 
     void setMainSprite(sf::Sprite* mainSprite);
     void setHeartSprite(sf::Sprite* heartSprite);
@@ -103,37 +88,32 @@ public:
     void setShotgunSound(sf::Sound* jumpSound);
     void setCrystalCountText(Text* text);
 private:
-    /* is current object moving */
-    bool moving = false;
-    
-    /* @var is current object jumping */
-    bool jumping = false;
-    
     /* is the current object dead*/
     bool dead = false;
     /* must the current object be deleted */
     bool mustBeDeleted = false;
-    /* is current object falling */
-    bool falling = false;
+
     /* is current object controlled by Player*/
     bool main = false;
     int health = 3;
     int crystals = 0;
-    float acceleration = 0.3f;
-    /* Velocity when object is moving left or right*/
-    float velocity = 0.f;
-    /* Velocity when jump*/
-    float velocityHorizontal = 0.f;
-    /* Max object velocity while moving*/
-    float maxVelocity = 5.f;
+
     /* When object jump, it can not jump higher than the value of the variable */
     float currentJumpHeight = 0.f;
-    
+    /* Velocity when jump*/
+    float velocityHorizontal = 0.f;
 
     float gravityPower = 0.1f;    
     float gravitationalVelocity = 0.f;
     float gravitationalAcceleration = 0.5f;
-    
+    /* Time for gravitational formula*/
+    float gravitationalTime = 0.0;
+
+    /* @var is current object jumping */
+    bool jumping = false;
+ 
+    /* is current object falling */
+    bool falling = false;
     
     sf::Sound* jumpSound;
     sf::Sound* shotgunSound;
@@ -143,8 +123,7 @@ private:
     sf::Sprite* heartSprite;
     sf::Sprite* explosionSprite;
     
-    /* Direction of the object for sprite choose*/
-    std::string direction = "right";
+
     
     /*  @var current frame for sprite choose */
     unsigned int currentFrame = 0;
@@ -154,8 +133,7 @@ private:
     
     /* time passed after new sprite choose */
     float elapsedTime = 0.0;
-    /* Time for gravitational formula*/
-    float gravitationalTime = 0.0;
+
     /* Time after last fire call */
     float fireTime = 0.f;
 
