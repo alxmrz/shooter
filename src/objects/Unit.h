@@ -13,12 +13,12 @@ struct GameObjects;
 class Window;
 class Text;
 
-class Shooter : public Movable {
+class Unit : public Movable {
 public:
-    Shooter();
-    Shooter(GameObjects* go, float x, float y, int width, int height);
-    Shooter(const Shooter& orig);
-    virtual ~Shooter();
+    Unit();
+    Unit(GameObjects* go, float x, float y, int width, int height);
+    Unit(const Unit& orig);
+    virtual ~Unit();
     
     /**
      * sf::Drawable is required by Window 

@@ -2,7 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <SFML/Graphics.hpp>
-#include "Shooter.h"
+#include "Unit.h"
 #include "Crystal.h"
 #include "Bullet.h"
 #include "Movable.h"
@@ -12,25 +12,25 @@
 #include "../Fabric.h"
 #include "../ui/Text.h"
 
-Shooter::Shooter()
+Unit::Unit()
 {
 }
 
-Shooter::Shooter(const Shooter& orig)
+Unit::Unit(const Unit& orig)
 {
 }
 
-Shooter::Shooter(GameObjects* go, float x, float y, int width, int height) 
+Unit::Unit(GameObjects* go, float x, float y, int width, int height) 
 : Movable(go, x, y, width, height)
 {
     
 }
 
-Shooter::~Shooter()
+Unit::~Unit()
 {
 }
 
-bool Shooter::collectCollidedCrystal()
+bool Unit::collectCollidedCrystal()
 {
     if (isPlayer()) {
         for (unsigned i = 0; i < go->crystals.size(); i++) {
@@ -48,7 +48,7 @@ bool Shooter::collectCollidedCrystal()
     return false;
 }
 
-sf::Drawable* Shooter::getDrawForm()
+sf::Drawable* Unit::getDrawForm()
 {
     if (!dead) {
         return shooterSprite;
@@ -57,7 +57,7 @@ sf::Drawable* Shooter::getDrawForm()
     }
 }
 
-void Shooter::draw(Window* window, float dt)
+void Unit::draw(Window* window, float dt)
 {
     bool showNextFrame = elapsedTime >= animationTime;
     if (!dead) {
@@ -85,7 +85,7 @@ void Shooter::draw(Window* window, float dt)
     
 }
 
-void Shooter::animateRun()
+void Unit::animateRun()
 {
     shooterSprite->setTextureRect(this->runSprites[direction][currentFrame]);
     currentFrame++;
@@ -95,7 +95,7 @@ void Shooter::animateRun()
     elapsedTime = 0.0;
 }
 
-void Shooter::animateExplosion()
+void Unit::animateExplosion()
 {
     explosionSprite->setTextureRect(this->explosionSprites[currentFrame]);
     currentFrame++;
@@ -107,7 +107,7 @@ void Shooter::animateExplosion()
     elapsedTime = 0.0;
 }
 
-void Shooter::drawHearts(Window* window)
+void Unit::drawHearts(Window* window)
 {
     for (int x = this->x, i = 0; i < health; i++) {
         heartSprite->setPosition(x, y - 25);
@@ -116,7 +116,7 @@ void Shooter::drawHearts(Window* window)
     }
 }
 
-void Shooter::fire()
+void Unit::fire()
 {
     if (fireTime >= 0.5f) {
         shotgunSound->play();
@@ -135,7 +135,7 @@ void Shooter::fire()
     }
 }
 
-void Shooter::think()
+void Unit::think()
 {
     if (!isPlayer() && !isDead()) {
         if (isMoveRight) {
@@ -156,7 +156,7 @@ void Shooter::think()
     }
 }
 
-bool Shooter::isNextFalling(std::string direction)
+bool Unit::isNextFalling(std::string direction)
 {
     int offsetX = 0;
     if (direction == "left") {
@@ -164,7 +164,7 @@ bool Shooter::isNextFalling(std::string direction)
     } else if (direction == "right") {
         offsetX = 25;
     }
-    Shooter fake = Shooter(this->go, getX()+offsetX, getY(), getWidth(), getHeight());
+    Unit fake = Unit(this->go, getX()+offsetX, getY(), getWidth(), getHeight());
     if (!fake.collideObjectAfterMove(0.f, 5.f)) {
         velocity = 0;
         return true;
@@ -172,7 +172,7 @@ bool Shooter::isNextFalling(std::string direction)
     return false;
 }
 
-bool Shooter::move(float x, float y) 
+bool Unit::move(float x, float y) 
 {
     if (Movable::move(x, y)) {
         shiftSpritePositions();
@@ -184,13 +184,13 @@ bool Shooter::move(float x, float y)
     return false;
 }
 
-void Shooter::shiftSpritePositions()
+void Unit::shiftSpritePositions()
 {
     this->shooterSprite->setPosition(this->x, this->y);
     this->explosionSprite->setPosition(this->x, this->y);
 }
 
-void Shooter::jump()
+void Unit::jump()
 {
     if (velocityHorizontal > -maxVelocity) {
         velocityHorizontal -= acceleration;
@@ -208,7 +208,7 @@ void Shooter::jump()
     }
 }
 
-void Shooter::gravitate()
+void Unit::gravitate()
 {
     float y = std::ceil(
             gravitationalTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f)
@@ -224,102 +224,102 @@ void Shooter::gravitate()
     }
 }
 
-bool Shooter::isJumping()
+bool Unit::isJumping()
 {
     return jumping;
 }
 
-bool Shooter::isFalling()
+bool Unit::isFalling()
 {
     return falling;
 }
 
-void Shooter::stopJumping()
+void Unit::stopJumping()
 {
     jumping = false;
     velocityHorizontal = 0.f;
 }
 
 
-bool Shooter::isDead()
+bool Unit::isDead()
 {
     return dead;
 }
 
-bool Shooter::remove()
+bool Unit::remove()
 {
     return mustBeDeleted;
 }
 
-bool Shooter::isPlayer()
+bool Unit::isPlayer()
 {
     return main;
 }
 
-int Shooter::getHealth()
+int Unit::getHealth()
 {
     return health;
 }
 
-int Shooter::getCrystals()
+int Unit::getCrystals()
 {
     return crystals;
 }
 
-float Shooter::getVelocityHorizontal()
+float Unit::getVelocityHorizontal()
 {
     return velocityHorizontal;
 }
 
-float Shooter::getCurrentJumpHeight()
+float Unit::getCurrentJumpHeight()
 {
     return currentJumpHeight;
 }
 
-void Shooter::setMain(bool main)
+void Unit::setMain(bool main)
 {
     this->main = main;
 }
 
-void Shooter::setDead(bool dead)
+void Unit::setDead(bool dead)
 {
     this->dead = dead;
 }
 
-void Shooter::decreaseHealth()
+void Unit::decreaseHealth()
 {
     health--;
 }
 
-void Shooter::setMainSprite(sf::Sprite* mainSprite)
+void Unit::setMainSprite(sf::Sprite* mainSprite)
 {
     shooterSprite = mainSprite;
 }
 
-void Shooter::setHeartSprite(sf::Sprite* heartSprite)
+void Unit::setHeartSprite(sf::Sprite* heartSprite)
 {
     this->heartSprite = heartSprite;
 }
 
 
-void Shooter::setExplosionSprite(sf::Sprite* explosionSprite)
+void Unit::setExplosionSprite(sf::Sprite* explosionSprite)
 {
     this->explosionSprite = explosionSprite;
     this->explosionSprite->setScale(0.5f, 0.5f);
     explosionSprite->setTextureRect(this->explosionSprites[0]);
 }
 
-void Shooter::setJumpSound(sf::Sound* jumpSound)
+void Unit::setJumpSound(sf::Sound* jumpSound)
 {
     this->jumpSound = jumpSound;
 }
 
-void Shooter::setCrystalSound(sf::Sound* crystalSound)
+void Unit::setCrystalSound(sf::Sound* crystalSound)
 {
     this->crystalSound = crystalSound;
 }
 
-void Shooter::setShotgunSound(sf::Sound* shotgunSound)
+void Unit::setShotgunSound(sf::Sound* shotgunSound)
 {
     this->shotgunSound = shotgunSound;
 }

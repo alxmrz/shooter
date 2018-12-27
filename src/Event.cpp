@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "Event.h"
 #include "Window.h"
-#include "objects/Shooter.h"
+#include "objects/Unit.h"
 #include "Scene.h"
 #include "Application.h"
 #include "GameState.h"

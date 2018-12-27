@@ -15,7 +15,7 @@ src/Fabric.cpp \
 src/Resources.cpp \
 src/objects/Ground.cpp \
 src/objects/Crystal.cpp \
-src/objects/Shooter.cpp \
+src/objects/Unit.cpp \
 src/objects/Bullet.cpp \
 src/objects/Movable.cpp \
 src/ui/Button.cpp \

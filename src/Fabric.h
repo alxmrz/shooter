@@ -8,7 +8,7 @@
 class Bullet;
 class GameObjects;
 class Resources;
-class Shooter;
+class Unit;
 class Ground;
 class Crystal;
 class CObject;
@@ -21,8 +21,8 @@ public:
     Fabric(const Fabric& orig);
     virtual ~Fabric();
 
-    Bullet* createBullet(Shooter* shooter, float x, float y, int width, int height);
-    Shooter* createShooter(float x, float y, int width, int height);
+    Bullet* createBullet(Unit* shooter, float x, float y, int width, int height);
+    Unit* createShooter(float x, float y, int width, int height);
     Ground* createGround(float x, float y, int width, int height);
     Crystal* createCrystal(float x, float y, int width, int height);
     CObject* createBorder(float x, float y, int width, int height);

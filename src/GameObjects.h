@@ -5,7 +5,7 @@
 #include <map>
 #include <SFML/Graphics.hpp>
 
-class Shooter;
+class Unit;
 class CObject;
 class Fabric;
 class Window;
@@ -24,7 +24,7 @@ struct GameObjects {
     std::vector<CObject*> crystals;
     
     GameState* gs;
-    Shooter* player;
+    Unit* player;
     Fabric* fabric;
     
     sf::Sprite* backgroundSprite;

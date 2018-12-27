@@ -5,7 +5,7 @@
 #include "Application.h"
 #include "CObject.h"
 #include "Scene.h"
-#include "objects/Shooter.h"
+#include "objects/Unit.h"
 #include "objects/Bullet.h"
 #include "Fabric.h"
 
@@ -51,7 +51,7 @@ void GameState::updateBulletsState()
 void GameState::causeGravity()
 {
     for (auto* obj: objects->playable) {
-        Shooter* shooter = static_cast<Shooter*>(obj);
+        Unit* shooter = static_cast<Unit*>(obj);
         if (!shooter->isJumping()) {
             shooter->think();
             shooter->gravitate();
