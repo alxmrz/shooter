@@ -1,14 +1,14 @@
-#ifndef CRYSTAL_H
-#define CRYSTAL_H
+#ifndef HEART_H
+#define HEART_H
 
-#include "../CObject.h"
+#include "../../CObject.h"
 
-class Crystal: public CObject {
+class Heart: public CObject {
 public:
-    Crystal();
-    Crystal(const Crystal& orig);
-    Crystal(sf::Texture* texture, int x, int y, int width, int height);
-    virtual ~Crystal();
+    Heart();
+    Heart(const Heart& orig);
+    Heart(sf::Texture* texture, int x, int y, int width, int height);
+    virtual ~Heart();
     
     /**
      * @var Sprite for drawing
@@ -35,5 +35,5 @@ private:
 
 };
 
-#endif /* CRYSTAL_H */
+#endif /* HEART_H */
 

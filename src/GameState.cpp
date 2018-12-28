@@ -5,8 +5,8 @@
 #include "Application.h"
 #include "CObject.h"
 #include "Scene.h"
-#include "objects/Unit.h"
-#include "objects/Bullet.h"
+#include "objects/units/Unit.h"
+#include "objects/interactive/Bullet.h"
 #include "Fabric.h"
 
 GameState::GameState()

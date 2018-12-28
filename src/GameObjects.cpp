@@ -4,8 +4,9 @@
 #include <SFML/Graphics.hpp>
 #include "GameObjects.h"
 #include "CObject.h"
-#include "objects/Unit.h"
-#include "objects/Ground.h"
+#include "objects/units/Unit.h"
+#include "objects/backgrounds/Ground.h"
+#include "objects/interactive/Ammunition.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 #include "Fabric.h"
@@ -26,7 +27,12 @@ GameObjects::GameObjects(GameState* gs)
     crystalSprite = fabric->createSprite("crystal", 0.f, 0.f);
     crystalSprite->setScale(0.5f, 0.5f);
     crystalSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
-    text = fabric->createText("", 0.f, 0.f);
+    cristalCountText = fabric->createText("", 0.f, 0.f);
+    ammoCountText = fabric->createText("", 0.f, 0.f);
+    
+    ammoSprite = fabric->createSprite("ammo", 0.f, 0.f);
+    ammoSprite->setScale(0.5f, 0.5f);
+    ammoSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
 }
 
 GameObjects::~GameObjects()
@@ -71,6 +77,14 @@ void GameObjects::draw(Window* window, float dt)
         for (unsigned i = 0; i < crystals.size(); i++) {
             crystals[i]->draw(window, dt);
         }
+        
+        for (unsigned i = 0; i < hearts.size(); i++) {
+            hearts[i]->draw(window, dt);
+        }
+       
+        for (unsigned i = 0; i < ammo.size(); i++) {
+            ammo[i]->draw(window, dt);
+        }
 
         for (unsigned i = 0; i < bullets.size(); i++) {
             bullets[i]->draw(window, dt);
@@ -79,6 +93,13 @@ void GameObjects::draw(Window* window, float dt)
         for (unsigned i = 0; i < playable.size(); i++) {
             playable[i]->draw(window, dt);
             if (((Unit*)playable[i])->remove()) {
+                ammo.push_back(fabric->createAmmo(
+                        playable[i]->getX(), 
+                        playable[i]->getY(), 
+                        50, 
+                        50
+                    )
+                );
                 playable.erase(playable.begin() + i);
             }
         }
@@ -96,10 +117,17 @@ void GameObjects::drawPlayerUi(Window* window)
        
     sf::Vector2f cristalWindowCoords = window->mapPixelToCoords(sf::Vector2i(150, 50));
     sf::Vector2f crystalCountCoords = window->mapPixelToCoords(sf::Vector2i(180, 50));
+    
+    sf::Vector2f ammoWindowCoords = window->mapPixelToCoords(sf::Vector2i(220, 50));
+    sf::Vector2f ammoCountCoords = window->mapPixelToCoords(sf::Vector2i(260, 50));
 
-    text->message->setString(std::to_string(player->getCrystals()));
-    text->message->setPosition(crystalCountCoords.x, crystalCountCoords.y);
+    cristalCountText->message->setString(std::to_string(player->getCrystals()));
+    cristalCountText->message->setPosition(crystalCountCoords.x, crystalCountCoords.y);
     crystalSprite->setPosition(cristalWindowCoords.x, cristalWindowCoords.y);
+    
+    ammoCountText->message->setString(std::to_string(player->getAmmo()));
+    ammoCountText->message->setPosition(ammoCountCoords.x, ammoCountCoords.y);
+    ammoSprite->setPosition(ammoWindowCoords.x, ammoWindowCoords.y);
 
 
     sf::Vector2f windowCoords = window->mapPixelToCoords(sf::Vector2i(50, 50));
@@ -111,7 +139,10 @@ void GameObjects::drawPlayerUi(Window* window)
         
     
     window->draw(*crystalSprite);
-    window->draw(*text->message);
+    window->draw(*cristalCountText->message);
+    
+    window->draw(*ammoSprite);
+    window->draw(*ammoCountText->message);
         
     
 }

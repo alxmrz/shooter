@@ -1,5 +1,5 @@
 #include "Movable.h"
-#include "../CObject.h"
+#include "../../CObject.h"
 
 Movable::Movable() {
 }

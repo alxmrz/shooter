@@ -3,14 +3,14 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include "Shooter.h"
-#include "Crystal.h"
-#include "Bullet.h"
-#include "Movable.h"
-#include "../CObject.h"
-#include "../Window.h"
-#include "../GameObjects.h"
-#include "../Fabric.h"
-#include "../ui/Text.h"
+#include "../interactive/Crystal.h"
+#include "../interactive/Bullet.h"
+#include "../interfaces/Movable.h"
+#include "../../CObject.h"
+#include "../../Window.h"
+#include "../../GameObjects.h"
+#include "../../Fabric.h"
+#include "../../ui/Text.h"
 
 Shooter::Shooter()
 {
@@ -91,9 +91,12 @@ void Shooter::drawHearts(Window* window)
 
 void Shooter::attack()
 {
-    if (fireTime >= 0.5f) {
+    if (fireTime >= 0.5f && getAmmo() > 0) {
         shotgunSound->play();
         fireTime = 0.f;
+        if (isPlayer()) {
+            --ammo;
+        }
         Bullet* bullet;
         std::vector<float> coords;
         if (direction == "right") {

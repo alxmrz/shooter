@@ -22,6 +22,8 @@ struct GameObjects {
     std::vector<CObject*> bullets;
     std::vector<CObject*> playable;
     std::vector<CObject*> crystals;
+    std::vector<CObject*> hearts;
+    std::vector<CObject*> ammo;
     
     GameState* gs;
     Unit* player;
@@ -30,7 +32,9 @@ struct GameObjects {
     sf::Sprite* backgroundSprite;
     sf::Sprite* heartSprite;
     sf::Sprite* crystalSprite;
-    Text* text;
+    sf::Sprite* ammoSprite;
+    Text* cristalCountText;
+    Text* ammoCountText;
     /**
      * Texture for sprite (Texture loads image). Sprite contains the texture
      */

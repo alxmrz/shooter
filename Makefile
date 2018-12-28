@@ -13,17 +13,27 @@ src/Scene.cpp \
 src/Window.cpp \
 src/Fabric.cpp \
 src/Resources.cpp \
-src/objects/Ground.cpp \
-src/objects/Crystal.cpp \
-src/objects/Unit.cpp \
-src/objects/Shooter.cpp \
-src/objects/Bullet.cpp \
-src/objects/Movable.cpp \
+src/objects/backgrounds/Ground.cpp \
+src/objects/interactive/Crystal.cpp \
+src/objects/interactive/Heart.cpp \
+src/objects/interactive/Ammunition.cpp \
+src/objects/units/Unit.cpp \
+src/objects/units/Shooter.cpp \
+src/objects/interactive/Bullet.cpp \
+src/objects/interfaces/Movable.cpp \
 src/ui/Button.cpp \
 src/ui/Text.cpp \
 include/tinyxml/tinyxml2.cpp
 
-DIRS = build build/src build/src/objects build/src/ui build/include/tinyxml
+DIRS = build \
+build/src \
+build/src/objects \
+build/src/objects/backgrounds \
+build/src/objects/interactive \
+build/src/objects/interfaces \
+build/src/objects/units \
+build/src/ui \
+build/include/tinyxml
 
 
 OBJECTS=$(SOURCES:.cpp=.o)
@@ -31,6 +41,7 @@ OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=run
 
 DIR_OBJECTS:=$(addprefix  build/, $(OBJECTS))
+DIR_OBJECTS_REMOVE:=$(addsuffix /*.o, $(DIRS))
 
 	
 all: dirs $(SOURCE) $(EXECUTABLE)
@@ -45,7 +56,7 @@ build/%.o : %.cpp
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o ./run build/*.o build/src/*.o build/src/objects/*.o build/src/ui/*.o build/include/tinyxml/*.o
+	rm -rf *.o ./run $(DIR_OBJECTS_REMOVE)
 	
 ex:
-	echo $(DIR_OBJECTS)
+	echo $(DIR_OBJECTS_REMOVE)

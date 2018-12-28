@@ -8,9 +8,11 @@
 #include "GameState.h"
 #include "Application.h"
 #include "Scene.h"
-#include "objects/Ground.h"
-#include "objects/Crystal.h"
-#include "objects/Shooter.h"
+#include "objects/backgrounds/Ground.h"
+#include "objects/interactive/Crystal.h"
+#include "objects/interactive/Heart.h"
+#include "objects/interactive/Ammunition.h"
+#include "objects/units/Shooter.h"
 #include "ui/Button.h"
 #include "Fabric.h"
 
@@ -120,6 +122,24 @@ void Scene::generatePlayable(tinyxml2::XMLElement* map)
                         atoi(object->Attribute("height"))
                         )}
                 );
+            } else if (type == "Heart") {
+                gameState->objects->hearts.push_back(
+                    gameState->objects->fabric->createHeart(
+                        atoi(object->Attribute("x")),
+                        atoi(object->Attribute("y")),
+                        50,
+                        50
+                    )
+                ); 
+            } else if (type == "Ammunition") {
+                gameState->objects->ammo.push_back(
+                    gameState->objects->fabric->createAmmo(
+                        atoi(object->Attribute("x")),
+                        atoi(object->Attribute("y")),
+                        50,
+                        50
+                    )
+                ); 
             }
         }
     }

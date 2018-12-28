@@ -4,11 +4,13 @@
 #include "Fabric.h"
 #include "GameObjects.h"
 #include "Resources.h"
-#include "objects/Bullet.h"
-#include "objects/Unit.h"
-#include "objects/Shooter.h"
-#include "objects/Ground.h"
-#include "objects/Crystal.h"
+#include "objects/interactive/Bullet.h"
+#include "objects/units/Unit.h"
+#include "objects/units/Shooter.h"
+#include "objects/backgrounds/Ground.h"
+#include "objects/interactive/Crystal.h"
+#include "objects/interactive/Heart.h"
+#include "objects/interactive/Ammunition.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 
@@ -58,9 +60,20 @@ Ground* Fabric::createGround(float x, float y, int width, int height)
 {
     return new Ground(resources->getTexture("ground"), x, y, width, height);
 }
+
 Crystal* Fabric::createCrystal(float x, float y, int width, int height)
 {
     return new Crystal(resources->getTexture("crystal"), x, y, width, height);
+}
+
+Ammunition* Fabric::createAmmo(float x, float y, int width, int height)
+{
+    return new Ammunition(resources->getTexture("ammo"), x, y, width, height);
+}
+
+Heart* Fabric::createHeart(float x, float y, int width, int height)
+{
+    return new Heart(resources->getTexture("heart"), x, y, width, height);
 }
 
 CObject* Fabric::createBorder(float x, float y, int width, int height)

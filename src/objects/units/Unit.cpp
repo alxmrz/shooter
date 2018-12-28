@@ -3,14 +3,16 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include "Unit.h"
-#include "Crystal.h"
-#include "Bullet.h"
-#include "Movable.h"
-#include "../CObject.h"
-#include "../Window.h"
-#include "../GameObjects.h"
-#include "../Fabric.h"
-#include "../ui/Text.h"
+#include "../interactive/Crystal.h"
+#include "../interactive/Heart.h"
+#include "../interactive/Ammunition.h"
+#include "../interactive/Bullet.h"
+#include "../interfaces/Movable.h"
+#include "../../CObject.h"
+#include "../../Window.h"
+#include "../../GameObjects.h"
+#include "../../Fabric.h"
+#include "../../ui/Text.h"
 
 Unit::Unit()
 {
@@ -47,6 +49,41 @@ bool Unit::collectCollidedCrystal()
     }
     return false;
 }
+
+bool Unit::collectCollidedHeart()
+{
+    if (isPlayer()) {
+        for (unsigned i = 0; i < go->hearts.size(); i++) {
+            Heart* obj = static_cast<Heart*> (go->hearts[i]);
+
+            if (collideRect(obj) && getHealth() < 3) {
+                health++;
+                go->hearts.erase(go->hearts.begin() + i);
+
+                return true;
+            }
+        }   
+    }
+    return false;
+}
+bool Unit::collectCollidedAmmo()
+{
+    if (isPlayer()) {
+        for (unsigned i = 0; i < go->ammo.size(); i++) {
+            Ammunition* obj = static_cast<Ammunition*> (go->ammo[i]);
+
+            if (collideRect(obj) && getAmmo() < 10) {
+                ammo+= 3;
+                if (ammo > 10) ammo = 10;
+                go->ammo.erase(go->ammo.begin() + i);
+
+                return true;
+            }
+        }   
+    }
+    return false;
+}
+
 void Unit::attack()
 {
 }
@@ -105,7 +142,9 @@ bool Unit::move(float x, float y)
 {
     if (Movable::move(x, y)) {
         shiftSpritePositions();
+        collectCollidedHeart();
         collectCollidedCrystal();
+        collectCollidedAmmo();
         
         return true;
     }
@@ -182,6 +221,11 @@ bool Unit::isPlayer()
 int Unit::getHealth()
 {
     return health;
+}
+
+int Unit::getAmmo()
+{
+    return ammo;
 }
 
 int Unit::getCrystals()

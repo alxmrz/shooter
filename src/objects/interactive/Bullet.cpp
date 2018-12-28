@@ -3,8 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "Bullet.h"
-#include "Unit.h"
-#include "../GameObjects.h"
+#include "../units/Unit.h"
+#include "../../GameObjects.h"
 
 Bullet::Bullet()
 {
