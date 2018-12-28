@@ -1,7 +1,7 @@
 #ifndef MOVABLE_H
 #define MOVABLE_H
 
-#include "../CObject.h"
+#include "../../CObject.h"
 
 class Movable: public CObject {
 public:

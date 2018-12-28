@@ -4,7 +4,7 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-#include "../CObject.h"
+#include "../../CObject.h"
 
 namespace sf {
     class Drawable;

@@ -4,8 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include "GameObjects.h"
 #include "CObject.h"
-#include "objects/Unit.h"
-#include "objects/Ground.h"
+#include "objects/units/Unit.h"
+#include "objects/backgrounds/Ground.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 #include "Fabric.h"

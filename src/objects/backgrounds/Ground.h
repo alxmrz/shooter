@@ -1,15 +1,15 @@
-#ifndef CRYSTAL_H
-#define CRYSTAL_H
+#ifndef GROUND_H
+#define GROUND_H
 
-#include "../CObject.h"
+#include "../../CObject.h"
 
-class Crystal: public CObject {
+class Ground : public CObject {
 public:
-    Crystal();
-    Crystal(const Crystal& orig);
-    Crystal(sf::Texture* texture, int x, int y, int width, int height);
-    virtual ~Crystal();
-    
+    Ground();
+    Ground(const Ground& orig);
+    Ground(sf::Texture* texture, int x, int y, int width, int height);
+    virtual ~Ground();
+
     /**
      * @var Sprite for drawing
      */
@@ -35,5 +35,5 @@ private:
 
 };
 
-#endif /* CRYSTAL_H */
+#endif /* GROUND_H */
 

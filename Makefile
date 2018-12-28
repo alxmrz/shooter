@@ -13,18 +13,26 @@ src/Scene.cpp \
 src/Window.cpp \
 src/Fabric.cpp \
 src/Resources.cpp \
-src/objects/Ground.cpp \
-src/objects/Crystal.cpp \
-src/objects/Heart.cpp \
-src/objects/Unit.cpp \
-src/objects/Shooter.cpp \
-src/objects/Bullet.cpp \
-src/objects/Movable.cpp \
+src/objects/backgrounds/Ground.cpp \
+src/objects/interactive/Crystal.cpp \
+src/objects/interactive/Heart.cpp \
+src/objects/units/Unit.cpp \
+src/objects/units/Shooter.cpp \
+src/objects/interactive/Bullet.cpp \
+src/objects/interfaces/Movable.cpp \
 src/ui/Button.cpp \
 src/ui/Text.cpp \
 include/tinyxml/tinyxml2.cpp
 
-DIRS = build build/src build/src/objects build/src/ui build/include/tinyxml
+DIRS = build \
+build/src \
+build/src/objects \
+build/src/objects/backgrounds \
+build/src/objects/interactive \
+build/src/objects/interfaces \
+build/src/objects/units \
+build/src/ui \
+build/include/tinyxml
 
 
 OBJECTS=$(SOURCES:.cpp=.o)

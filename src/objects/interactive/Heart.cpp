@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Heart.h"
-#include "../CObject.h"
+#include "../../CObject.h"
 
 Heart::Heart() {
 }

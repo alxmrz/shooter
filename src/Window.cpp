@@ -4,7 +4,7 @@
 #include "Window.h"
 #include "GameState.h"
 #include "CObject.h"
-#include "objects/Unit.h"
+#include "objects/units/Unit.h"
 
 Window::Window(sf::VideoMode mode,
         const sf::String& title,

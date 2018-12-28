@@ -1,7 +1,7 @@
 #ifndef HEART_H
 #define HEART_H
 
-#include "../CObject.h"
+#include "../../CObject.h"
 
 class Heart: public CObject {
 public:

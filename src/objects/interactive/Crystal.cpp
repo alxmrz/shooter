@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Crystal.h"
-#include "../CObject.h"
+#include "../../CObject.h"
 
 Crystal::Crystal()
 {    

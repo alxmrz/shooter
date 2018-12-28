@@ -6,8 +6,8 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-#include "../GameObjects.h"
-#include "Unit.h"
+#include "../../GameObjects.h"
+#include "../units/Unit.h"
 
 struct GameObjects;
 class Window;
