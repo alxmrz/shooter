@@ -5,6 +5,7 @@
 #include "Unit.h"
 #include "../interactive/Crystal.h"
 #include "../interactive/Heart.h"
+#include "../interactive/Ammunition.h"
 #include "../interactive/Bullet.h"
 #include "../interfaces/Movable.h"
 #include "../../CObject.h"
@@ -58,6 +59,23 @@ bool Unit::collectCollidedHeart()
             if (collideRect(obj) && getHealth() < 3) {
                 health++;
                 go->hearts.erase(go->hearts.begin() + i);
+
+                return true;
+            }
+        }   
+    }
+    return false;
+}
+bool Unit::collectCollidedAmmo()
+{
+    if (isPlayer()) {
+        for (unsigned i = 0; i < go->ammo.size(); i++) {
+            Ammunition* obj = static_cast<Ammunition*> (go->ammo[i]);
+
+            if (collideRect(obj) && getAmmo() < 10) {
+                ammo+= 3;
+                if (ammo > 10) ammo = 10;
+                go->ammo.erase(go->ammo.begin() + i);
 
                 return true;
             }
@@ -126,6 +144,7 @@ bool Unit::move(float x, float y)
         shiftSpritePositions();
         collectCollidedHeart();
         collectCollidedCrystal();
+        collectCollidedAmmo();
         
         return true;
     }
@@ -202,6 +221,11 @@ bool Unit::isPlayer()
 int Unit::getHealth()
 {
     return health;
+}
+
+int Unit::getAmmo()
+{
+    return ammo;
 }
 
 int Unit::getCrystals()

@@ -61,6 +61,7 @@ private:
         {"heart", "resources/images/heart.png"},
         {"crystal", "resources/images/crystal.png"},
         {"background", "resources/images/background.png"},
+        {"ammo", "resources/images/ammo.png"},
     };
     
     std::map<std::string, std::string> fontsLoadQueue = {

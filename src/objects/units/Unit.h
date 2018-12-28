@@ -56,6 +56,7 @@ public:
     bool isFalling();
     bool isJumping();
     int getHealth();
+    int getAmmo();
     int getCrystals();
     sf::Drawable* getDrawForm() override;
     void decreaseHealth();
@@ -78,6 +79,7 @@ protected:
     /* is current object controlled by Player*/
     bool main = false;
     int health = 3;
+    int ammo = 10;
     int crystals = 0;
 
     /* When object jump, it can not jump higher than the value of the variable */
@@ -129,6 +131,7 @@ protected:
      */
     bool collectCollidedCrystal();
     bool collectCollidedHeart();
+    bool collectCollidedAmmo();
     
     bool isNextFalling(std::string direction);
     void animateMoving();

@@ -10,6 +10,7 @@
 #include "objects/backgrounds/Ground.h"
 #include "objects/interactive/Crystal.h"
 #include "objects/interactive/Heart.h"
+#include "objects/interactive/Ammunition.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 
@@ -63,6 +64,11 @@ Ground* Fabric::createGround(float x, float y, int width, int height)
 Crystal* Fabric::createCrystal(float x, float y, int width, int height)
 {
     return new Crystal(resources->getTexture("crystal"), x, y, width, height);
+}
+
+Ammunition* Fabric::createAmmo(float x, float y, int width, int height)
+{
+    return new Ammunition(resources->getTexture("ammo"), x, y, width, height);
 }
 
 Heart* Fabric::createHeart(float x, float y, int width, int height)

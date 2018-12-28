@@ -12,6 +12,7 @@ class Unit;
 class Shooter;
 class Ground;
 class Crystal;
+class Ammunition;
 class Heart;
 class CObject;
 class Button;
@@ -27,6 +28,7 @@ public:
     Shooter* createShooter(float x, float y, int width, int height);
     Ground* createGround(float x, float y, int width, int height);
     Crystal* createCrystal(float x, float y, int width, int height);
+    Ammunition* createAmmo(float x, float y, int width, int height);
     Heart* createHeart(float x, float y, int width, int height);
     CObject* createBorder(float x, float y, int width, int height);
     Text* createText(std::string text, int x, int y);

@@ -91,9 +91,12 @@ void Shooter::drawHearts(Window* window)
 
 void Shooter::attack()
 {
-    if (fireTime >= 0.5f) {
+    if (fireTime >= 0.5f && getAmmo() > 0) {
         shotgunSound->play();
         fireTime = 0.f;
+        if (isPlayer()) {
+            --ammo;
+        }
         Bullet* bullet;
         std::vector<float> coords;
         if (direction == "right") {
