@@ -128,6 +128,7 @@ protected:
      * @return is crystal collected
      */
     bool collectCollidedCrystal();
+    bool collectCollidedHeart();
     
     bool isNextFalling(std::string direction);
     void animateMoving();

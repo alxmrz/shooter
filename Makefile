@@ -15,6 +15,7 @@ src/Fabric.cpp \
 src/Resources.cpp \
 src/objects/Ground.cpp \
 src/objects/Crystal.cpp \
+src/objects/Heart.cpp \
 src/objects/Unit.cpp \
 src/objects/Shooter.cpp \
 src/objects/Bullet.cpp \

@@ -9,6 +9,7 @@
 #include "objects/Shooter.h"
 #include "objects/Ground.h"
 #include "objects/Crystal.h"
+#include "objects/Heart.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 
@@ -58,9 +59,15 @@ Ground* Fabric::createGround(float x, float y, int width, int height)
 {
     return new Ground(resources->getTexture("ground"), x, y, width, height);
 }
+
 Crystal* Fabric::createCrystal(float x, float y, int width, int height)
 {
     return new Crystal(resources->getTexture("crystal"), x, y, width, height);
+}
+
+Heart* Fabric::createHeart(float x, float y, int width, int height)
+{
+    return new Heart(resources->getTexture("heart"), x, y, width, height);
 }
 
 CObject* Fabric::createBorder(float x, float y, int width, int height)

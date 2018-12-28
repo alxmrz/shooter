@@ -22,6 +22,7 @@ struct GameObjects {
     std::vector<CObject*> bullets;
     std::vector<CObject*> playable;
     std::vector<CObject*> crystals;
+    std::vector<CObject*> hearts;
     
     GameState* gs;
     Unit* player;

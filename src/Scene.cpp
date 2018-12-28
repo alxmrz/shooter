@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include "objects/Ground.h"
 #include "objects/Crystal.h"
+#include "objects/Heart.h"
 #include "objects/Shooter.h"
 #include "ui/Button.h"
 #include "Fabric.h"
@@ -120,6 +121,15 @@ void Scene::generatePlayable(tinyxml2::XMLElement* map)
                         atoi(object->Attribute("height"))
                         )}
                 );
+            } else if (type == "Heart") {
+                gameState->objects->hearts.push_back(
+                        gameState->objects->fabric->createHeart(
+                            atoi(object->Attribute("x")),
+                            atoi(object->Attribute("y")),
+                            50,
+                            50
+                        )
+                    ); 
             }
         }
     }

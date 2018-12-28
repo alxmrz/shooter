@@ -71,6 +71,10 @@ void GameObjects::draw(Window* window, float dt)
         for (unsigned i = 0; i < crystals.size(); i++) {
             crystals[i]->draw(window, dt);
         }
+        
+        for (unsigned i = 0; i < hearts.size(); i++) {
+            hearts[i]->draw(window, dt);
+        }
 
         for (unsigned i = 0; i < bullets.size(); i++) {
             bullets[i]->draw(window, dt);

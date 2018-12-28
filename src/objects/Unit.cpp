@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "Unit.h"
 #include "Crystal.h"
+#include "Heart.h"
 #include "Bullet.h"
 #include "Movable.h"
 #include "../CObject.h"
@@ -47,6 +48,24 @@ bool Unit::collectCollidedCrystal()
     }
     return false;
 }
+
+bool Unit::collectCollidedHeart()
+{
+    if (isPlayer()) {
+        for (unsigned i = 0; i < go->hearts.size(); i++) {
+            Heart* obj = static_cast<Heart*> (go->hearts[i]);
+
+            if (collideRect(obj) && getHealth() < 3) {
+                health++;
+                go->hearts.erase(go->hearts.begin() + i);
+
+                return true;
+            }
+        }   
+    }
+    return false;
+}
+
 void Unit::attack()
 {
 }
@@ -105,6 +124,7 @@ bool Unit::move(float x, float y)
 {
     if (Movable::move(x, y)) {
         shiftSpritePositions();
+        collectCollidedHeart();
         collectCollidedCrystal();
         
         return true;
