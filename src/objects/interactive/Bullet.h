@@ -2,7 +2,6 @@
 #define BULLET_H
 
 #include <string>
-#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "../../CObject.h"
 
@@ -18,14 +17,6 @@ public:
     Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int height);
     Bullet(const Bullet& orig);
     virtual ~Bullet();
-
-    /**
-     * sf::Drawable is required by Window 
-     * to display simple SFML object on the screen
-     * 
-     * @return shape to draw 
-     */
-    sf::Drawable* getDrawForm() override;
     
     /**
      * Shift object position on x and y
@@ -45,12 +36,9 @@ public:
     
     sf::Sound* explosionSound;
     void setExplosionSound(sf::Sound* sound);
-    void setMainTexture(sf::Texture* texture);
 private:
     /** Shooter, that did the bullet */
     Unit* shooter;
-    /**  Sprite for drawing */
-    sf::Sprite* sprite;
     
     /** Direction of the object to move */
     std::string direction;

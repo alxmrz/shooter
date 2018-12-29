@@ -46,7 +46,7 @@ void Movable::calcVelocity()
 bool Movable::move(float x, float y)
 {
     bool isMapEnd = this->x+x <= 0 || this->y + y <= 0;
-    if (!isMapEnd && !collideObjectAfterMove(x, y) == true) {
+    if (!isMapEnd && !collideObjectAfterMove(x, y)) {
         this->x += x;
         this->y += y;
         return true;

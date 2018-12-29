@@ -13,6 +13,7 @@ class Shooter;
 class Ground;
 class Crystal;
 class Ammunition;
+class Platform;
 class Heart;
 class CObject;
 class Button;
@@ -30,6 +31,7 @@ public:
     Crystal* createCrystal(float x, float y, int width, int height);
     Ammunition* createAmmo(float x, float y, int width, int height);
     Heart* createHeart(float x, float y, int width, int height);
+    Platform* createPlatform(float x, float y, int width, int height);
     CObject* createBorder(float x, float y, int width, int height);
     Text* createText(std::string text, int x, int y);
     Button* createButton(std::string id, std::string text, float x, float y, int width, int height);
