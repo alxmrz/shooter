@@ -1,6 +1,5 @@
 #include <string>
 #include <iostream>
-#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "Bullet.h"
 #include "../units/Unit.h"
@@ -16,23 +15,15 @@ Bullet::Bullet(const Bullet& orig)
 
 Bullet::~Bullet()
 {
-    delete sprite;
+    delete mainSprite;
 }
 
 Bullet::Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int height)
 : CObject(go, x, y, width, height)
 {
-    sprite = new sf::Sprite();
-    sprite->setTextureRect(sf::IntRect(0, 0, 18, 7));
-    sprite->setPosition(x, y);
     this->shooter = shooter;
     endPosition.push_back(x + 500);
     endPosition.push_back(y);
-}
-
-sf::Drawable* Bullet::getDrawForm()
-{
-    return sprite;
 }
 
 bool Bullet::move(float x, float y)
@@ -46,7 +37,7 @@ bool Bullet::move(float x, float y)
     if (!isEndPosition && !collidePlayableAfterMove(x, y) && !collideObjectAfterMove(x, y)) {
         this->x += x;
         this->y += y;
-        this->sprite->setPosition(this->x, this->y);
+        this->mainSprite->setPosition(this->x, this->y);
 
         return true;
     }
@@ -63,7 +54,7 @@ void Bullet::setDirection(std::string direction)
          * It is a hack, so TODO: remake it
          */
         endPosition[0] -= 1000;
-        sprite->rotate(180);
+        mainSprite->rotate(180);
     }
     this->direction = direction;
 }
@@ -100,9 +91,4 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
 void Bullet::setExplosionSound(sf::Sound* sound)
 {
     explosionSound = sound;
-}
-
-void Bullet::setMainTexture(sf::Texture* texture)
-{
-    this->sprite->setTexture(*texture);
 }
