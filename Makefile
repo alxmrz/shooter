@@ -17,6 +17,7 @@ src/objects/backgrounds/Ground.cpp \
 src/objects/interactive/Crystal.cpp \
 src/objects/interactive/Heart.cpp \
 src/objects/interactive/Ammunition.cpp \
+src/objects/interactive/Platform.cpp \
 src/objects/units/Unit.cpp \
 src/objects/units/Shooter.cpp \
 src/objects/interactive/Bullet.cpp \

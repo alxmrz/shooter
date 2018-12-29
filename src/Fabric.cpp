@@ -11,6 +11,7 @@
 #include "objects/interactive/Crystal.h"
 #include "objects/interactive/Heart.h"
 #include "objects/interactive/Ammunition.h"
+#include "objects/interactive/Platform.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 
@@ -75,6 +76,18 @@ Heart* Fabric::createHeart(float x, float y, int width, int height)
     heart->setMainSprite(sprite);
     
     return heart;
+}
+
+Platform* Fabric::createPlatform(float x, float y, int width, int height)
+{
+    /*sf::Sprite* sprite = createSprite("heart", x, y);
+    sprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    sprite->setScale(0.8f, 0.8f);*/
+    
+    Platform* platform = new Platform(x, y, width, height);
+    //platform->setMainSprite(sprite);
+    
+    return platform;
 }
 
 Shooter* Fabric::createShooter(float x, float y, int width, int height)

@@ -33,6 +33,7 @@ public:
 
     using Movable::move;
     
+    void update();
     bool move(float x, float y) override;
     
     virtual void shiftSpritePositions();
@@ -63,7 +64,7 @@ public:
     
     void setMain(bool main);
     void setDead(bool dead);
-
+    
    
     void setMainSprite(sf::Sprite* mainSprite);
     void setHeartSprite(sf::Sprite* heartSprite);
@@ -75,7 +76,8 @@ protected:
     bool dead = false;
     /* must the current object be deleted */
     bool mustBeDeleted = false;
-
+    bool isPlatformAffected = false;
+    
     /* is current object controlled by Player*/
     bool main = false;
     int health = 3;
@@ -132,6 +134,7 @@ protected:
     bool collectCollidedCrystal();
     bool collectCollidedHeart();
     bool collectCollidedAmmo();
+    bool collidePlatform();
     
     bool isNextFalling(std::string direction);
     void animateMoving();

@@ -89,6 +89,10 @@ void GameObjects::draw(Window* window, float dt)
         for (unsigned i = 0; i < bullets.size(); i++) {
             bullets[i]->draw(window, dt);
         }
+        
+        for (unsigned i = 0; i < platforms.size(); i++) {
+            platforms[i]->draw(window, dt);
+        }
 
         for (unsigned i = 0; i < playable.size(); i++) {
             playable[i]->draw(window, dt);
