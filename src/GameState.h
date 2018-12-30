@@ -54,12 +54,7 @@ private:
     /**
      * Call gravity for objects
      */
-    void causeGravity();
-    
-    /**
-     * Move all bullets and deleted if the are ready
-     */
-    void updateBulletsState();
+    void updateObjects();
 };
 
 #endif

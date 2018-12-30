@@ -67,21 +67,21 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
         getWidth(),
         getHeight()
         );
-    for (unsigned i = 0; i < go->playable.size(); i++) {
-        Unit* shooter = static_cast<Unit*>(go->playable[i]); 
+    for (unsigned i = 0; i < go->all.size(); i++) {
+        if (Unit* shooter = dynamic_cast<Unit*>(go->all[i])) {
+            /** if the player is shot down or the player did the shot */
+           bool playerEnvolved = shooter->isPlayer() || this->shooter->isPlayer();
 
-        /** if the player is shot down or the player did the shot */
-        bool playerEnvolved = shooter->isPlayer() || this->shooter->isPlayer();
-        
-        if (playerEnvolved && collider.collideRect(shooter)) { 
-            explosionSound->play();
+           if (playerEnvolved && collider.collideRect(shooter)) { 
+               explosionSound->play();
 
-            shooter->decreaseHealth();
-            if (shooter->getHealth() == 0) {
-                shooter->setDead(true);
-            } 
+               shooter->decreaseHealth();
+               if (shooter->getHealth() == 0) {
+                   shooter->setDead(true);
+               } 
 
-            return true;        
+               return true;        
+           }            
         } 
     }
 

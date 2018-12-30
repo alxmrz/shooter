@@ -42,10 +42,6 @@ void Window::draw(GameState* gameState)
 
 void Window::updateView(GameState* gameState)
 {
-    /*sf::Vector2i playerWindowCoords = mapCoordsToPixel(sf::Vector2f(
-            gameState->objects->player->getX(),
-            gameState->objects->player->getY())
-            );*/
     gameState->view->setCenter(
             gameState->objects->player->getX(),
             gameState->objects->player->getY()-200

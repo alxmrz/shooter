@@ -107,7 +107,7 @@ void Shooter::attack()
             bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
         }
         bullet->setDirection(direction); 
-        go->bullets.push_back(bullet);
+        go->all.push_back(bullet);
     }
 }
 

@@ -125,17 +125,7 @@ protected:
     
     bool isMoveRight = true;
     bool isMoveLeft = false;
-    
-    /**
-     * If a crystall collide it will be collected and deleted
-     * 
-     * @return is crystal collected
-     */
-    bool collectCollidedCrystal();
-    bool collectCollidedHeart();
-    bool collectCollidedAmmo();
-    bool collidePlatform();
-    
+  
     bool isNextFalling(std::string direction);
     void animateMoving();
 };

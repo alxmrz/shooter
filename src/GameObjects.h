@@ -25,6 +25,7 @@ struct GameObjects {
     std::vector<CObject*> hearts;
     std::vector<CObject*> ammo;
     std::vector<CObject*> platforms;
+    std::vector<CObject*> all;
     
     GameState* gs;
     Unit* player;
@@ -40,16 +41,6 @@ struct GameObjects {
      * Texture for sprite (Texture loads image). Sprite contains the texture
      */
     sf::Texture* texture;
-    
-    /**
-     * Get all objects of the game.
-     * Not used. Bad implementation. 
-     * 
-     * TODO: fix and use in Window
-     * 
-     * @return 
-     */
-    std::vector<CObject*>* all();
     
     /**
      * Delete all game objects

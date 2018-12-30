@@ -39,15 +39,6 @@ GameObjects::~GameObjects()
 {
 }
 
-std::vector<CObject*>* GameObjects::all()
-{
-    // TODO: fix that. Must return all objects in one container
-    
-    std::vector<CObject*>* all = {};
-    
-    return all;
-}
-
 void GameObjects::reset()
 {
     buttons.clear();
@@ -61,6 +52,8 @@ void GameObjects::reset()
 void GameObjects::draw(Window* window, float dt)
 {
     sf::Vector2f backgroundCoords = window->mapPixelToCoords(sf::Vector2i(0, 0));
+    CObject currentWindow (backgroundCoords.x, backgroundCoords.y, 900, 600);
+    
     //y must be up 300px, because background images is very low
     backgroundSprite->setPosition(backgroundCoords.x, backgroundCoords.y-300);
 
@@ -74,39 +67,13 @@ void GameObjects::draw(Window* window, float dt)
             background[i]->draw(window, dt);
         }   
         
-        for (unsigned i = 0; i < crystals.size(); i++) {
-            crystals[i]->draw(window, dt);
-        }
-        
-        for (unsigned i = 0; i < hearts.size(); i++) {
-            hearts[i]->draw(window, dt);
-        }
-       
-        for (unsigned i = 0; i < ammo.size(); i++) {
-            ammo[i]->draw(window, dt);
-        }
-
-        for (unsigned i = 0; i < bullets.size(); i++) {
-            bullets[i]->draw(window, dt);
-        }
-        
-        for (unsigned i = 0; i < platforms.size(); i++) {
-            platforms[i]->draw(window, dt);
-        }
-
-        for (unsigned i = 0; i < playable.size(); i++) {
-            playable[i]->draw(window, dt);
-            if (((Unit*)playable[i])->remove()) {
-                ammo.push_back(fabric->createAmmo(
-                        playable[i]->getX(), 
-                        playable[i]->getY(), 
-                        50, 
-                        50
-                    )
-                );
-                playable.erase(playable.begin() + i);
+        for (unsigned i = 0; i < all.size(); i++) {
+            if (currentWindow.collideRect(all[i])) {
+                all[i]->draw(window, dt);
             }
+            
         }
+        
         drawPlayerUi(window);  
     }
 }
