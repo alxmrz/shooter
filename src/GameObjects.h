@@ -17,7 +17,7 @@ struct GameObjects {
     virtual ~GameObjects();
     
     std::vector<CObject*> buttons;
-    std::vector<CObject*> background;
+    //std::vector<CObject*> background;
     std::map<int, CObject*> borders;
     std::vector<CObject*> bullets;
     std::vector<CObject*> playable;
@@ -25,12 +25,15 @@ struct GameObjects {
     std::vector<CObject*> hearts;
     std::vector<CObject*> ammo;
     std::vector<CObject*> platforms;
+    std::vector<std::vector<float>> background;
+    std::vector<CObject*> all;
     
     GameState* gs;
     Unit* player;
     Fabric* fabric;
     
     sf::Sprite* backgroundSprite;
+    sf::Sprite* groundSprite;
     sf::Sprite* heartSprite;
     sf::Sprite* crystalSprite;
     sf::Sprite* ammoSprite;
@@ -40,16 +43,6 @@ struct GameObjects {
      * Texture for sprite (Texture loads image). Sprite contains the texture
      */
     sf::Texture* texture;
-    
-    /**
-     * Get all objects of the game.
-     * Not used. Bad implementation. 
-     * 
-     * TODO: fix and use in Window
-     * 
-     * @return 
-     */
-    std::vector<CObject*>* all();
     
     /**
      * Delete all game objects

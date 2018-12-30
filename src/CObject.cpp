@@ -146,6 +146,12 @@ bool CObject::collideObjectAfterMove(float x, float y)
     return false;
 }
 
+void CObject::setCoords(float x, float y)
+{
+    this->x = x;
+    this->y = y;
+}
+
 void CObject::setMainSprite(sf::Sprite* sprite)
 {
     mainSprite = sprite;

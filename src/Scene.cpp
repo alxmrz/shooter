@@ -78,9 +78,7 @@ void Scene::generateBackground(std::string data)
         boost::split(lineChars, line, boost::algorithm::is_any_of(","), boost::token_compress_on);
         for (auto c : lineChars) {
             if (c == "9") {
-                gameState->objects->background.push_back(
-                        gameState->objects->fabric->createGround(x, y, 50, 50)
-                        );
+                gameState->objects->background.push_back({9, x, y});
             } 
             x += 50;
         }
@@ -109,9 +107,9 @@ void Scene::generatePlayable(tinyxml2::XMLElement* map)
                     gameState->objects->player = shooter;
                 }
 
-                gameState->objects->playable.push_back(shooter);
+                gameState->objects->all.push_back(shooter);
             } else if (type == "Crystal") {
-                gameState->objects->crystals.push_back(
+                gameState->objects->all.push_back(
                         gameState->objects->fabric->createCrystal(atoi(object->Attribute("x")), atoi(object->Attribute("y")), 50, 50)
                         );
             } else if (type == "Border") {
@@ -124,7 +122,7 @@ void Scene::generatePlayable(tinyxml2::XMLElement* map)
                         )}
                 );
             } else if (type == "Heart") {
-                gameState->objects->hearts.push_back(
+                gameState->objects->all.push_back(
                     gameState->objects->fabric->createHeart(
                         atoi(object->Attribute("x")),
                         atoi(object->Attribute("y")),
@@ -133,7 +131,7 @@ void Scene::generatePlayable(tinyxml2::XMLElement* map)
                     )
                 ); 
             } else if (type == "Ammunition") {
-                gameState->objects->ammo.push_back(
+                gameState->objects->all.push_back(
                     gameState->objects->fabric->createAmmo(
                         atoi(object->Attribute("x")),
                         atoi(object->Attribute("y")),
@@ -142,7 +140,7 @@ void Scene::generatePlayable(tinyxml2::XMLElement* map)
                     )
                 ); 
             } else if (type == "Platform") {
-                gameState->objects->platforms.push_back(
+                gameState->objects->all.push_back(
                     gameState->objects->fabric->createPlatform(
                         atoi(object->Attribute("x")),
                         atoi(object->Attribute("y")),

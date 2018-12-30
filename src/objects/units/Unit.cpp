@@ -91,88 +91,49 @@ bool Unit::move(float x, float y)
 {
     if (Movable::move(x, y)) {
         shiftSpritePositions();
-        
-        // TODO: need to union CObjects into 1 vector and check collisions in 1 loop
-        collectCollidedHeart();
-        collectCollidedCrystal();
-        collectCollidedAmmo();
-        collidePlatform();
+
+        if (isPlayer()) {
+            for (unsigned i = 0; i < go->all.size(); i++) {
+                if (Crystal* obj = dynamic_cast<Crystal*> (go->all[i])) {
+                   if (collideRect(obj)) {
+                    crystals++;
+                    crystalSound->play();
+                    go->all.erase(go->all.begin() + i);
+
+                    break;
+                    } 
+                } else if (Ammunition* obj = dynamic_cast<Ammunition*>(go->all[i])) {
+                    if (collideRect(obj) && getAmmo() < 10) {
+                        ammo += 3;
+                        if (ammo > 10) ammo = 10;
+                        go->all.erase(go->all.begin() + i);
+
+                        break;
+                    }
+                } else if (Heart* obj = dynamic_cast<Heart*>(go->all[i])) {
+                    if (collideRect(obj) && getHealth() < 3) {
+                        health++;
+                        go->all.erase(go->all.begin() + i);
+
+                        break;
+                    } 
+                } else if (Platform* obj = dynamic_cast<Platform*>(go->all[i])) {
+                    if (collideRect(obj)) {
+                        isPlatformAffected = true;
+                        gravitationalVelocity = 0.0;
+                        gravitationalTime = 0.0;
+                        currentJumpHeight = this->y - 300.f;
+                        jump();
+
+                        break;
+                    }
+                }
+            }
+        }
         
         return true;
     }
     
-    return false;
-}
-
-bool Unit::collectCollidedCrystal()
-{
-    if (isPlayer()) {
-        for (unsigned i = 0; i < go->crystals.size(); i++) {
-            Crystal* obj = static_cast<Crystal*> (go->crystals[i]);
-
-            if (collideRect(obj)) {
-                crystals++;
-                crystalSound->play();
-                go->crystals.erase(go->crystals.begin() + i);
-
-                return true;
-            }
-        }   
-    }
-    return false;
-}
-
-bool Unit::collectCollidedHeart()
-{
-    if (isPlayer()) {
-        for (unsigned i = 0; i < go->hearts.size(); i++) {
-            Heart* obj = static_cast<Heart*> (go->hearts[i]);
-
-            if (collideRect(obj) && getHealth() < 3) {
-                health++;
-                go->hearts.erase(go->hearts.begin() + i);
-
-                return true;
-            }
-        }   
-    }
-    return false;
-}
-bool Unit::collectCollidedAmmo()
-{
-    if (isPlayer()) {
-        for (unsigned i = 0; i < go->ammo.size(); i++) {
-            Ammunition* obj = static_cast<Ammunition*> (go->ammo[i]);
-
-            if (collideRect(obj) && getAmmo() < 10) {
-                ammo+= 3;
-                if (ammo > 10) ammo = 10;
-                go->ammo.erase(go->ammo.begin() + i);
-
-                return true;
-            }
-        }   
-    }
-    return false;
-}
-
-bool Unit::collidePlatform()
-{
-    if (isPlayer() && !isJumping()) {
-        for (unsigned i = 0; i < go->platforms.size(); i++) {
-            Platform* obj = static_cast<Platform*> (go->platforms[i]);
-
-            if (collideRect(obj)) {
-                isPlatformAffected = true;
-                gravitationalVelocity = 0.0;
-                gravitationalTime = 0.0;
-                currentJumpHeight = this->y - 300.f;
-                jump();
-
-                return true;
-            }
-        }   
-    }
     return false;
 }
 
