@@ -39,4 +39,5 @@ private:
      * @var current game state
      */
     GameState* gameState;
+    sf::Time timePerFrame = sf::seconds(1.f/60.f);
 };

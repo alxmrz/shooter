@@ -78,9 +78,7 @@ void Scene::generateBackground(std::string data)
         boost::split(lineChars, line, boost::algorithm::is_any_of(","), boost::token_compress_on);
         for (auto c : lineChars) {
             if (c == "9") {
-                gameState->objects->background.push_back(
-                        gameState->objects->fabric->createGround(x, y, 50, 50)
-                        );
+                gameState->objects->background.push_back({9, x, y});
             } 
             x += 50;
         }

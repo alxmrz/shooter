@@ -21,8 +21,7 @@ Application::~Application()
 {
 }
 
-int Application::run()
-{
+int Application::run() {
     window->init();
     scene->initMainMenu();
     /*gameState->startNewGame*/
