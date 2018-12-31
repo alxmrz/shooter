@@ -9,6 +9,7 @@ src/CObject.cpp \
 src/Event.cpp \
 src/GameObjects.cpp \
 src/GameState.cpp \
+src/Map.cpp \
 src/Scene.cpp \
 src/Window.cpp \
 src/Fabric.cpp \

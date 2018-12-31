@@ -8,6 +8,7 @@ namespace tinyxml2 {
 
 class Application;
 class GameState;
+class Map;
 
 class Scene {
 public:
@@ -24,13 +25,6 @@ public:
      * Init objects for new game
      */
     void initNewGame();
-    
-    /**
-     * Generate level from string. Level string is inside the method until
-     * count of levels is one
-     */
-    void generateLevel();
-    void generateLevelNew();
 private:
     /**
      * Current instance of the application
@@ -41,8 +35,7 @@ private:
      * Current game state instance
      */
     GameState* gameState;
-    void generateBackground(std::string data);
-    void generatePlayable(tinyxml2::XMLElement* objectgroup);
+    Map* map;
 };
 
 #endif /* SCENE_H */
