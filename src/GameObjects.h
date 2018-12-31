@@ -17,7 +17,6 @@ struct GameObjects {
     virtual ~GameObjects();
     
     std::vector<CObject*> buttons;
-    //std::vector<CObject*> background;
     std::map<int, CObject*> borders;
     std::vector<CObject*> bullets;
     std::vector<CObject*> playable;
@@ -25,8 +24,9 @@ struct GameObjects {
     std::vector<CObject*> hearts;
     std::vector<CObject*> ammo;
     std::vector<CObject*> platforms;
-    std::vector<std::vector<float>> background;
+    std::vector<std::vector<int>> background;
     std::vector<CObject*> all;
+    std::vector<std::vector<int>> globalTileIds;
     
     GameState* gs;
     Unit* player;

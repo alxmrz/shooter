@@ -23,8 +23,9 @@ public:
 private:
     GameObjects* go;
     
-    void generateBackground(std::string data);
+    void generateBackground(tinyxml2::XMLElement* map);
     void generatePlayable(tinyxml2::XMLElement* objectgroup);
+    void generateTIleIdPositions(std::string tileset);
 };
 
 #endif /* MAP_H */

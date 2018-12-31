@@ -66,10 +66,9 @@ void GameObjects::draw(Window* window, float dt)
     }
     if (gs->isGameStarted) {
         for (unsigned i = 0; i < background.size(); i++) {    
-            if (background[i][0] == 9) {
-                 groundSprite->setPosition(background[i][1], background[i][2]);
-                 window->draw(*groundSprite);
-            }         
+            groundSprite->setTextureRect(sf::IntRect(background[i][2], background[i][3], 25, 25));
+            groundSprite->setPosition(background[i][0], background[i][1]);
+            window->draw(*groundSprite);
         }
         
         for (unsigned i = 0; i < all.size(); i++) {

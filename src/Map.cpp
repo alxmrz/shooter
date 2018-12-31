@@ -1,3 +1,5 @@
+#include <string>
+#include <iostream>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -32,37 +34,51 @@ Map::~Map()
 void Map::generateLevel()
 {
     tinyxml2::XMLDocument doc;
-    doc.LoadFile("resources/levels/test.xml");
-    const char* str = doc.FirstChildElement("map")
-                        ->FirstChildElement("layer")
-                        ->FirstChildElement("data")
-                        ->GetText();
+    doc.LoadFile("resources/levels/training.tmx");
+
     tinyxml2::XMLElement* map = doc.FirstChildElement("map");
-    
-    generateBackground(str);
+    generateTIleIdPositions("basd");
+    generateBackground(map);
     generatePlayable(map);
 }
 
-void Map::generateBackground(std::string data)
+void Map::generateBackground(tinyxml2::XMLElement* map)
 {
-    std::vector<std::string> lines;
-    std::vector<std::string> lineChars;
-    boost::trim(data);
-    boost::split(lines, data, boost::algorithm::is_any_of("\n"), boost::token_compress_on);
-    float x = 0;
-    float y = 0;
-     
-    for (std::string line : lines) {
-        x = 0;
-        boost::split(lineChars, line, boost::algorithm::is_any_of(","), boost::token_compress_on);
-        for (auto c : lineChars) {
-            if (c == "9") {
-                go->background.push_back({9, x, y});
-            } 
-            x += 50;
+    for (tinyxml2::XMLElement* layer = map->FirstChildElement("layer");
+            layer != NULL;
+            layer = layer->NextSiblingElement()) {
+        
+        if (layer->FirstChildElement("data") == NULL) break;
+        std::string data = layer->FirstChildElement("data")->GetText();
+        
+        std::vector<std::string> lines;
+        std::vector<std::string> lineChars;
+        boost::trim(data);
+        boost::split(lines, data, boost::algorithm::is_any_of("\n"), boost::token_compress_on);
+        int x = 0;
+        int y = 0;
+
+        for (std::string line : lines) {
+            x = 0;
+            boost::split(lineChars, line, boost::algorithm::is_any_of(","), boost::token_compress_on);
+            for (auto c : lineChars) {
+                unsigned id = atoi(c.c_str()) - 1;
+                std::cout << "ID:" << id << std::endl;
+                if (id > 0 && id < go->globalTileIds.size()) {
+                    go->background.push_back({x, y, go->globalTileIds[id][0], go->globalTileIds[id][1]});
+                }
+
+
+                x += 25;
+            }
+            y += 25;
         }
-        y += 50;
     }
+    
+    
+
+    
+    std::cout << "FINISHED!" << std::endl;
 }
 
 void Map::generatePlayable(tinyxml2::XMLElement* map)
@@ -130,4 +146,26 @@ void Map::generatePlayable(tinyxml2::XMLElement* map)
             }
         }
     }
+}
+
+void Map::generateTIleIdPositions(std::string tileset)
+{
+    int width = 1972;
+    int height = 1184;
+    int columns = 77;
+    int margin = 25;
+    int tileWidth = 25;
+    int tileHeight = 25;
+    int tilecount = 3542;
+    
+    int currentTileCount = 0;
+    for (int y = margin; y < height - margin; y+=tileHeight) {
+        for (int x = margin, column = 1; x < width-margin && column <= columns; x+=tileWidth, column++) {
+            go->globalTileIds.push_back({x, y});
+            currentTileCount++;
+        }
+    }
+    
+    std::cout << "CURRENT TILE COUNT" << currentTileCount << std::endl;
+    std::cout << "Tile 77 X:" << go->globalTileIds[77][0] << " Tile 77 Y:" << go->globalTileIds[77][1] << std::endl;
 }
