@@ -37,6 +37,10 @@ struct GameObjects {
     sf::Sprite* heartSprite;
     sf::Sprite* crystalSprite;
     sf::Sprite* ammoSprite;
+    
+    sf::RenderTexture* grounds;
+    sf::Sprite* groundsSprite;
+    
     Text* cristalCountText;
     Text* ammoCountText;
     /**

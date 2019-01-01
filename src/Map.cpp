@@ -152,8 +152,8 @@ void Map::generateTIleIdPositions(std::string tileset)
 {
     int width = 1972;
     int height = 1184;
-    int columns = 77;
-    int margin = 25;
+    int columns = 78;
+    int margin = 0;
     int tileWidth = 25;
     int tileHeight = 25;
     int tilecount = 3542;

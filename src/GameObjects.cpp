@@ -18,6 +18,7 @@ GameObjects::GameObjects(GameState* gs)
     this->gs = gs;
     fabric = new Fabric(this);
     backgroundSprite = fabric->createSprite("background", 0.f, 0.f);
+   // groundsSprite = fabric->createSprite("grounds", 0.f, 0.f);
     
     heartSprite = fabric->createSprite("heart", 0.f, 0.f);
     heartSprite->setScale(0.5f, 0.5f);
@@ -35,6 +36,8 @@ GameObjects::GameObjects(GameState* gs)
     ammoSprite = fabric->createSprite("ammo", 0.f, 0.f);
     ammoSprite->setScale(0.5f, 0.5f);
     ammoSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    
+    grounds = new sf::RenderTexture;
 }
 
 GameObjects::~GameObjects()
@@ -53,6 +56,7 @@ void GameObjects::reset()
 
 void GameObjects::draw(Window* window, float dt)
 {
+
     sf::Vector2f backgroundCoords = window->mapPixelToCoords(sf::Vector2i(0, 0));
     CObject currentWindow (backgroundCoords.x, backgroundCoords.y, 900, 600);
     CObject back;
@@ -60,16 +64,29 @@ void GameObjects::draw(Window* window, float dt)
     backgroundSprite->setPosition(backgroundCoords.x, backgroundCoords.y-300);
 
     window->draw(*backgroundSprite);
+    
 
     for (unsigned i = 0; i < buttons.size(); i++) {
         buttons[i]->draw(window, dt);
     }
     if (gs->isGameStarted) {
-        for (unsigned i = 0; i < background.size(); i++) {    
-            groundSprite->setTextureRect(sf::IntRect(background[i][2], background[i][3], 25, 25));
-            groundSprite->setPosition(background[i][0], background[i][1]);
-            window->draw(*groundSprite);
-        }
+        if (groundsSprite == nullptr) {
+            grounds->create(5000, 2500);
+
+            for (unsigned i = 0; i < background.size(); i++) {
+                groundSprite->setTextureRect(sf::IntRect(background[i][2], background[i][3], 25, 25));
+                groundSprite->setPosition(background[i][0], background[i][1]);
+                grounds->draw(*groundSprite);
+            }
+
+            grounds->display();
+            const sf::Texture& texture = grounds->getTexture();
+            
+            groundsSprite = new sf::Sprite(texture);
+        } 
+        
+       window->draw(*groundsSprite);
+
         
         for (unsigned i = 0; i < all.size(); i++) {
             if (currentWindow.collideRect(all[i])) {
