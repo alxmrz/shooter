@@ -30,3 +30,6 @@ In the future releases:
 * New Objects for the interaction  
 * Real levels
 * A game plot
+
+CREDITS:
+* Master484 (https://opengameart.org/users/master484) for main free images

@@ -57,7 +57,7 @@ private:
         {"bullet", "resources/images/shell.png"},
         {"shooter", "resources/images/OpenGunnerHeroVer2.png"},
         {"explosion", "resources/images/oneshot.png"},
-        {"ground", "resources/images/ground.jpeg"},
+        {"ground", "resources/images/OpenGunnerForestTiles-1.png"},
         {"heart", "resources/images/heart.png"},
         {"crystal", "resources/images/crystal.png"},
         {"background", "resources/images/background.png"},
