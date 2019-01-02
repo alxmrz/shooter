@@ -14,6 +14,7 @@
 #include "../../GameObjects.h"
 #include "../../Fabric.h"
 #include "../../ui/Text.h"
+#include "../../AI.h"
 
 Unit::Unit()
 {
@@ -26,11 +27,12 @@ Unit::Unit(const Unit& orig)
 Unit::Unit(GameObjects* go, float x, float y, int width, int height) 
 : Movable(go, x, y, width, height)
 {
-    
+    ai = new AI(go, this);
 }
 
 Unit::~Unit()
 {
+    delete ai;
 }
 
 void Unit::attack()
@@ -48,43 +50,6 @@ sf::Drawable* Unit::getDrawForm()
     } else {
         return explosionSprite;
     }
-}
-
-void Unit::think()
-{
-    if (!isPlayer() && !isDead()) {
-        if (isMoveRight) {
-            isMoveRight = move("right");
-            if (isMoveRight) {
-                isMoveRight = !isNextFalling("right");
-            }
-            attack();
-            isMoveLeft = !isMoveRight;
-        } else if (isMoveLeft) {
-            isMoveLeft = move("left");
-            if (isMoveLeft) {
-                isMoveLeft = !isNextFalling("left");
-            }
-            attack();
-            isMoveRight = !isMoveLeft;
-        }
-    }
-}
-
-bool Unit::isNextFalling(std::string direction)
-{
-    int offsetX = 0;
-    if (direction == "left") {
-        offsetX = -25;
-    } else if (direction == "right") {
-        offsetX = 25;
-    }
-    Unit fake = Unit(this->go, getX()+offsetX, getY(), getWidth(), getHeight());
-    if (!fake.collideObjectAfterMove(0.f, 5.f)) {
-        velocity = 0;
-        return true;
-    } 
-    return false;
 }
 
 bool Unit::move(float x, float y) 
@@ -184,6 +149,11 @@ void Unit::update()
 
 }
 
+void Unit::think() 
+{
+    ai->think();
+}
+
 bool Unit::isJumping()
 {
     return jumping;
@@ -279,4 +249,9 @@ void Unit::setCrystalSound(sf::Sound* crystalSound)
 void Unit::setShotgunSound(sf::Sound* shotgunSound)
 {
     this->shotgunSound = shotgunSound;
+}
+
+void Unit::setVelocity(float value)
+{
+    velocity = value;
 }

@@ -160,7 +160,7 @@ void Map::generateTIleIdPositions()
     int margin = 0;
     int tileWidth = 25;
     int tileHeight = 25;
-    int tilecount = 3542;
+    //int tilecount = 3542;
     
     int currentTileCount = 0;
     for (int y = margin; y < height - margin; y+=tileHeight) {

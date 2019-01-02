@@ -10,6 +10,7 @@ src/Event.cpp \
 src/GameObjects.cpp \
 src/GameState.cpp \
 src/Map.cpp \
+src/AI.cpp \
 src/Scene.cpp \
 src/Window.cpp \
 src/Fabric.cpp \
