@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-up" width="200" height="100" tilewidth="25" tileheight="25" infinite="0" nextobjectid="124">
+<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="right-up" width="200" height="100" tilewidth="25" tileheight="25" infinite="0" nextobjectid="133">
  <tileset firstgid="1" source="tiles/OpenGunnerForestTiles-1.tsx"/>
  <layer name="Background" width="200" height="100">
   <data encoding="csv">
@@ -175,6 +175,15 @@
  </objectgroup>
  <objectgroup name="units">
   <object id="1" name="Player" type="Shooter" x="175.333" y="498" width="50" height="50"/>
+  <object id="124" name="Shooter" type="Shooter" x="949.333" y="496" width="50" height="50"/>
+  <object id="125" name="Shooter" type="Shooter" x="655.667" y="217.667" width="50" height="50"/>
+  <object id="126" name="Shooter" type="Shooter" x="2819.67" y="839" width="50" height="50"/>
+  <object id="127" name="Shooter" type="Shooter" x="2368.33" y="489" width="50" height="50"/>
+  <object id="128" name="Shooter" type="Shooter" x="3907" y="942.5" width="50" height="50"/>
+  <object id="129" name="Shooter" type="Shooter" x="3711.36" y="2050.76" width="50" height="50"/>
+  <object id="130" name="Shooter" type="Shooter" x="3600.33" y="1669" width="50" height="50"/>
+  <object id="131" name="Shooter" type="Shooter" x="1301.67" y="2012.33" width="50" height="50"/>
+  <object id="132" name="Shooter" type="Shooter" x="391.667" y="2068.33" width="50" height="50"/>
  </objectgroup>
  <objectgroup name="borders">
   <object id="4" name="Border" type="Border" x="130.303" y="554.545" width="2415.15" height="72.7273"/>
