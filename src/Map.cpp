@@ -31,13 +31,13 @@ Map::~Map()
     
 }
 
-void Map::generateLevel()
+void Map::generateLevel(const char* level)
 {
     tinyxml2::XMLDocument doc;
-    doc.LoadFile("resources/levels/training.tmx");
+    doc.LoadFile(level);
 
     tinyxml2::XMLElement* map = doc.FirstChildElement("map");
-    generateTIleIdPositions("basd");
+    generateTIleIdPositions();
     generateBackground(map);
     generatePlayable(map);
 }
@@ -63,22 +63,15 @@ void Map::generateBackground(tinyxml2::XMLElement* map)
             boost::split(lineChars, line, boost::algorithm::is_any_of(","), boost::token_compress_on);
             for (auto c : lineChars) {
                 unsigned id = atoi(c.c_str()) - 1;
-                std::cout << "ID:" << id << std::endl;
                 if (id > 0 && id < go->globalTileIds.size()) {
                     go->background.push_back({x, y, go->globalTileIds[id][0], go->globalTileIds[id][1]});
                 }
-
 
                 x += 25;
             }
             y += 25;
         }
     }
-    
-    
-
-    
-    std::cout << "FINISHED!" << std::endl;
 }
 
 void Map::generatePlayable(tinyxml2::XMLElement* map)
@@ -92,8 +85,15 @@ void Map::generatePlayable(tinyxml2::XMLElement* map)
                 object;
                 object = object->NextSiblingElement()
                 ) {
+            if (object->Attribute("type") == 0) {
+                continue;
+            }
+            
             type = object->Attribute("type");
-
+            
+            /**
+             * TODO: fix DRY
+             */
             if (type == "Shooter") {
                 Shooter* shooter = go->fabric->createShooter(atoi(object->Attribute("x")), atoi(object->Attribute("y")), 50, 50);
                 std::string name = object->Attribute("name");
@@ -148,8 +148,12 @@ void Map::generatePlayable(tinyxml2::XMLElement* map)
     }
 }
 
-void Map::generateTIleIdPositions(std::string tileset)
+void Map::generateTIleIdPositions()
 {
+    /**
+     * TODO: need to remove strict values from level template files
+     * Current values are stored in files: training.tmx and *.tsx
+     */
     int width = 1972;
     int height = 1184;
     int columns = 78;
@@ -165,7 +169,4 @@ void Map::generateTIleIdPositions(std::string tileset)
             currentTileCount++;
         }
     }
-    
-    std::cout << "CURRENT TILE COUNT" << currentTileCount << std::endl;
-    std::cout << "Tile 77 X:" << go->globalTileIds[77][0] << " Tile 77 Y:" << go->globalTileIds[77][1] << std::endl;
 }

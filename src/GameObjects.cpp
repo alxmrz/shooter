@@ -18,7 +18,6 @@ GameObjects::GameObjects(GameState* gs)
     this->gs = gs;
     fabric = new Fabric(this);
     backgroundSprite = fabric->createSprite("background", 0.f, 0.f);
-   // groundsSprite = fabric->createSprite("grounds", 0.f, 0.f);
     
     heartSprite = fabric->createSprite("heart", 0.f, 0.f);
     heartSprite->setScale(0.5f, 0.5f);
@@ -44,13 +43,10 @@ GameObjects::~GameObjects()
 {
 }
 
-void GameObjects::reset()
+void GameObjects::clear()
 {
     buttons.clear();
-    playable.clear();
-    background.clear();
-    crystals.clear();
-    bullets.clear();
+    all.clear();
     player = NULL;
 }
 
@@ -59,7 +55,7 @@ void GameObjects::draw(Window* window, float dt)
 
     sf::Vector2f backgroundCoords = window->mapPixelToCoords(sf::Vector2i(0, 0));
     CObject currentWindow (backgroundCoords.x, backgroundCoords.y, 900, 600);
-    CObject back;
+
     //y must be up 300px, because background images is very low
     backgroundSprite->setPosition(backgroundCoords.x, backgroundCoords.y-300);
 
@@ -86,13 +82,11 @@ void GameObjects::draw(Window* window, float dt)
         } 
         
        window->draw(*groundsSprite);
-
         
         for (unsigned i = 0; i < all.size(); i++) {
             if (currentWindow.collideRect(all[i])) {
                 all[i]->draw(window, dt);
-            }
-            
+            }   
         }
         
         drawPlayerUi(window);  

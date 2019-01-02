@@ -58,7 +58,6 @@ private:
         {"shooter", "resources/images/OpenGunnerHeroVer2.png"},
         {"explosion", "resources/images/oneshot.png"},
         {"ground", "resources/images/OpenGunnerForestTiles-1.png"},
-        {"grounds", "resources/levels/tiles/training.png"},
         {"heart", "resources/images/heart.png"},
         {"crystal", "resources/images/crystal.png"},
         {"background", "resources/images/background.png"},

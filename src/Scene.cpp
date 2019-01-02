@@ -39,6 +39,6 @@ void Scene::initMainMenu()
 
 void Scene::initNewGame()
 {
-    gameState->objects->reset();
-    map->generateLevel();
+    gameState->objects->clear();
+    map->generateLevel("resources/levels/training.tmx");
 }

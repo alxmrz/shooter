@@ -23,7 +23,7 @@ GameState::GameState(Application* app)
 
 GameState::~GameState()
 {
-    objects->reset();
+    objects->clear();
     delete backgroundMusic;
     delete objects;
 }

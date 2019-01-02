@@ -26,15 +26,13 @@ public:
      */
     void initNewGame();
 private:
-    /**
-     * Current instance of the application
-     */
+    /** Current instance of the application */
     Application* app;
     
-    /**
-     * Current game state instance
-     */
+    /** Current game state instance */
     GameState* gameState;
+    
+    /** Map generator*/
     Map* map;
 };
 

@@ -18,12 +18,6 @@ struct GameObjects {
     
     std::vector<CObject*> buttons;
     std::map<int, CObject*> borders;
-    std::vector<CObject*> bullets;
-    std::vector<CObject*> playable;
-    std::vector<CObject*> crystals;
-    std::vector<CObject*> hearts;
-    std::vector<CObject*> ammo;
-    std::vector<CObject*> platforms;
     std::vector<std::vector<int>> background;
     std::vector<CObject*> all;
     std::vector<std::vector<int>> globalTileIds;
@@ -39,7 +33,7 @@ struct GameObjects {
     sf::Sprite* ammoSprite;
     
     sf::RenderTexture* grounds;
-    sf::Sprite* groundsSprite;
+    sf::Sprite* groundsSprite = nullptr;
     
     Text* cristalCountText;
     Text* ammoCountText;
@@ -51,7 +45,7 @@ struct GameObjects {
     /**
      * Delete all game objects
      */
-    void reset();
+    void clear();
     
     void draw(Window* window, float dt);
     void correctBackgroundSprite();
