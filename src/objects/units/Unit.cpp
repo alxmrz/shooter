@@ -53,19 +53,37 @@ sf::Drawable* Unit::getDrawForm()
 void Unit::think()
 {
     if (!isPlayer() && !isDead()) {
+        bool isPlayerOnY = getY() - 25 <= go->player->getY() && go->player->getY() <= getY() + 25;
+        bool isPlayerOnXLeft = getX() - 300 <= go->player->getX() && go->player->getX() <= getX();
+        bool isPlayerOnXRight = getX()<= go->player->getX() && go->player->getX() <= getX() + 300;
+        
+        if (isPlayerOnY && isPlayerOnXLeft) {
+            isMoveRight = false;
+            isMoveLeft = true;
+        } else if (isPlayerOnY && isPlayerOnXRight) {
+           isMoveRight = true;
+           isMoveLeft = false; 
+        }
+           
+        
         if (isMoveRight) {
             isMoveRight = move("right");
             if (isMoveRight) {
                 isMoveRight = !isNextFalling("right");
             }
-            attack();
+            if (isPlayerOnXRight && isPlayerOnY) {
+                attack();
+            }
+            
             isMoveLeft = !isMoveRight;
         } else if (isMoveLeft) {
             isMoveLeft = move("left");
             if (isMoveLeft) {
                 isMoveLeft = !isNextFalling("left");
             }
-            attack();
+            if (isPlayerOnXLeft && isPlayerOnY) {
+                attack();
+            }
             isMoveRight = !isMoveLeft;
         }
     }
