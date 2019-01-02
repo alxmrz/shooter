@@ -16,7 +16,8 @@ AI::~AI() {
 
 void AI::think()
 {
-    if (!unit->isPlayer() && !unit->isDead()) {      
+    if (!unit->isPlayer() && !unit->isDead()) { 
+        
         if (isPlayerOnY() && isPlayerOnXLeft()) {
             isMoveRight = false;
             isMoveLeft = true;
@@ -25,28 +26,30 @@ void AI::think()
            isMoveLeft = false; 
         }
            
+        bool isPlayerOnFireLine = (isPlayerOnXRight() || isPlayerOnXLeft()) && isPlayerOnY();
         
         if (isMoveRight) {
-            isMoveRight = unit->move("right");
-            if (isMoveRight) {
-                isMoveRight = !isNextFalling("right");
-            }
-            if (isPlayerOnXRight() && isPlayerOnY()) {
+            isMoveRight = move("right");
+            
+            if (isPlayerOnFireLine) {
                 unit->attack();
             }
             
             isMoveLeft = !isMoveRight;
         } else if (isMoveLeft) {
-            isMoveLeft = unit->move("left");
-            if (isMoveLeft) {
-                isMoveLeft = !isNextFalling("left");
-            }
-            if (isPlayerOnXLeft() && isPlayerOnY()) {
+            isMoveLeft = move("left");
+            
+            if (isPlayerOnFireLine) {
                 unit->attack();
             }
             isMoveRight = !isMoveLeft;
         }
     }
+}
+
+bool AI::move(std::string direction)
+{
+    return unit->move(direction) && !isNextFalling(direction);
 }
 
 bool AI::isNextFalling(std::string direction)

@@ -20,6 +20,8 @@ private:
     bool isMoveRight = true;
     bool isMoveLeft = false;
     
+    bool move(std::string direction);
+    
     bool isNextFalling(std::string direction);
     bool isPlayerOnY();
     bool isPlayerOnXLeft();
