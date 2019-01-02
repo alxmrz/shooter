@@ -12,6 +12,7 @@
 struct GameObjects;
 class Window;
 class Text;
+class AI;
 
 class Unit : public Movable {
 public:
@@ -24,7 +25,6 @@ public:
      * Make a fire (it creates Bullet instance)
      */
     virtual void attack();
-    virtual void think();
     
     bool isPlayer();
     bool isDead();
@@ -65,13 +65,16 @@ public:
     void setMain(bool main);
     void setDead(bool dead);
     
-   
+    void think();
     void setMainSprite(sf::Sprite* mainSprite);
     void setHeartSprite(sf::Sprite* heartSprite);
     void setJumpSound(sf::Sound* jumpSound);
     void setCrystalSound(sf::Sound* jumpSound);
     void setShotgunSound(sf::Sound* jumpSound);
+    void setVelocity(float value);
 protected:
+    AI* ai;
+    
     /* is the current object dead*/
     bool dead = false;
     /* must the current object be deleted */
@@ -122,11 +125,7 @@ protected:
 
     /* Time after last fire call */
     float fireTime = 0.f; 
-    
-    bool isMoveRight = true;
-    bool isMoveLeft = false;
   
-    bool isNextFalling(std::string direction);
     void animateMoving();
 };
 

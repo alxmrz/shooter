@@ -9,6 +9,7 @@
 #include "objects/interactive/Bullet.h"
 #include "objects/interactive/Ammunition.h"
 #include "Fabric.h"
+#include "AI.h"
 
 GameState::GameState()
 {
@@ -51,8 +52,10 @@ void GameState::updateObjects()
                 objects->all.erase(objects->all.begin() + i);
             }
             shooter->update();
-            if (!shooter->isJumping()) {      
-                shooter->think();
+            
+            shooter->think();
+            
+            if (!shooter->isJumping()) {         
                 shooter->gravitate();
             } 
         } else if (Bullet* bullet = dynamic_cast<Bullet*>(objects->all[i])) {

@@ -9,6 +9,7 @@
 class Application;
 class CObject;
 class GameObjects;
+class AI;
 
 class GameState {
 public:
