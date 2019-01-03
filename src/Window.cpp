@@ -46,6 +46,13 @@ void Window::updateView(GameState* gameState)
             gameState->objects->player->getX(),
             gameState->objects->player->getY()-200
     );
+    
+    auto center = gameState->view->getCenter();
+    
+    if (center.x - 450 <= 0) {
+        gameState->view->setCenter (450, gameState->objects->player->getY()-200);
+    }
+    
     setView(*gameState->view);
 }
 
