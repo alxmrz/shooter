@@ -4,7 +4,7 @@
 #include "Window.h"
 #include "GameState.h"
 #include "CObject.h"
-#include "objects/Shooter.h"
+#include "objects/units/Unit.h"
 
 Window::Window(sf::VideoMode mode,
         const sf::String& title,
@@ -42,14 +42,17 @@ void Window::draw(GameState* gameState)
 
 void Window::updateView(GameState* gameState)
 {
-    /*sf::Vector2i playerWindowCoords = mapCoordsToPixel(sf::Vector2f(
-            gameState->objects->player->getX(),
-            gameState->objects->player->getY())
-            );*/
     gameState->view->setCenter(
             gameState->objects->player->getX(),
             gameState->objects->player->getY()-200
     );
+    
+    auto center = gameState->view->getCenter();
+    
+    if (center.x - 450 <= 0) {
+        gameState->view->setCenter (450, gameState->objects->player->getY()-200);
+    }
+    
     setView(*gameState->view);
 }
 

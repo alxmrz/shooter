@@ -5,11 +5,11 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-#include <vector>
 
 class Application;
 class CObject;
 class GameObjects;
+class AI;
 
 class GameState {
 public:
@@ -55,12 +55,7 @@ private:
     /**
      * Call gravity for objects
      */
-    void causeGravity();
-    
-    /**
-     * Move all bullets and deleted if the are ready
-     */
-    void updateBulletsState();
+    void updateObjects();
 };
 
 #endif

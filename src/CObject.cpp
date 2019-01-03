@@ -28,6 +28,7 @@ height(height)
 
 CObject::~CObject()
 {
+    delete mainSprite;
 }
 
 bool CObject::collideRect(CObject* obj)
@@ -61,7 +62,7 @@ bool CObject::collidePoint(int x, int y)
 
 sf::Drawable* CObject::getDrawForm()
 {
-    return NULL;
+    return mainSprite;
 }
 
 float CObject::getX()
@@ -143,4 +144,15 @@ bool CObject::collideObjectAfterMove(float x, float y)
     }
 
     return false;
+}
+
+void CObject::setCoords(float x, float y)
+{
+    this->x = x;
+    this->y = y;
+}
+
+void CObject::setMainSprite(sf::Sprite* sprite)
+{
+    mainSprite = sprite;
 }

@@ -69,13 +69,16 @@ public:
     float getY();
     int getWidth();
     int getHeight();
-
+    void setCoords(float x, float y);
+    void setMainSprite(sf::Sprite* sprite);
 protected:
     GameObjects* go;
     float x;
     float y;
     int width;
     int height;
+
+    sf::Sprite* mainSprite = nullptr;
 };
 
 #endif /* COBJECT_H */

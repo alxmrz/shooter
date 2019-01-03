@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "Event.h"
 #include "Window.h"
-#include "objects/Shooter.h"
+#include "objects/units/Unit.h"
 #include "Scene.h"
 #include "Application.h"
 #include "GameState.h"
@@ -125,7 +125,7 @@ void Event::handleRealTimeKeyboardState()
 {
     handleArrowKeys();
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        player->fire();
+        player->attack();
     } 
 }
 

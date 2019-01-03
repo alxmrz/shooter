@@ -4,10 +4,14 @@
 #include "Fabric.h"
 #include "GameObjects.h"
 #include "Resources.h"
-#include "objects/Bullet.h"
-#include "objects/Shooter.h"
-#include "objects/Ground.h"
-#include "objects/Crystal.h"
+#include "objects/interactive/Bullet.h"
+#include "objects/units/Unit.h"
+#include "objects/units/Shooter.h"
+#include "objects/backgrounds/Ground.h"
+#include "objects/interactive/Crystal.h"
+#include "objects/interactive/Heart.h"
+#include "objects/interactive/Ammunition.h"
+#include "objects/interactive/Platform.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 
@@ -29,10 +33,61 @@ Fabric::~Fabric()
 
 Bullet* Fabric::createBullet(Shooter* shooter, float x, float y, int width, int height)
 {
+    sf::Sprite* sprite = createSprite("bullet", x, y);
+    sprite->setTextureRect(sf::IntRect(0, 0, 18, 7));
+    
     Bullet* bullet = new Bullet(shooter, go, x, y, width, height);
-    bullet->setMainTexture(resources->getTexture("bullet"));
+    bullet->setMainSprite(sprite);
     bullet->setExplosionSound(resources->getSound("explosion"));
     return bullet;
+}
+
+Crystal* Fabric::createCrystal(float x, float y, int width, int height)
+{
+    sf::Sprite* sprite = createSprite("crystal", x, y);
+    sprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    sprite->setScale(0.8f, 0.8f);
+    
+    Crystal* crystal = new Crystal(x, y, width, height);
+    crystal->setMainSprite(sprite);
+    
+    return crystal;
+}
+
+Ammunition* Fabric::createAmmo(float x, float y, int width, int height)
+{
+    sf::Sprite* sprite = createSprite("ammo", x, y);
+    sprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    sprite->setScale(0.8f, 0.8f);
+    
+    Ammunition* ammo = new Ammunition(x, y, width, height);
+    ammo->setMainSprite(sprite);
+    
+    return ammo;
+}
+
+Heart* Fabric::createHeart(float x, float y, int width, int height)
+{
+    sf::Sprite* sprite = createSprite("heart", x, y);
+    sprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    sprite->setScale(0.8f, 0.8f);
+    
+    Heart* heart = new Heart(x, y, width, height);
+    heart->setMainSprite(sprite);
+    
+    return heart;
+}
+
+Platform* Fabric::createPlatform(float x, float y, int width, int height)
+{
+    /*sf::Sprite* sprite = createSprite("heart", x, y);
+    sprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
+    sprite->setScale(0.8f, 0.8f);*/
+    
+    Platform* platform = new Platform(x, y, width, height);
+    //platform->setMainSprite(sprite);
+    
+    return platform;
 }
 
 Shooter* Fabric::createShooter(float x, float y, int width, int height)
@@ -55,11 +110,13 @@ Shooter* Fabric::createShooter(float x, float y, int width, int height)
 
 Ground* Fabric::createGround(float x, float y, int width, int height)
 {
-    return new Ground(resources->getTexture("ground"), x, y, width, height);
-}
-Crystal* Fabric::createCrystal(float x, float y, int width, int height)
-{
-    return new Crystal(resources->getTexture("crystal"), x, y, width, height);
+    sf::Sprite* sprite = createSprite("ground", x, y);
+    sprite->setTextureRect(sf::IntRect(0, 100, 50, 50));
+    
+    Ground* ground = new Ground(x, y, width, height);
+    ground->setMainSprite(sprite);
+    
+    return ground;
 }
 
 CObject* Fabric::createBorder(float x, float y, int width, int height)

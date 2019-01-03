@@ -5,9 +5,11 @@
 #include "Application.h"
 #include "CObject.h"
 #include "Scene.h"
-#include "objects/Shooter.h"
-#include "objects/Bullet.h"
+#include "objects/units/Unit.h"
+#include "objects/interactive/Bullet.h"
+#include "objects/interactive/Ammunition.h"
 #include "Fabric.h"
+#include "AI.h"
 
 GameState::GameState()
 {
@@ -22,7 +24,7 @@ GameState::GameState(Application* app)
 
 GameState::~GameState()
 {
-    objects->reset();
+    objects->clear();
     delete backgroundMusic;
     delete objects;
 }
@@ -30,32 +32,37 @@ GameState::~GameState()
 void GameState::update()
 {
     if (isGameStarted && !isGamePaused) {
-        updateBulletsState();
-        causeGravity();
+        updateObjects();
         resetElapsedTime();
     }
 }
 
-
-void GameState::updateBulletsState()
+void GameState::updateObjects()
 {
-    for (unsigned i = 0; i < objects->bullets.size(); i++) {
-        Bullet* bullet = static_cast<Bullet*>(objects->bullets[i]);
-        if (!bullet->move(10.f, 0.f)) {
-            objects->bullets.erase(objects->bullets.begin() + i);
-            break;
-        }
-    }   
-}
-
-void GameState::causeGravity()
-{
-    for (auto* obj: objects->playable) {
-        Shooter* shooter = static_cast<Shooter*>(obj);
-        if (!shooter->isJumping()) {
+    for (unsigned i = 0; i < objects->all.size(); i++) {
+        if (Unit* shooter = dynamic_cast<Unit*>(objects->all[i])) {
+            if (shooter->remove()) {
+                objects->all.push_back(objects->fabric->createAmmo(
+                            shooter->getX(),
+                            shooter->getY(),
+                            50,
+                            50
+                            )
+                        );
+                objects->all.erase(objects->all.begin() + i);
+            }
+            shooter->update();
+            
             shooter->think();
-            shooter->gravitate();
-        } 
+            
+            if (!shooter->isJumping()) {         
+                shooter->gravitate();
+            } 
+        } else if (Bullet* bullet = dynamic_cast<Bullet*>(objects->all[i])) {
+            if (!bullet->move(10.f, 0.f)) {
+                objects->all.erase(objects->all.begin() + i);
+            }
+        }   
     }
 }
 

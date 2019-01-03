@@ -5,7 +5,7 @@
 #include <map>
 #include <SFML/Graphics.hpp>
 
-class Shooter;
+class Unit;
 class CObject;
 class Fabric;
 class Window;
@@ -17,39 +17,35 @@ struct GameObjects {
     virtual ~GameObjects();
     
     std::vector<CObject*> buttons;
-    std::vector<CObject*> background;
     std::map<int, CObject*> borders;
-    std::vector<CObject*> bullets;
-    std::vector<CObject*> playable;
-    std::vector<CObject*> crystals;
+    std::vector<std::vector<int>> background;
+    std::vector<CObject*> all;
+    std::vector<std::vector<int>> globalTileIds;
     
     GameState* gs;
-    Shooter* player;
+    Unit* player;
     Fabric* fabric;
     
     sf::Sprite* backgroundSprite;
+    sf::Sprite* groundSprite;
     sf::Sprite* heartSprite;
     sf::Sprite* crystalSprite;
-    Text* text;
+    sf::Sprite* ammoSprite;
+    
+    sf::RenderTexture* grounds;
+    sf::Sprite* groundsSprite = nullptr;
+    
+    Text* cristalCountText;
+    Text* ammoCountText;
     /**
      * Texture for sprite (Texture loads image). Sprite contains the texture
      */
     sf::Texture* texture;
     
     /**
-     * Get all objects of the game.
-     * Not used. Bad implementation. 
-     * 
-     * TODO: fix and use in Window
-     * 
-     * @return 
-     */
-    std::vector<CObject*>* all();
-    
-    /**
      * Delete all game objects
      */
-    void reset();
+    void clear();
     
     void draw(Window* window, float dt);
     void correctBackgroundSprite();

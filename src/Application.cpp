@@ -9,23 +9,23 @@
 
 Application::Application()
 {
+    window    = new Window();
     gameState = new GameState(this);
-
-    window = new Window();
-
-    event = new Event(this, gameState);
-    scene = new Scene(this, gameState);
+    event     = new Event(this, gameState);
+    scene     = new Scene(this, gameState);
 }
 
 Application::~Application()
 {
+    delete window;
+    delete gameState;
+    delete event;
+    delete scene;
 }
 
-int Application::run()
-{
+int Application::run() {
     window->init();
     scene->initMainMenu();
-    /*gameState->startNewGame*/
 
     while (window->isOpen()) {
         event->handle();
