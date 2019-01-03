@@ -2,7 +2,7 @@
 
 This is not a real game, not now any way. This is just a prototype.
 
-<img src="/resources/images/shooter_processv03.gif?raw=true" width=300>
+<img src="/resources/images/shooter_processv.gif?raw=true" width=300>
 
 For linux users:  
 
@@ -19,17 +19,19 @@ Notes:
 
 Done in the current release:  
 * Refactoring & optimization
-* A map editor (now *tiledmap* (mapeditor.org) is used for a level creation)  
-* Full screen mode (need to press F for that)
-* An easy *AI* 
-
-In the future releases:  
-* Further optimization
 * Improving *AI*
 * New Textures
 * New Objects for the interaction  
-* Real levels
+
+In the future releases:  
+* Further optimization
+* A dialog system
+* Improving UI
+* Improving the level design
+* Improving the game's balance
 * A game plot
+* Real levels
+
 
 CREDITS:
 * Master484 (https://opengameart.org/users/master484) for main free images
