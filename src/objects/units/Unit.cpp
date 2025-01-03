@@ -16,35 +16,31 @@
 #include "../../ui/Text.h"
 #include "../../AI.h"
 
-Unit::Unit()
-{
+#include "../../Event.h"
+
+
+Unit::Unit() {
 }
 
-Unit::Unit(const Unit& orig)
-{
+Unit::Unit(const Unit &orig) {
 }
 
-Unit::Unit(GameObjects* go, float x, float y, int width, int height) 
-: Movable(go, x, y, width, height)
-{
+Unit::Unit(GameObjects *go, float x, float y, int width, int height)
+    : Movable(go, x, y, width, height) {
     ai = new AI(go, this);
 }
 
-Unit::~Unit()
-{
+Unit::~Unit() {
     delete ai;
 }
 
-void Unit::attack()
-{
+void Unit::attack() {
 }
 
-void Unit::shiftSpritePositions()
-{
+void Unit::shiftSpritePositions() {
 }
 
-sf::Drawable* Unit::getDrawForm()
-{
+sf::Drawable *Unit::getDrawForm() {
     if (!dead) {
         return mainSprite;
     } else {
@@ -52,22 +48,21 @@ sf::Drawable* Unit::getDrawForm()
     }
 }
 
-bool Unit::move(float x, float y) 
-{
+bool Unit::move(float x, float y) {
     if (Movable::move(x, y)) {
         shiftSpritePositions();
 
         if (isPlayer()) {
             for (unsigned i = 0; i < go->all.size(); i++) {
-                if (Crystal* obj = dynamic_cast<Crystal*> (go->all[i])) {
-                   if (collideRect(obj)) {
-                    crystals++;
-                    crystalSound->play();
-                    go->all.erase(go->all.begin() + i);
+                if (Crystal *obj = dynamic_cast<Crystal *>(go->all[i])) {
+                    if (collideRect(obj)) {
+                        crystals++;
+                        crystalSound->play();
+                        go->all.erase(go->all.begin() + i);
 
-                    break;
-                    } 
-                } else if (Ammunition* obj = dynamic_cast<Ammunition*>(go->all[i])) {
+                        break;
+                    }
+                } else if (Ammunition *obj = dynamic_cast<Ammunition *>(go->all[i])) {
                     if (collideRect(obj) && getAmmo() < 10) {
                         ammo += 3;
                         if (ammo > 10) ammo = 10;
@@ -75,14 +70,14 @@ bool Unit::move(float x, float y)
 
                         break;
                     }
-                } else if (Heart* obj = dynamic_cast<Heart*>(go->all[i])) {
+                } else if (Heart *obj = dynamic_cast<Heart *>(go->all[i])) {
                     if (collideRect(obj) && getHealth() < 3) {
                         health++;
                         go->all.erase(go->all.begin() + i);
 
                         break;
-                    } 
-                } else if (Platform* obj = dynamic_cast<Platform*>(go->all[i])) {
+                    }
+                } else if (Platform *obj = dynamic_cast<Platform *>(go->all[i])) {
                     if (collideRect(obj)) {
                         isPlatformAffected = true;
                         gravitationalVelocity = 0.0;
@@ -95,15 +90,14 @@ bool Unit::move(float x, float y)
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     return false;
 }
 
-void Unit::jump()
-{
+void Unit::jump() {
     if (velocityHorizontal > -maxVelocity) {
         velocityHorizontal -= acceleration;
     }
@@ -120,12 +114,11 @@ void Unit::jump()
     }
 }
 
-void Unit::gravitate()
-{
+void Unit::gravitate() {
     float y = std::ceil(
-            gravitationalTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f)
-            );
-    
+        gravitationalTime * (gravitationalVelocity + elapsedTime * gravitationalAcceleration / 2.f)
+    );
+
     falling = y > 0 && move(0.f, y);
     if (falling) {
         gravitationalVelocity += gravitationalTime * gravitationalAcceleration;
@@ -136,132 +129,119 @@ void Unit::gravitate()
     }
 }
 
-void Unit::update()
-{
+void Unit::update(Event event) {
     if (remove()) {
-                destroy();
-            }
-            
-            think();
-            
-            if (!isJumping()) {         
-                gravitate();
-            } 
+        destroy();
+    }
+
+    think();
+
+    if (!isJumping()) {
+        gravitate();
+    }
 
     if (isPlayer()) {
+        if (event.IsKeyReleased()) {
+            if (event.IsKeyBoardUp()) {
+                stopJumping();
+            } else if (event.IsKeyBoardLeft()) {
+                stopMoving();
+            } else if (event.IsKeyBoardRight()) {
+                stopMoving();
+            }
+        }
+
         if (isPlatformAffected) {
             jump();
             if (!isJumping()) {
                 isPlatformAffected = false;
             }
-        }       
+        }
     }
-
 }
 
-void Unit::think() 
-{
+void Unit::think() {
     ai->think();
 }
 
-bool Unit::isJumping()
-{
+bool Unit::isJumping() {
     return jumping;
 }
 
-bool Unit::isFalling()
-{
+bool Unit::isFalling() {
     return falling;
 }
 
-void Unit::stopJumping()
-{
+void Unit::stopJumping() {
     jumping = false;
     velocityHorizontal = 0.f;
 }
 
 
-bool Unit::isDead()
-{
+bool Unit::isDead() {
     return dead;
 }
 
-bool Unit::remove()
-{
+bool Unit::remove() {
     return mustBeDeleted;
 }
 
-bool Unit::isPlayer()
-{
+bool Unit::isPlayer() {
     return main;
 }
 
-int Unit::getHealth()
-{
+int Unit::getHealth() {
     return health;
 }
 
-int Unit::getAmmo()
-{
+int Unit::getAmmo() {
     return ammo;
 }
 
-int Unit::getCrystals()
-{
+int Unit::getCrystals() {
     return crystals;
 }
 
-float Unit::getVelocityHorizontal()
-{
+float Unit::getVelocityHorizontal() {
     return velocityHorizontal;
 }
 
-float Unit::getCurrentJumpHeight()
-{
+float Unit::getCurrentJumpHeight() {
     return currentJumpHeight;
 }
 
-void Unit::setMain(bool main)
-{
+void Unit::setMain(bool main) {
     this->main = main;
 }
 
-void Unit::setDead(bool dead)
-{
+void Unit::setDead(bool dead) {
     this->dead = dead;
 }
 
-void Unit::decreaseHealth()
-{
+void Unit::decreaseHealth() {
     health--;
 }
 
-void Unit::setMainSprite(sf::Sprite* mainSprite)
-{
+void Unit::setMainSprite(sf::Sprite *mainSprite) {
     this->mainSprite = mainSprite;
 }
 
-void Unit::setHeartSprite(sf::Sprite* heartSprite)
-{
+void Unit::setHeartSprite(sf::Sprite *heartSprite) {
     this->heartSprite = heartSprite;
 }
 
-void Unit::setJumpSound(sf::Sound* jumpSound)
-{
+void Unit::setJumpSound(sf::Sound *jumpSound) {
     this->jumpSound = jumpSound;
 }
 
-void Unit::setCrystalSound(sf::Sound* crystalSound)
-{
+void Unit::setCrystalSound(sf::Sound *crystalSound) {
     this->crystalSound = crystalSound;
 }
 
-void Unit::setShotgunSound(sf::Sound* shotgunSound)
-{
+void Unit::setShotgunSound(sf::Sound *shotgunSound) {
     this->shotgunSound = shotgunSound;
 }
 
-void Unit::setVelocity(float value)
-{
+void Unit::setVelocity(float value) {
     velocity = value;
 }

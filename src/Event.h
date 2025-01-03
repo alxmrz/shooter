@@ -1,57 +1,43 @@
+//
+// Created by alexandr on 03.01.25.
+//
+
 #ifndef EVENT_H
 #define EVENT_H
-
-#include <SFML/Graphics.hpp>
-
-class Application;
-class GameState;
-class Unit;
+#include <SFML/Window/Event.hpp>
 
 class Event {
 public:
-    Event();
-    Event(Application* app, GameState* gameState);
-    virtual ~Event();
-    
-    /**
-     * Handle all events
-     */
-    void handle();
-private:
-    Application* app;
-    GameState* gameState;
-    Unit* player;
+    enum Type {
+        Closed,
+        KeyPressed,
+        KeyReleased,
+        MouseWheelScrolled,
+        MouseButtonPressed,
+        MouseMoved
+    };
 
-    /**
-     * Handle events of usual keys
-     * 
-     * @param event
-     */
-    void handleMainKeys(sf::Event& event);
-    
-    /**
-     * Handle arrow keys events
-     * 
-     * @param event
-     */
-    void handleArrowKeys();
-    void handleArrowKeysReleased(sf::Event& event);
-    
-    /**
-     * Handle mouse events
-     * @param event
-     */
-    void handleMouseEvents(sf::Event& event);
-    
-    /**
-     * Handle buttons events (click, hover)
-     * 
-     * @param event
-     */
-    void handleUiButtonsClick(sf::Event& event);
-    void handleUiButtonsHover(sf::Event& event);
-    void handleRealTimeKeyboardState();
+    Event();
+
+    Event(int type);
+
+    virtual ~Event();
+
+    bool HasType(Type type) const;
+
+    void SetType(Type type, const sf::Event &event);
+
+    bool IsKeyBoardUp();
+
+    bool IsKeyBoardLeft();
+
+    bool IsKeyBoardRight();
+
+    bool IsKeyReleased();
+
+private:
+    int type;
+    sf::Event event;
 };
 
-#endif /* EVENT_H */
-
+#endif //EVENT_H

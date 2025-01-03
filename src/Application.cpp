@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "Application.h"
 #include "GameState.h"
-#include "Event.h"
+#include "EventHandler.h"
 #include "Scene.h"
 #include "Window.h"
 
@@ -9,7 +9,7 @@ Application::Application()
 {
     window    = new Window();
     gameState = new GameState(this);
-    event     = new Event(this, gameState);
+    event     = new EventHandler(this, gameState);
     scene     = new Scene(this, gameState);
 }
 
@@ -26,8 +26,8 @@ int Application::run() {
     scene->initMainMenu();
 
     while (window->isOpen()) {
-        event->handle();
-        gameState->update();
+        Event eventSubmitted = event->handle();
+        gameState->update(eventSubmitted);
         window->draw(gameState);
     }
 

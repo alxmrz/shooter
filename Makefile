@@ -7,6 +7,7 @@ main.cpp \
 src/Application.cpp \
 src/CObject.cpp \
 src/Event.cpp \
+src/EventHandler.cpp \
 src/GameObjects.cpp \
 src/GameState.cpp \
 src/Map.cpp \

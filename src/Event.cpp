@@ -1,145 +1,44 @@
-#include <iostream>
-#include <string>
-#include <SFML/Graphics.hpp>
+//
+// Created by alexandr on 03.01.25.
+//
 #include "Event.h"
-#include "Window.h"
-#include "objects/units/Unit.h"
-#include "Scene.h"
-#include "Application.h"
-#include "GameState.h"
-#include "ui/Button.h"
+
+#include <utility>
+#include <SFML/Window/Event.hpp>
+
 
 Event::Event()
+= default;
+
+Event::Event(int type):
+type(type)
 {
+
 }
 
-Event::Event(Application* app, GameState* gameState)
-{
-    this->app = app;
-    this->gameState = gameState;
+Event::~Event() = default;
+
+bool Event::HasType(const Type type) const {
+    return this->type == type;
 }
 
-Event::~Event()
-{
+void Event::SetType(const Type type, const sf::Event &event) {
+    this->type = type;
+    this->event = event;
 }
 
-void Event::handle()
-{
-    sf::Event event;
-
-    while (app->window->pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            app->close();
-        } else if (event.type == sf::Event::KeyPressed) {
-            handleMainKeys(event);
-        } else if (event.type == sf::Event::KeyReleased) {
-            handleArrowKeysReleased(event);
-        } else  if (event.type == sf::Event::MouseWheelScrolled) { 
-            handleMouseEvents(event);
-        } else if (event.type == sf::Event::MouseButtonPressed) {
-            if (event.mouseButton.button == sf::Mouse::Left) {
-                handleUiButtonsClick(event);
-            }
-        } else if (event.type == sf::Event::MouseMoved) {
-            handleUiButtonsHover(event);
-        }
-    }
-    if (gameState->isGameStarted) {
-        handleRealTimeKeyboardState();
-    }   
+bool Event::IsKeyBoardUp() {
+    return this->event.key.code == sf::Keyboard::Up;
 }
 
-void Event::handleMainKeys(sf::Event& event)
-{
-    if (event.key.code == sf::Keyboard::Escape) {
-        app->close();
-    } else if (event.key.code == sf::Keyboard::F) {
-        app->window->changeFullScreenMode();
-    }
+bool Event::IsKeyBoardLeft() {
+    return this->event.key.code == sf::Keyboard::Left;
 }
 
-void Event::handleArrowKeysReleased(sf::Event& event)
-{
-    if (event.key.code == sf::Keyboard::Up) {
-            player->stopJumping();
-    } else if (event.key.code == sf::Keyboard::Left) {
-         player->stopMoving();
-    } else if (event.key.code == sf::Keyboard::Right) {
-         player->stopMoving();
-    }
+bool Event::IsKeyBoardRight() {
+    return this->event.key.code == sf::Keyboard::Right;
 }
 
-void Event::handleMouseEvents(sf::Event& event)
-{
-    if (gameState->isGameStarted) {
-        if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel) {
-            if (event.mouseWheelScroll.delta == -1) {
-                gameState->view->zoom(1.5);
-            } else {
-                gameState->view->zoom(0.5);
-            }
-        } else if (event.mouseWheelScroll.wheel == sf::Mouse::HorizontalWheel) {
-            gameState->view->zoom(-1.f);
-        } else {
-            std::cout << "wheel type: unknown" << std::endl;
-        }
-    }
-}
-
-void Event::handleUiButtonsClick(sf::Event& event)
-{
-    for (unsigned i = 0; i < gameState->objects->buttons.size(); i++) {
-        Button* button = static_cast<Button*>(gameState->objects->buttons[i]);
-        
-        bool isHovered = button->collidePoint(event.mouseButton.x, event.mouseButton.y);
-        if (isHovered) {
-            button->clicked();
-            
-            std::string id = button->getId();
-            if (id == "start") {
-                gameState->startNewGame();
-                this->player = gameState->objects->player;
-                break;
-            } else if (id == "exit") {
-                app->close();
-            }
-        } 
-    }
-}
-
-void Event::handleUiButtonsHover(sf::Event& event)
-{
-    for (unsigned i = 0; i < gameState->objects->buttons.size(); i++) {
-        Button* button = static_cast<Button*>(gameState->objects->buttons[i]);
-
-        bool isHovered = button->collidePoint(event.mouseMove.x, event.mouseMove.y);
-        if (isHovered) {
-            button->hovered();
-        } else {
-            button->defaultState();
-        }
-    }
-}
-
-void Event::handleRealTimeKeyboardState()
-{
-    handleArrowKeys();
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        player->attack();
-    } 
-}
-
-void Event::handleArrowKeys()
-{
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        if (!player->isFalling()) {
-            player->jump();
-        }
-    } 
-    
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        player->move("left");
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) { 
-        player->move("right");
-    } 
+bool Event::IsKeyReleased() {
+    return this->event.type == sf::Event::KeyReleased;
 }

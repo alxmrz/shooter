@@ -5,6 +5,9 @@
 #include "../units/Unit.h"
 #include "../../GameObjects.h"
 
+#include "../../Event.h"
+
+
 Bullet::Bullet()
 {
 }
@@ -26,7 +29,7 @@ Bullet::Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int heig
     endPosition.push_back(y);
 }
 
-void Bullet::update()
+void Bullet::update(Event event)
 { 
     if (!move(10.f, 0.f)) {
         destroy();

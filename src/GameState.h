@@ -6,6 +6,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
+#include "Event.h"
+
 class Application;
 class CObject;
 class GameObjects;
@@ -35,7 +37,7 @@ public:
     /**
      * Update current game state every frame
      */
-    void update();
+    void update(Event event);
     bool isGameStarted = false;
     bool isGamePaused = false;
     void playBackgroundMusic();
@@ -55,7 +57,7 @@ private:
     /**
      * Call gravity for objects
      */
-    void updateObjects();
+    void updateObjects(Event event);
 };
 
 #endif

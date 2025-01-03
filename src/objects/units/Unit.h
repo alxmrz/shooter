@@ -9,6 +9,8 @@
 #include "../../GameObjects.h"
 #include "../interfaces/Movable.h"
 
+#include "../../Event.h"
+
 struct GameObjects;
 class Window;
 class Text;
@@ -33,7 +35,7 @@ public:
 
     using Movable::move;
     
-    void update();
+    void update(Event event);
     bool move(float x, float y) override;
     
     virtual void shiftSpritePositions();

@@ -4,6 +4,8 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
+#include "Event.h"
+
 class Window;
 struct GameObjects;
 
@@ -14,7 +16,7 @@ public:
     CObject(GameObjects* go, int x, int y, int width, int height);
     virtual ~CObject();
 
-    virtual void update();
+    virtual void update(Event event);
     void destroy();
 
     /**

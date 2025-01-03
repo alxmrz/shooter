@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
-class Event;
+class EventHandler;
 class Scene;
 class Window;
 class GameState;
@@ -20,7 +20,7 @@ public:
     /**
      * @var class for handling events
      */
-    Event* event;
+    EventHandler* event;
     
     /**
      * class for creating scene on the window

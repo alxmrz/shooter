@@ -2,6 +2,8 @@
 #include <cmath>
 #include <iostream>
 #include "CObject.h"
+
+#include "Event.h"
 #include "GameObjects.h"
 #include "Window.h"
 
@@ -60,7 +62,7 @@ bool CObject::collidePoint(int x, int y)
             y >= this->y + 1;
 }
 
-void CObject::update()
+void CObject::update(Event event)
 {
 }
 

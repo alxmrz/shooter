@@ -16,34 +16,35 @@ AI::~AI() {
 
 void AI::think()
 {
-    if (!unit->isPlayer() && !unit->isDead()) { 
-        
-        if (isPlayerOnY() && isPlayerOnXLeft()) {
-            isMoveRight = false;
-            isMoveLeft = true;
-        } else if (isPlayerOnY() && isPlayerOnXRight()) {
-           isMoveRight = true;
-           isMoveLeft = false; 
+    if (unit->isPlayer() || unit->isDead()) {
+        return;
+    }
+
+    if (isPlayerOnY() && isPlayerOnXLeft()) {
+        isMoveRight = false;
+        isMoveLeft = true;
+    } else if (isPlayerOnY() && isPlayerOnXRight()) {
+       isMoveRight = true;
+       isMoveLeft = false;
+    }
+
+    bool isPlayerOnFireLine = (isPlayerOnXRight() || isPlayerOnXLeft()) && isPlayerOnY();
+
+    if (isMoveRight) {
+        isMoveRight = move("right");
+
+        if (isPlayerOnFireLine) {
+            unit->attack();
         }
-           
-        bool isPlayerOnFireLine = (isPlayerOnXRight() || isPlayerOnXLeft()) && isPlayerOnY();
-        
-        if (isMoveRight) {
-            isMoveRight = move("right");
-            
-            if (isPlayerOnFireLine) {
-                unit->attack();
-            }
-            
-            isMoveLeft = !isMoveRight;
-        } else if (isMoveLeft) {
-            isMoveLeft = move("left");
-            
-            if (isPlayerOnFireLine) {
-                unit->attack();
-            }
-            isMoveRight = !isMoveLeft;
+
+        isMoveLeft = !isMoveRight;
+    } else if (isMoveLeft) {
+        isMoveLeft = move("left");
+
+        if (isPlayerOnFireLine) {
+            unit->attack();
         }
+        isMoveRight = !isMoveLeft;
     }
 }
 

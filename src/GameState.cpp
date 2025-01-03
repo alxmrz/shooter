@@ -12,6 +12,8 @@
 #include "AI.h"
 #include <typeinfo>
 
+#include "Event.h"
+
 GameState::GameState()
 {
 }
@@ -30,18 +32,18 @@ GameState::~GameState()
     delete objects;
 }
 
-void GameState::update()
+void GameState::update(Event event)
 {
     if (isGameStarted && !isGamePaused) {
-        updateObjects();
+        updateObjects(event);
         resetElapsedTime();
     }
 }
 
-void GameState::updateObjects()
+void GameState::updateObjects(Event event)
 {
     for (const auto &object: objects->all) {
-        object->update();
+        object->update(event);
     }
 }
 

@@ -5,6 +5,9 @@
 #include <SFML/Audio.hpp>
 #include "../../CObject.h"
 
+#include "../../Event.h"
+
+
 namespace sf {
     class Drawable;
 }
@@ -26,7 +29,7 @@ public:
      * @return is moving done successfully
      */
     bool move(float x, float y);
-    void update();
+    void update(Event event) override;
     /**
      * Set direction the objects will be moving
      * 
