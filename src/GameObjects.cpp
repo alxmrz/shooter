@@ -52,7 +52,6 @@ void GameObjects::clear()
 
 void GameObjects::draw(Window* window, float dt)
 {
-
     sf::Vector2f backgroundCoords = window->mapPixelToCoords(sf::Vector2i(0, 0));
     CObject currentWindow (backgroundCoords.x, backgroundCoords.y, 900, 600);
 

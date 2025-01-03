@@ -47,8 +47,11 @@ DIR_OBJECTS:=$(addprefix  build/, $(OBJECTS))
 DIR_OBJECTS_REMOVE:=$(addsuffix /*.o, $(DIRS))
 
 	
-all: dirs $(SOURCE) $(EXECUTABLE)
-	
+all: clean dirs $(SOURCE) $(EXECUTABLE)
+
+exec:
+	./$(EXECUTABLE)
+
 dirs:
 	$(info $(shell mkdir -p $(DIRS)))
 	

@@ -13,6 +13,10 @@ public:
     CObject(int x, int y, int width, int height);
     CObject(GameObjects* go, int x, int y, int width, int height);
     virtual ~CObject();
+
+    virtual void update();
+    void destroy();
+
     /**
      * sf::Drawable is required by Window 
      * to display simple SFML object on the screen

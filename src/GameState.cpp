@@ -10,6 +10,7 @@
 #include "objects/interactive/Ammunition.h"
 #include "Fabric.h"
 #include "AI.h"
+#include <typeinfo>
 
 GameState::GameState()
 {
@@ -39,30 +40,8 @@ void GameState::update()
 
 void GameState::updateObjects()
 {
-    for (unsigned i = 0; i < objects->all.size(); i++) {
-        if (Unit* shooter = dynamic_cast<Unit*>(objects->all[i])) {
-            if (shooter->remove()) {
-                objects->all.push_back(objects->fabric->createAmmo(
-                            shooter->getX(),
-                            shooter->getY(),
-                            50,
-                            50
-                            )
-                        );
-                objects->all.erase(objects->all.begin() + i);
-            }
-            shooter->update();
-            
-            shooter->think();
-            
-            if (!shooter->isJumping()) {         
-                shooter->gravitate();
-            } 
-        } else if (Bullet* bullet = dynamic_cast<Bullet*>(objects->all[i])) {
-            if (!bullet->move(10.f, 0.f)) {
-                objects->all.erase(objects->all.begin() + i);
-            }
-        }   
+    for (const auto &object: objects->all) {
+        object->update();
     }
 }
 

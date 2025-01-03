@@ -1,5 +1,3 @@
-#include <iostream>
-#include <string>
 #include <SFML/Graphics.hpp>
 #include "Application.h"
 #include "GameState.h"

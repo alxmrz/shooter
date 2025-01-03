@@ -20,6 +20,8 @@ public:
     Shooter(const Shooter& orig);
     virtual ~Shooter();
 
+    void destroy();
+
     /**
      * Draw the object with it's specific algorithm
      * 
@@ -27,7 +29,6 @@ public:
      * @param dt Delayed time after last frame (in milliseconds / 1000)
      */
     void draw(Window* window, float dt) override;
-    
     /**
      * Make a fire (it creates Bullet instance)
      */

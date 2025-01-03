@@ -138,6 +138,16 @@ void Unit::gravitate()
 
 void Unit::update()
 {
+    if (remove()) {
+                destroy();
+            }
+            
+            think();
+            
+            if (!isJumping()) {         
+                gravitate();
+            } 
+
     if (isPlayer()) {
         if (isPlatformAffected) {
             jump();

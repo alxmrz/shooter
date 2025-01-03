@@ -10,8 +10,8 @@ You can compile it yourself with the next simple console command:
 `make && ./run`
 
 But make sure that you have installed:  
-* BOOST library  
-* SFML library  
+* BOOST library  - `sudo apt-get install libboost-all-dev`
+* SFML library   - `sudo apt-get install libsfml-dev`
 
 Notes: 
 * The code was made and run on Linux Ubuntu 18.04. Windows and MAC is not checked.  

@@ -26,7 +26,7 @@ public:
      * @return is moving done successfully
      */
     bool move(float x, float y);
-    
+    void update();
     /**
      * Set direction the objects will be moving
      * 

@@ -30,6 +30,22 @@ Shooter::~Shooter()
 {
 }
 
+void Shooter::destroy()
+{
+    CObject::destroy();
+
+   /* Ammunition* amma= go->fabric->createAmmo(
+                            getX(),
+                            getY(),
+                            50,
+                            50
+                            );
+
+    CObject* ammo = dynamic_cast<CObject*>(amma); */
+
+    //go->all.push_back(ammo);
+}
+
 void Shooter::draw(Window* window, float dt)
 {
     bool showNextFrame = elapsedTime >= animationTime;

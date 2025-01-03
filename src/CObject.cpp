@@ -60,6 +60,21 @@ bool CObject::collidePoint(int x, int y)
             y >= this->y + 1;
 }
 
+void CObject::update()
+{
+}
+
+void CObject::destroy()
+{
+    for (auto iter = go->all.begin(); iter != go->all.end(); ++iter) {
+        if (*iter == this) {
+            go->all.erase(iter);
+            break;
+        }
+    }
+   
+}
+
 sf::Drawable* CObject::getDrawForm()
 {
     return mainSprite;

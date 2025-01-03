@@ -26,6 +26,13 @@ Bullet::Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int heig
     endPosition.push_back(y);
 }
 
+void Bullet::update()
+{ 
+    if (!move(10.f, 0.f)) {
+        destroy();
+    }
+}
+
 bool Bullet::move(float x, float y)
 {
     if ((direction == "right" && x < 0 )|| direction == "left") {

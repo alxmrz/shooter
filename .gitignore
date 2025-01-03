@@ -4,3 +4,6 @@ nbproject
 /res.cpp
 /run
 ./core
+
+.idea
+.vscode
