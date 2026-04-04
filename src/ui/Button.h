@@ -62,6 +62,11 @@ public:
      * Make default state of the button
      */
     void defaultState();
+    
+    /**
+     * Update button position (overrides CObject::setCoords)
+     */
+    void setCoords(float x, float y) override;
 
 
 private:
@@ -76,7 +81,7 @@ private:
     Text* text;
     
     /**
-     * @var id of the button. 
+     * @var id of the button.
      * Need to check unique id when creating instances
      */
     std::string id;

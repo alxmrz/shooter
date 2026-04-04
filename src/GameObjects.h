@@ -10,6 +10,7 @@ class CObject;
 class Fabric;
 class Window;
 class Text;
+class Button;
 class GameState;
 
 struct GameObjects {
@@ -37,10 +38,21 @@ struct GameObjects {
     
     Text* cristalCountText;
     Text* ammoCountText;
+    
+    // UI элементы для экрана смерти
+    Text* gameOverText;
+    Button* restartButton;
+    sf::RectangleShape* gameOverContainer;
+    
     /**
      * Texture for sprite (Texture loads image). Sprite contains the texture
      */
     sf::Texture* texture;
+    
+    /**
+     * Флаг, что игрок умер и игра остановлена
+     */
+    bool gameOver = false;
     
     /**
      * Delete all game objects
@@ -50,6 +62,21 @@ struct GameObjects {
     void draw(Window* window, float dt);
     void correctBackgroundSprite();
     void drawPlayerUi(Window* window);
+    
+    /**
+     * Показать экран смерти
+     */
+    void showGameOverScreen();
+    
+    /**
+     * Скрыть экран смерти
+     */
+    void hideGameOverScreen();
+    
+    /**
+     * Перезапустить игру
+     */
+    void restartGame();
 };
 
 

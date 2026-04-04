@@ -75,3 +75,13 @@ void Button::defaultState()
     shape->setOutlineColor(sf::Color::Red);
     text->message->setFillColor(sf::Color::Black);
 }
+
+void Button::setCoords(float x, float y)
+{
+    CObject::setCoords(x, y);
+    shape->setPosition(x, y);
+    if (text) {
+        // Обновить позицию текста относительно кнопки (можно настроить)
+        text->message->setPosition(x + 10, y + 10);
+    }
+}

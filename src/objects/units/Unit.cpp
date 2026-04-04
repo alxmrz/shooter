@@ -131,7 +131,10 @@ void Unit::gravitate() {
 
 void Unit::update(Event event) {
     if (remove()) {
-        destroy();
+        // Не удаляем игрока, пока не показан экран завершения игры
+        if (!(isPlayer() && !go->gameOver)) {
+            destroy();
+        }
     }
 
     think();
@@ -244,4 +247,8 @@ void Unit::setShotgunSound(sf::Sound *shotgunSound) {
 
 void Unit::setVelocity(float value) {
     velocity = value;
+}
+
+bool Unit::isMustBeDeleted() {
+    return mustBeDeleted;
 }

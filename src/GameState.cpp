@@ -35,8 +35,21 @@ GameState::~GameState()
 void GameState::update(Event event)
 {
     if (isGameStarted && !isGamePaused) {
-        updateObjects(event);
-        resetElapsedTime();
+        // Проверяем, умер ли игрок
+        if (objects->player && objects->player->isDead() && !objects->gameOver) {
+            // Ждем завершения анимации смерти (mustBeDeleted становится true)
+            if (objects->player->isMustBeDeleted()) {
+                objects->showGameOverScreen();
+                // Останавливаем обновление игрового мира
+                // isGamePaused = true; // не ставим паузу, чтобы кнопка могла обрабатываться
+            }
+        }
+        
+        // Если игра не в состоянии gameOver, обновляем объекты
+        if (!objects->gameOver) {
+            updateObjects(event);
+            resetElapsedTime();
+        }
     }
 }
 

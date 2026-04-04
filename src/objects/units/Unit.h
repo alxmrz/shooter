@@ -32,6 +32,8 @@ public:
     bool isDead();
     /* need to remove the current object? */
     bool remove();
+    /* check if object marked for deletion */
+    bool isMustBeDeleted();
 
     using Movable::move;
     

@@ -48,6 +48,13 @@ void Shooter::destroy()
 
 void Shooter::draw(Window* window, float dt)
 {
+    // Если игра окончена, останавливаем все анимации
+    if (go->gameOver) {
+        // Просто отрисовываем текущий спрайт без обновления анимации
+        this->CObject::draw(window, dt);
+        return;
+    }
+    
     bool showNextFrame = elapsedTime >= animationTime;
     if (!dead) {
         if (falling || jumping) {
@@ -57,13 +64,16 @@ void Shooter::draw(Window* window, float dt)
         } else if (!moving && !falling && !jumping) {
             mainSprite->setTextureRect(this->noMotionSprites[direction]);
         }
-    }  else if (showNextFrame){
+    }  else if (showNextFrame && !mustBeDeleted){
         animateExplosion();
     }
     
-    elapsedTime += dt;
-    fireTime += dt;
-    gravitationalTime += dt;
+    // Если анимация смерти завершена, останавливаем обновление таймеров
+    if (!(dead && mustBeDeleted)) {
+        elapsedTime += dt;
+        fireTime += dt;
+        gravitationalTime += dt;
+    }
     
     bool aliveNPC = health > 0 && !isPlayer();
     if (aliveNPC) {
@@ -89,7 +99,8 @@ void Shooter::animateExplosion()
     explosionSprite->setTextureRect(this->explosionSprites[currentFrame]);
     currentFrame++;
     if (currentFrame >= this->explosionSprites.size()) {
-        currentFrame = 0;
+        // Достигли конца анимации, остаёмся на последнем кадре
+        currentFrame = this->explosionSprites.size() - 1;
         mustBeDeleted = true;
     }
 

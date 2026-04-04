@@ -75,7 +75,7 @@ public:
     float getY();
     int getWidth();
     int getHeight();
-    void setCoords(float x, float y);
+    virtual void setCoords(float x, float y);
     void setMainSprite(sf::Sprite* sprite);
 protected:
     GameObjects* go;

@@ -36,6 +36,15 @@ GameObjects::GameObjects(GameState* gs)
     ammoSprite->setScale(0.5f, 0.5f);
     ammoSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
     
+    // Инициализация UI элементов смерти (скрыты по умолчанию)
+    gameOverText = fabric->createText("You are dead", 0.f, 0.f);
+    restartButton = fabric->createButton("restart", "Restart", 0.f, 0.f, 200, 50);
+    gameOverContainer = new sf::RectangleShape(sf::Vector2f(400, 200));
+    gameOverContainer->setFillColor(sf::Color::White);
+    gameOverContainer->setOutlineThickness(2);
+    gameOverContainer->setOutlineColor(sf::Color::Black);
+    gameOver = false;
+    
     grounds = new sf::RenderTexture;
 }
 
@@ -60,10 +69,6 @@ void GameObjects::draw(Window* window, float dt)
 
     window->draw(*backgroundSprite);
     
-
-    for (unsigned i = 0; i < buttons.size(); i++) {
-        buttons[i]->draw(window, dt);
-    }
     if (gs->isGameStarted) {
         if (groundsSprite == nullptr) {
             grounds->create(5000, 2500);
@@ -78,17 +83,28 @@ void GameObjects::draw(Window* window, float dt)
             const sf::Texture& texture = grounds->getTexture();
             
             groundsSprite = new sf::Sprite(texture);
-        } 
+        }
         
        window->draw(*groundsSprite);
         
         for (unsigned i = 0; i < all.size(); i++) {
             if (currentWindow.collideRect(all[i])) {
                 all[i]->draw(window, dt);
-            }   
+            }
         }
         
-        drawPlayerUi(window);  
+        drawPlayerUi(window);
+        
+        // Если игра окончена, отображаем контейнер, текст и кнопки поверх всего
+        if (gameOver) {
+            window->draw(*gameOverContainer);
+            window->draw(*gameOverText->message);
+        }
+    }
+    
+    // Кнопки отрисовываются поверх всего (включая экран смерти)
+    for (unsigned i = 0; i < buttons.size(); i++) {
+        buttons[i]->draw(window, dt);
     }
 }
 
@@ -130,4 +146,68 @@ void GameObjects::drawPlayerUi(Window* window)
     window->draw(*ammoCountText->message);
         
     
+}
+
+void GameObjects::showGameOverScreen() {
+    gameOver = true;
+    
+    // Останавливаем фоновую музыку
+    gs->stopBackgroundMusic();
+    
+    // Получаем центр камеры (view)
+    sf::Vector2f center = gs->view->getCenter();
+    
+    // Позиционируем контейнер
+    gameOverContainer->setSize(sf::Vector2f(400, 200));
+    gameOverContainer->setOrigin(200, 100); // центр контейнера
+    gameOverContainer->setPosition(center.x, center.y);
+    gameOverContainer->setFillColor(sf::Color::White);
+    gameOverContainer->setOutlineThickness(2);
+    gameOverContainer->setOutlineColor(sf::Color::Black);
+    
+    // Позиционируем текст "Вы проиграли" по центру экрана (внутри контейнера)
+    gameOverText->message->setCharacterSize(48);
+    gameOverText->message->setFillColor(sf::Color::Red);
+    // Центрируем текст по горизонтали
+    sf::FloatRect textBounds = gameOverText->message->getLocalBounds();
+    gameOverText->message->setOrigin(textBounds.width / 2, textBounds.height / 2);
+    gameOverText->message->setPosition(center.x, center.y - 40);
+    
+    // Позиционируем кнопку "Начать заново" ниже текста
+    restartButton->setCoords(center.x - 100, center.y + 40);
+    
+    // Добавляем кнопку в вектор buttons для отрисовки
+    // Проверим, не добавлена ли уже
+    bool alreadyAdded = false;
+    for (auto btn : buttons) {
+        if (btn == restartButton) {
+            alreadyAdded = true;
+            break;
+        }
+    }
+    if (!alreadyAdded) {
+        buttons.push_back(restartButton);
+    }
+}
+
+void GameObjects::hideGameOverScreen() {
+    gameOver = false;
+    
+    // Удаляем кнопку из вектора buttons
+    for (auto it = buttons.begin(); it != buttons.end(); ++it) {
+        if (*it == restartButton) {
+            buttons.erase(it);
+            break;
+        }
+    }
+}
+
+void GameObjects::restartGame() {
+    hideGameOverScreen();
+    
+    // Очищаем текущее состояние игры
+    clear();
+    
+    // Запускаем новую игру через GameState
+    gs->startNewGame();
 }

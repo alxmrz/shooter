@@ -86,10 +86,13 @@ void EventHandler::handleMouseEvents(sf::Event& event)
 
 void EventHandler::handleUiButtonsClick(sf::Event& event)
 {
+    // Преобразуем координаты мыши в мировые координаты (учитывая view)
+    sf::Vector2f mousePos = app->window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+    
     for (unsigned i = 0; i < gameState->objects->buttons.size(); i++) {
         Button* button = static_cast<Button*>(gameState->objects->buttons[i]);
         
-        bool isHovered = button->collidePoint(event.mouseButton.x, event.mouseButton.y);
+        bool isHovered = button->collidePoint(mousePos.x, mousePos.y);
         if (isHovered) {
             button->clicked();
             
@@ -100,17 +103,24 @@ void EventHandler::handleUiButtonsClick(sf::Event& event)
                 break;
             } else if (id == "exit") {
                 app->close();
+            } else if (id == "restart") {
+                gameState->objects->restartGame();
+                this->player = gameState->objects->player;
+                break;
             }
-        } 
+        }
     }
 }
 
 void EventHandler::handleUiButtonsHover(sf::Event& event)
 {
+    // Преобразуем координаты мыши в мировые координаты (учитывая view)
+    sf::Vector2f mousePos = app->window->mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
+    
     for (unsigned i = 0; i < gameState->objects->buttons.size(); i++) {
         Button* button = static_cast<Button*>(gameState->objects->buttons[i]);
 
-        bool isHovered = button->collidePoint(event.mouseMove.x, event.mouseMove.y);
+        bool isHovered = button->collidePoint(mousePos.x, mousePos.y);
         if (isHovered) {
             button->hovered();
         } else {
@@ -121,10 +131,15 @@ void EventHandler::handleUiButtonsHover(sf::Event& event)
 
 void EventHandler::handleRealTimeKeyboardState()
 {
+    // Если игра окончена (gameOver) или игрок умер, не обрабатываем ввод
+    if (gameState->objects->gameOver || (player && player->isDead())) {
+        return;
+    }
+    
     handleArrowKeys();
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
         player->attack();
-    } 
+    }
 }
 
 void EventHandler::handleArrowKeys()
