@@ -68,13 +68,13 @@ clean:
 # --- Testing ---
 BUILD_DIR=build_cmake
 
-test:
+test-build:
 	mkdir -p $(BUILD_DIR) && cd $(BUILD_DIR) && cmake -DBUILD_TESTS=ON .. && cmake --build . --target tests
 
-test-run: test
+test: test-build
 	cd $(BUILD_DIR) && ./tests/tests
 
 test-clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all exec dirs clean test test-run test-clean
+.PHONY: all exec dirs clean test test test-clean
