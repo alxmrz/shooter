@@ -15,9 +15,7 @@ class Text;
 
 class Shooter : public Unit {
 public:
-    Shooter();
     Shooter(GameObjects* go, float x, float y, int width, int height);
-    Shooter(const Shooter& orig);
     virtual ~Shooter();
 
     void destroy();

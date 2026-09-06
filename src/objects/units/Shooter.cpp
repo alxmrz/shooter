@@ -12,14 +12,6 @@
 #include "../../Fabric.h"
 #include "../../ui/Text.h"
 
-Shooter::Shooter()
-{
-}
-
-Shooter::Shooter(const Shooter& orig)
-{
-}
-
 Shooter::Shooter(GameObjects* go, float x, float y, int width, int height) 
 : Unit(go, x, y, width, height)
 {

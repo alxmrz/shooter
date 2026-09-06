@@ -5,6 +5,15 @@ add_executable(tests
     GameObjects_test.cpp
     Fabric_test.cpp
     EventHandler_test.cpp
+    Ground_test.cpp
+    Crystal_test.cpp
+    Heart_test.cpp
+    Ammunition_test.cpp
+    Platform_test.cpp
+    Movable_test.cpp
+    Unit_test.cpp
+    Shooter_test.cpp
+    Bullet_test.cpp
 )
 
 target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include)

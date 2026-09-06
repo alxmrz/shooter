@@ -18,9 +18,7 @@ class AI;
 
 class Unit : public Movable {
 public:
-    Unit();
     Unit(GameObjects* go, float x, float y, int width, int height);
-    Unit(const Unit& orig);
     virtual ~Unit();
     
     /**

@@ -19,12 +19,6 @@
 #include "../../Event.h"
 
 
-Unit::Unit() {
-}
-
-Unit::Unit(const Unit &orig) {
-}
-
 Unit::Unit(GameObjects *go, float x, float y, int width, int height)
     : Movable(go, x, y, width, height) {
     ai = new AI(go, this);
