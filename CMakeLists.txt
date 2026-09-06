@@ -4,7 +4,6 @@ project(shooter)
 set(CMAKE_CXX_STANDARD 11)
 
 set(PROJECT_HEADERS
-        main.h
         src/Application.h
         src/CObject.h
         src/Event.h
@@ -31,7 +30,6 @@ set(PROJECT_HEADERS
         include/tinyxml/tinyxml2.h
 )
 set(PROJECT_SOURCES
-        main.cpp 
         src/Application.cpp
         src/CObject.cpp 
         src/Event.cpp
@@ -58,4 +56,24 @@ set(PROJECT_SOURCES
         include/tinyxml/tinyxml2.cpp
 )
 
-add_executable(shooter ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+find_package(SFML 2.5 COMPONENTS graphics window system audio REQUIRED)
+
+add_library(shooter_lib STATIC ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+
+add_executable(shooter main.cpp)
+target_link_libraries(shooter shooter_lib sfml-graphics sfml-window sfml-system sfml-audio)
+
+# --- Testing ---
+option(BUILD_TESTS "Build unit tests" OFF)
+
+if(BUILD_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.14.0
+    )
+    FetchContent_MakeAvailable(googletest)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

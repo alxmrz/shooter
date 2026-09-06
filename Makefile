@@ -64,6 +64,17 @@ build/%.o : %.cpp
 
 clean:
 	rm -rf *.o ./run $(DIR_OBJECTS_REMOVE)
-	
-ex:
-	echo $(DIR_OBJECTS_REMOVE)
+
+# --- Testing ---
+BUILD_DIR=build_cmake
+
+test:
+	mkdir -p $(BUILD_DIR) && cd $(BUILD_DIR) && cmake -DBUILD_TESTS=ON .. && cmake --build . --target tests
+
+test-run: test
+	cd $(BUILD_DIR) && ./tests/tests
+
+test-clean:
+	rm -rf $(BUILD_DIR)
+
+.PHONY: all exec dirs clean test test-run test-clean

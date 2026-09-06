@@ -1,9 +1,11 @@
 build/
+build_cmake/
 dist/
 nbproject
 /res.cpp
 /run
 ./core
+*.o
 
 .idea
 .vscode
