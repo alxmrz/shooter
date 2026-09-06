@@ -38,6 +38,8 @@ public:
     
     void setExplosionSprite(sf::Sprite* explosionSprite);
     void setCrystalCountText(Text* text);
+    
+    void onSecondJump() override;
 private:
     /* Sprites map for showing run images depending on direction (left, right) */
     std::map<std::string, std::vector<sf::IntRect>> runSprites
@@ -100,6 +102,13 @@ private:
     void animateRun();
     void animateExplosion();
     void drawHearts(Window* window);
+    
+private:
+    // Double jump rotation
+    bool rotating = false;
+    float rotationAngle = 0.f;
+    void startRotation();
+    void applyRotation(float dt);
 };
 
 #endif /* SHOOTER_H */

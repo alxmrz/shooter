@@ -145,14 +145,14 @@ void EventHandler::handleRealTimeKeyboardState()
 void EventHandler::handleArrowKeys()
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        if (!player->isFalling()) {
+        if (player->canJump()) {
             player->jump();
         }
-    } 
+    }
     
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
         player->move("left");
-    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) { 
+    } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
         player->move("right");
-    } 
+    }
 }

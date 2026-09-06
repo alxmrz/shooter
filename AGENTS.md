@@ -1,236 +1,50 @@
-# Анализ проекта Shooter (кэш для нейросети)
+# Shooter Project - Quick Start Guide
 
-## Общая информация
-- **Тип проекта**: 2D игра на C++ с использованием SFML
-- **Статус**: Прототип/демо версия
-- **Цель**: Платформер-шутер с элементами RPG
-- **Язык**: C++11
-- **Сборка**: Makefile и CMakeLists.txt
-
-## Архитектура проекта
-
-### Основные компоненты
-1. **Application** (`src/Application.h/cpp`) - главный класс приложения
-   - Управляет основным циклом игры (60 FPS)
-   - Координирует Window, EventHandler, Scene, GameState
-   - Точка входа: `app.run()`
-
-2. **GameState** (`src/GameState.h/cpp`) - состояние игры
-   - Управляет игровой логикой, камерой (sf::View)
-   - Содержит контейнер игровых объектов (GameObjects)
-   - Обрабатывает гравитацию, обновление объектов
-
-3. **GameObjects** (`src/GameObjects.h/cpp`) - контейнер всех объектов
-   - Векторы: `buttons`, `borders`, `all`, `background`
-   - Игрок: `Unit* player`
-   - Фабрика: `Fabric* fabric`
-   - Спрайты: фон, земля, сердца, кристаллы, патроны
-   - UI тексты: счетчики кристаллов и патронов
-
-4. **CObject** (`src/CObject.h/cpp`) - базовый класс всех игровых объектов
-   - Абстрактный класс с виртуальными методами
-   - Коллизии, отрисовка, обновление
-   - Наследуется всеми игровыми объектами
-
-### Иерархия классов
-
+## Build & Run
+```bash
+make && ./run
 ```
-CObject (базовый)
-├── Movable (интерфейс)
-│   └── Unit (игровые юниты)
-│       └── Shooter (игрок)
-├── Interactive объекты:
-│   ├── Bullet (пули)
-│   ├── Crystal (кристаллы)
-│   ├── Heart (здоровье)
-│   ├── Ammunition (патроны)
-│   └── Platform (платформы)
-├── Background объекты:
-│   └── Ground (земля)
-└── UI компоненты:
-    ├── Button (кнопки)
-    └── Text (текст)
+- Makefile is authoritative (not CMake)
+- SFML 2.5.1+ required at `/home/alexandr/libraries/SFML-2.5.1/lib/`
+- C++11 required (`-std=c++11`)
+
+## Architecture
+
+### Entry Point
+- `main.cpp` → `Application.run()` → 60 FPS loop (`sf::seconds(1.f/60.f)`)
+
+### Key Classes
+- `Application` - main loop coordinator, owns Window/EventHandler/Scene/GameState
+- `GameState` - game logic, camera (sf::View), gravity, object updates
+- `GameObjects` - container with `buttons`, `borders`, `all`, `background` vectors + `player` + `fabric`
+- `CObject` - base class for all game objects (virtual methods: `update()`, `draw()`, `collide*`)
+- `Fabric` - factory for creating objects (Bullet, Shooter, Crystal, etc.)
+
+### Object Tree
+```
+CObject → Movable → Unit → Shooter (player)
+CObject → Bullet, Crystal, Heart, Ammunition, Platform
+CObject → Ground (background)
+CObject → Button, Text (UI)
 ```
 
-### Вспомогательные системы
-- **Window** (`src/Window.h/cpp`) - управление окном SFML
-- **EventHandler** (`src/EventHandler.h/cpp`) - обработка событий
-- **Scene** (`src/Scene.h/cpp`) - отрисовка сцены
-- **AI** (`src/AI.h/cpp`) - искусственный интеллект врагов
-- **Fabric** (`src/Fabric.h/cpp`) - фабрика объектов
-- **Resources** (`src/Resources.h/cpp`) - управление ресурсами
-- **Map** (`src/Map.h/cpp`) - загрузка карт (Tiled XML)
+### Map System
+- Tiled XML format via TinyXML2 (included in `include/tinyxml/`)
+- Level files in `resources/levels/`
+- Generates background tiles and interactive objects from XML
 
-## Структура директорий
+## Resources
+- Images: `resources/images/*.png` (texture atlases)
+- Audio: `resources/audio/*.wav`
+- Fonts: `resources/fonts/arial.ttf`
+- Levels: `resources/levels/*.tmx` (Tiled) / `*.xml`
 
-```
-/
-├── CMakeLists.txt          # Конфигурация CMake
-├── Makefile               # Конфигурация Make
-├── main.cpp              # Точка входа
-├── Readme.md             # Документация
-├── include/              # Внешние библиотеки
-│   └── tinyxml/         # Парсер XML (для карт)
-├── resources/           # Ресурсы игры
-│   ├── audio/          # Звуковые эффекты
-│   ├── fonts/          # Шрифты
-│   ├── images/         # Текстуры и спрайты
-│   └── levels/         # Уровни (XML/Tiled)
-└── src/                # Исходный код
-    ├── core/           # Ядро игры
-    │   ├── Application.*
-    │   ├── GameState.*
-    │   ├── GameObjects.*
-    │   ├── CObject.*
-    │   ├── Event.*
-    │   ├── EventHandler.*
-    │   ├── Window.*
-    │   ├── Scene.*
-    │   ├── AI.*
-    │   ├── Fabric.*
-    │   ├── Resources.*
-    │   └── Map.*
-    ├── objects/        # Игровые объекты
-    │   ├── backgrounds/   # Фоновые объекты
-    │   ├── interactive/   # Интерактивные объекты
-    │   ├── interfaces/    # Интерфейсы
-    │   └── units/        # Юниты (игрок, враги)
-    └── ui/             # Пользовательский интерфейс
-        ├── Button.*
-        └── Text.*
-```
+## Platform
+- Linux Ubuntu 18.04+ (Windows/Mac untested)
+- Fullscreen buggy in SFML < 2.5.1 with multi-monitor
 
-## Зависимости
-
-### Основные библиотеки
-1. **SFML 2.5.1+** (обязательно)
-   - Graphics, Window, System, Audio
-   - Путь в Makefile: `/home/alexandr/libraries/SFML-2.5.1/lib/`
-
-2. **Boost** (опционально, согласно Readme)
-   - Установка: `sudo apt-get install libboost-all-dev`
-
-3. **TinyXML2** (включен в проект)
-   - Расположен в `include/tinyxml/`
-   - Используется для парсинга XML карт
-
-### Системные требования
-- **ОС**: Linux Ubuntu 18.04+ (Windows/Mac не проверены)
-- **Компилятор**: g++ с поддержкой C++11
-- **Библиотеки**: SFML-dev, Boost (для сборки)
-
-## Сборка
-
-### Варианты сборки
-1. **Makefile** (основной):
-   ```bash
-   make && ./run
-   ```
-
-2. **CMake** (альтернативный):
-   ```bash
-   mkdir build && cd build
-   cmake ..
-   make
-   ```
-
-### Ключевые настройки Makefile
-- `CC=g++`
-- `CFLAGS=-c -Wall -g -std=c++11`
-- `LDFLAGS`: ссылки на SFML библиотеки
-- `EXECUTABLE=run`
-- Структура сборки в `build/` директории
-
-## Игровые механики
-
-### Управление
-- **Движение**: WASD или стрелки
-- **Прыжок**: Space
-- **Атака**: ЛКМ или специальная клавиша
-- **Взаимодействие**: E или приближение к объектам
-
-### Системы
-1. **Здоровье** (Heart objects)
-2. **Боеприпасы** (Ammunition objects)
-3. **Валюта** (Crystal objects)
-4. **Гравитация** (реализована в GameState)
-5. **Коллизии** (CObject::collide* методы)
-6. **ИИ врагов** (AI класс)
-
-### Ресурсы игры
-- **Текстуры**: PNG изображения в `resources/images/`
-- **Звуки**: WAV файлы в `resources/audio/`
-- **Шрифты**: TTF в `resources/fonts/`
-- **Уровни**: XML/Tiled в `resources/levels/`
-
-## Текущее состояние
-
-### Реализовано (из Readme):
-- Рефакторинг и оптимизация
-- Улучшенный ИИ
-- Новые текстуры
-- Новые интерактивные объекты
-
-### Планируется:
-- Дальнейшая оптимизация
-- Система диалогов
-- Улучшение UI
-- Улучшение дизайна уровней
-- Балансировка игры
-- Сюжет
-- Реальные уровни
-
-## Ключевые файлы для понимания
-
-### Основные:
-- `main.cpp` - точка входа
-- `src/Application.*` - главный цикл
-- `src/GameState.*` - игровая логика
-- `src/CObject.*` - базовая система объектов
-
-### Важные компоненты:
-- `src/objects/units/Unit.*` - система юнитов
-- `src/GameObjects.*` - менеджер объектов
-- `src/Map.*` - система карт
-- `src/AI.*` - искусственный интеллект
-
-## Примечания для разработки
-
-1. **Архитектура**: Классическая компонентная архитектура на C++
-2. **Расширяемость**: Новые объекты наследуются от CObject
-3. **Ресурсы**: Все ресурсы загружаются через Resources класс
-4. **Уровни**: Поддержка Tiled редактора через XML
-5. **Сборка**: Два варианта (Make и CMake) для гибкости
-
-## Потенциальные точки улучшения
-
-1. **Производительность**: Возможна оптимизация отрисовки
-2. **Код**: Некоторые классы имеют большую связность
-3. **Архитектура**: Можно внедрить систему компонентов (ECS)
-4. **Тестирование**: Отсутствуют unit-тесты
-5. **Документация**: Комментарии в коде, но нет полной документации
-
-## Быстрый доступ к файлам
-
-### Ядро:
-- `src/Application.h` - главный класс
-- `src/GameState.h` - состояние игры  
-- `src/GameObjects.h` - контейнер объектов
-- `src/CObject.h` - базовый класс объектов
-
-### Объекты:
-- `src/objects/units/Unit.h` - система юнитов
-- `src/objects/units/Shooter.h` - игрок
-- `src/objects/interactive/Bullet.h` - пули
-- `src/objects/interactive/Crystal.h` - кристаллы
-
-### Утилиты:
-- `src/Window.h` - управление окном
-- `src/EventHandler.h` - обработка событий
-- `src/Map.h` - загрузка карт
-- `src/AI.h` - искусственный интеллект
-
-### Конфигурация:
-- `Makefile` - сборка через make
-- `CMakeLists.txt` - сборка через cmake
-- `Readme.md` - документация проекта
+## Conventions
+- All objects inherit from `CObject`
+- New objects go under `src/objects/{backgrounds,interactive,interfaces,units}/`
+- UI components in `src/ui/`
+- Core systems in `src/core/` (Application, GameState, etc.)

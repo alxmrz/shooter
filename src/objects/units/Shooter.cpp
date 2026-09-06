@@ -80,6 +80,9 @@ void Shooter::draw(Window* window, float dt)
         drawHearts(window);
     }
     
+    // Apply rotation for double jump
+    applyRotation(dt);
+    
     this->CObject::draw(window, dt);
     
 }
@@ -150,4 +153,36 @@ void Shooter::setExplosionSprite(sf::Sprite* explosionSprite)
     this->explosionSprite = explosionSprite;
     this->explosionSprite->setScale(0.5f, 0.5f);
     explosionSprite->setTextureRect(this->explosionSprites[0]);
+}
+
+void Shooter::startRotation()
+{
+    rotating = true;
+    rotationAngle = 0.f;
+}
+
+void Shooter::onSecondJump()
+{
+    startRotation();
+}
+
+void Shooter::applyRotation(float dt)
+{
+    if (!rotating) {
+        return;
+    }
+    
+    // Rotation speed: 360 degrees per 0.5 seconds
+    float rotationSpeed = 360.f / 0.5f; // degrees per second
+    rotationAngle += rotationSpeed * dt;
+    
+    if (rotationAngle >= 360.f) {
+        rotationAngle = 0.f;
+        rotating = false;
+    }
+    
+    // Apply rotation to main sprite
+    if (mainSprite) {
+        mainSprite->setRotation(rotationAngle);
+    }
 }

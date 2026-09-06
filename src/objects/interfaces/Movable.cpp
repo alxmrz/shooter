@@ -83,5 +83,9 @@ float Movable::getMaxVelocity()
 
 void Movable::setDirection(std::string direction)
 {
+    if (this->direction != direction) {
+        // Direction changed, reset velocity for instant response
+        velocity = 0.f;
+    }
     this->direction = direction;
 }

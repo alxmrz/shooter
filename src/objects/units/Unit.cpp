@@ -98,20 +98,28 @@ bool Unit::move(float x, float y) {
 }
 
 void Unit::jump() {
-    if (velocityHorizontal > -maxVelocity) {
-        velocityHorizontal -= acceleration;
+    if (jumping) {
+        return;
     }
+
+    if (!canJump()) {
+        return;
+    }
+
+    jumpCount++;
 
     if (currentJumpHeight == 0.f) {
+        float jumpHeight = 100.f;
+        if (jumpCount == 2) {
+            jumpHeight = 60.f;
+            onSecondJump();
+        }
         jumpSound->play();
-        currentJumpHeight = this->y - 125.f;
+        currentJumpHeight = this->y - jumpHeight;
     }
 
-    if (this->y > currentJumpHeight && move(0.f, velocityHorizontal)) {
-        jumping = true;
-    } else {
-        stopJumping();
-    }
+    velocityHorizontal = -1.0f;
+    jumping = true;
 }
 
 void Unit::gravitate() {
@@ -126,6 +134,11 @@ void Unit::gravitate() {
         currentJumpHeight = 0.0;
         gravitationalVelocity = 0.0;
         gravitationalTime = 0.0;
+        // Reset jump count when touching ground
+        resetJumpCount();
+        // Stop jumping state when on ground
+        jumping = false;
+        velocityHorizontal = 0.f;
     }
 }
 
@@ -139,15 +152,23 @@ void Unit::update(Event event) {
 
     think();
 
-    if (!isJumping()) {
+    if (jumping) {
+        if (velocityHorizontal > -maxVelocity) {
+            velocityHorizontal -= acceleration;
+        }
+        if (this->y > currentJumpHeight && move(0.f, velocityHorizontal)) {
+        } else {
+            jumping = false;
+            velocityHorizontal = 0.f;
+            currentJumpHeight = 0.f;
+        }
+    } else {
         gravitate();
     }
 
     if (isPlayer()) {
         if (event.IsKeyReleased()) {
-            if (event.IsKeyBoardUp()) {
-                stopJumping();
-            } else if (event.IsKeyBoardLeft()) {
+            if (event.IsKeyBoardLeft()) {
                 stopMoving();
             } else if (event.IsKeyBoardRight()) {
                 stopMoving();
@@ -178,6 +199,10 @@ bool Unit::isFalling() {
 void Unit::stopJumping() {
     jumping = false;
     velocityHorizontal = 0.f;
+}
+
+void Unit::onSecondJump() {
+    // Base implementation does nothing
 }
 
 
@@ -251,4 +276,16 @@ void Unit::setVelocity(float value) {
 
 bool Unit::isMustBeDeleted() {
     return mustBeDeleted;
+}
+
+bool Unit::isGrounded() {
+    return !falling && !jumping;
+}
+
+void Unit::resetJumpCount() {
+    jumpCount = 0;
+}
+
+bool Unit::canJump() {
+    return jumpCount < maxJumps && !jumping;
 }

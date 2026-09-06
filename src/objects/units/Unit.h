@@ -54,12 +54,18 @@ public:
     virtual void gravitate();
     
     virtual void stopJumping();
+    
+    /**
+     * Called when performing second jump in air (for special effects)
+     */
+    virtual void onSecondJump();
 
     float getCurrentJumpHeight();
     float getVelocityHorizontal();
 
     bool isFalling();
     bool isJumping();
+    bool canJump();
     int getHealth();
     int getAmmo();
     int getCrystals();
@@ -128,8 +134,16 @@ protected:
     float elapsedTime = 0.0;
 
     /* Time after last fire call */
-    float fireTime = 0.f; 
+    float fireTime = 0.f;
   
+    /* Jump system */
+    int jumpCount = 0;
+    const int maxJumps = 2;
+    bool jumpCooldown = false;
+    int jumpCooldownFrames = 0;
+    bool isGrounded();
+    void resetJumpCount();
+    
     void animateMoving();
 };
 
