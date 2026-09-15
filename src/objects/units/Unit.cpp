@@ -73,13 +73,25 @@ bool Unit::move(float x, float y) {
                     }
                 } else if (Platform *obj = dynamic_cast<Platform *>(go->all[i])) {
                     if (collideRect(obj)) {
-                        isPlatformAffected = true;
-                        gravitationalVelocity = 0.0;
-                        gravitationalTime = 0.0;
-                        currentJumpHeight = this->y - 300.f;
-                        jump();
-
-                        break;
+                        if (y < 0) {
+                            // Moving up into platform from below - stop jump
+                            jumping = false;
+                            velocityHorizontal = 0.f;
+                            currentJumpHeight = 0.f;
+                            gravitationalVelocity = 0.0;
+                            gravitationalTime = 0.0;
+                            return true;
+                        } else if (y > 0) {
+                            // Falling down onto platform - snap to top and stop
+                            this->y = obj->getY() - this->height;
+                            shiftSpritePositions();
+                            gravitationalVelocity = 0.0;
+                            gravitationalTime = 0.0;
+                            currentJumpHeight = 0.f;
+                            resetJumpCount();
+                            return false;
+                        }
+                        // Horizontal collision - don't snap, don't stop
                     }
                 }
             }

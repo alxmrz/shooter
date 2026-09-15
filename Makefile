@@ -2,6 +2,8 @@ CC=g++
 CFLAGS=-c -Wall -g -std=c++11
 LDFLAGS= -L/home/alexandr/libraries/SFML-2.5.1/lib/ -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
+MAKEFLAGS += -j8
+
 SOURCES= \
 main.cpp \
 src/Application.cpp \
@@ -16,6 +18,7 @@ src/Scene.cpp \
 src/Window.cpp \
 src/Fabric.cpp \
 src/Resources.cpp \
+src/LevelGenerator.cpp \
 src/objects/backgrounds/Ground.cpp \
 src/objects/interactive/Crystal.cpp \
 src/objects/interactive/Heart.cpp \
@@ -50,7 +53,7 @@ DIR_OBJECTS_REMOVE:=$(addsuffix /*.o, $(DIRS))
 	
 all: clean dirs $(SOURCE) $(EXECUTABLE)
 
-exec:
+play:
 	./$(EXECUTABLE)
 
 dirs:

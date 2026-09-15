@@ -13,6 +13,7 @@
 #include "objects/interactive/Platform.h"
 #include "objects/units/Shooter.h"
 #include "Fabric.h"
+#include "LevelGenerator.h"
 
 Map::Map() 
 {
@@ -40,6 +41,11 @@ void Map::generateLevel(const char* level)
     generateTIleIdPositions();
     generateBackground(map);
     generatePlayable(map);
+}
+
+void Map::generateLevel(LevelGenerator& generator)
+{
+    generator.generateLevel(this);
 }
 
 void Map::generateBackground(tinyxml2::XMLElement* map)

@@ -16,6 +16,7 @@ set(PROJECT_HEADERS
         src/Window.h
         src/Fabric.h
         src/Resources.h
+        src/LevelGenerator.h
         src/objects/backgrounds/Ground.h
         src/objects/interactive/Crystal.h
         src/objects/interactive/Heart.h
@@ -42,6 +43,7 @@ set(PROJECT_SOURCES
         src/Window.cpp
         src/Fabric.cpp
         src/Resources.cpp
+        src/LevelGenerator.cpp
         src/objects/backgrounds/Ground.cpp
         src/objects/interactive/Crystal.cpp
         src/objects/interactive/Heart.cpp

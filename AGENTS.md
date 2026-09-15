@@ -48,3 +48,11 @@ CObject → Button, Text (UI)
 - New objects go under `src/objects/{backgrounds,interactive,interfaces,units}/`
 - UI components in `src/ui/`
 - Core systems in `src/core/` (Application, GameState, etc.)
+
+## TDD Workflow (Test-Driven Development)
+All new code must be written following TDD:
+1. **Red** — Write a failing test first. Run it and confirm it fails.
+2. **Green** — Write the minimal code to make the test pass.
+3. **Refactor** — Clean up the code while keeping tests green.
+
+Never skip the test step. If a change has no tests, it is not done.

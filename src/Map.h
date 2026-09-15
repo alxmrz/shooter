@@ -8,6 +8,7 @@ namespace tinyxml2 {
 }
 
 class GameObjects;
+class LevelGenerator;
 
 class Map {
 public:
@@ -20,6 +21,11 @@ public:
      * count of levels is one
      */
     void generateLevel(const char* level);
+    
+    /**
+     * Generate level programmatically using LevelGenerator
+     */
+    void generateLevel(LevelGenerator& generator);
 private:
     GameObjects* go;
     
