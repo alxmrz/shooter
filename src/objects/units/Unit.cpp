@@ -74,7 +74,10 @@ bool Unit::move(float x, float y) {
                 } else if (Platform *obj = dynamic_cast<Platform *>(go->all[i])) {
                     if (collideRect(obj)) {
                         if (y < 0) {
-                            // Moving up into platform from below - stop jump
+                            // Moving up into platform from below - revert and stop jump
+                            this->x -= x;
+                            this->y -= y;
+                            shiftSpritePositions();
                             jumping = false;
                             velocityHorizontal = 0.f;
                             currentJumpHeight = 0.f;
@@ -90,8 +93,13 @@ bool Unit::move(float x, float y) {
                             currentJumpHeight = 0.f;
                             resetJumpCount();
                             return false;
+                        } else {
+                            // Horizontal collision - revert movement
+                            this->x -= x;
+                            this->y -= y;
+                            shiftSpritePositions();
+                            return false;
                         }
-                        // Horizontal collision - don't snap, don't stop
                     }
                 }
             }

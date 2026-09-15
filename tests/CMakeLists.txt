@@ -16,6 +16,7 @@ add_executable(tests
     Bullet_test.cpp
     LevelGenerator_test.cpp
     PlatformCollision_test.cpp
+    ShooterPlatformCollision_test.cpp
 )
 
 target_include_directories(tests PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include)
