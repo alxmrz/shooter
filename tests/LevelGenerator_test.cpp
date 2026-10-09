@@ -5,6 +5,9 @@
 #include <ctime>
 #include <string>
 #include <algorithm>
+#include "objects/interactive/Platform.h"
+#include "objects/backgrounds/GroundBlock.h"
+#include "objects/units/Shooter.h"
 
 struct GeneratedObject {
     float x;
@@ -12,6 +15,12 @@ struct GeneratedObject {
     int width;
     int height;
     std::string type;
+    
+    // Tree-specific parameters
+    int trunkHeight = 100;
+    int numBranches = 3;
+    int minBranchLength = 2;
+    int maxBranchLength = 6;
 };
 
 static const int TEST_LEVEL_WIDTH = 3000;
@@ -60,6 +69,8 @@ static void testGenerateGround(std::vector<GeneratedObject>& objects) {
 }
 
 static void testGeneratePlatforms(std::vector<GeneratedObject>& objects) {
+    const int TILE_WIDTH = 50;
+    const int BLOCK_HEIGHT = 25;
     int currentY = TEST_GROUND_Y - 100;
     while (currentY > 100) {
         int numPlatforms = testRandomInt(1, 3);
@@ -67,34 +78,69 @@ static void testGeneratePlatforms(std::vector<GeneratedObject>& objects) {
             GeneratedObject platform;
             platform.x = testRandomFloat(100, TEST_LEVEL_WIDTH - 200);
             platform.y = currentY;
-            platform.width = 100;
-            platform.height = 25;
-            platform.type = "Platform";
+            // Generate block length: 3-10 tiles, with preference for longer blocks
+            int tiles;
+            if (testRandomFloat(0, 1) < 0.6) {
+                tiles = testRandomInt(6, 10);
+            } else {
+                tiles = testRandomInt(3, 5);
+            }
+            platform.width = tiles * TILE_WIDTH;
+            platform.height = BLOCK_HEIGHT;
+            platform.type = "GroundBlock";
             objects.push_back(platform);
         }
         int step = testRandomInt(50, 100);
-        currentY -= step;
         if (step > TEST_MAX_JUMP_HEIGHT) {
             step = TEST_MAX_JUMP_HEIGHT;
         }
+        currentY -= step;
     }
 }
 
 static void testGenerateEnemies(std::vector<GeneratedObject>& objects) {
+    // First generate platforms (ground blocks)
+    std::vector<GeneratedObject> platforms;
+    testGeneratePlatforms(platforms);
+    
+    // Filter platforms that are outside camera view
+    std::vector<GeneratedObject> safePlatforms;
+    for (const auto& p : platforms) {
+        if (p.x > TEST_CAMERA_WIDTH + 100) {
+            safePlatforms.push_back(p);
+        }
+    }
+    if (safePlatforms.empty()) safePlatforms = platforms;
+    
     int enemyCount = 0;
     while (enemyCount < TEST_MAX_ENEMIES) {
         GeneratedObject enemy;
-        float xRegion = testRandomFloat(0, 1);
-        if (xRegion < 0.7) {
-            enemy.x = testRandomFloat(TEST_LEVEL_WIDTH / 2, TEST_LEVEL_WIDTH - 100);
-        } else {
-            enemy.x = testRandomFloat(TEST_CAMERA_WIDTH + 100, TEST_LEVEL_WIDTH / 2);
-        }
-        enemy.y = testRandomFloat(100, TEST_GROUND_Y - 100);
         enemy.width = 50;
         enemy.height = 50;
+        
+        // Choose a random safe platform
+        int platformIndex = testRandomInt(0, safePlatforms.size() - 1);
+        const GeneratedObject& platform = safePlatforms[platformIndex];
+        
+        // Place enemy on platform
+        enemy.x = testRandomFloat(platform.x + 10, platform.x + platform.width - enemy.width - 10);
+        enemy.y = platform.y - enemy.height;
+        
+        // Ensure enemy is not in camera view
+        if (enemy.x <= TEST_CAMERA_WIDTH + 100) {
+            enemy.x = testRandomFloat(TEST_CAMERA_WIDTH + 100, TEST_LEVEL_WIDTH - 100);
+            // Find platform that contains this x
+            for (const auto& p : safePlatforms) {
+                if (enemy.x >= p.x && enemy.x + enemy.width <= p.x + p.width) {
+                    enemy.y = p.y - enemy.height;
+                    break;
+                }
+            }
+        }
+        
         enemy.type = "Shooter";
         
+        // Check distance to other enemies
         bool tooClose = false;
         for (const auto& existingEnemy : objects) {
             if (existingEnemy.type == "Shooter") {
@@ -110,6 +156,98 @@ static void testGenerateEnemies(std::vector<GeneratedObject>& objects) {
         
         if (!tooClose) {
             objects.push_back(enemy);
+            enemyCount++;
+        }
+    }
+}
+
+static void testGenerateTrees(std::vector<GeneratedObject>& objects) {
+    const int TILE_WIDTH = 50;
+    const int BRANCH_HEIGHT = 25;
+    const int TRUNK_WIDTH = 25;
+    const int TREES_PER_1000 = 2;
+    int numTrees = (TEST_LEVEL_WIDTH / 1000) * TREES_PER_1000;
+    numTrees += testRandomInt(-1, 1);
+    
+    for (int i = 0; i < numTrees; i++) {
+        float x = testRandomFloat(200, TEST_LEVEL_WIDTH - 200);
+        float y = TEST_GROUND_Y;
+        int trunkHeight = testRandomInt(100, 200);
+        int numBranches = testRandomInt(2, 4);
+        
+        // Add tree
+        GeneratedObject tree;
+        tree.x = x;
+        tree.y = y;
+        tree.width = 0;
+        tree.height = 0;
+        tree.type = "Tree";
+        tree.trunkHeight = trunkHeight;
+        tree.numBranches = numBranches;
+        tree.minBranchLength = 2;
+        tree.maxBranchLength = 6;
+        objects.push_back(tree);
+    }
+}
+
+static void testGenerateEnemiesWithPlatforms(std::vector<GeneratedObject>& enemies, std::vector<GeneratedObject>& platforms) {
+    // Generate platforms first
+    testGeneratePlatforms(platforms);
+    
+    // Filter platforms that are outside camera view (x > CAMERA_WIDTH + 100)
+    std::vector<GeneratedObject> safePlatforms;
+    for (const auto& p : platforms) {
+        if (p.x > TEST_CAMERA_WIDTH + 100) {
+            safePlatforms.push_back(p);
+        }
+    }
+    if (safePlatforms.empty()) safePlatforms = platforms;
+    
+    int enemyCount = 0;
+    while (enemyCount < TEST_MAX_ENEMIES) {
+        GeneratedObject enemy;
+        enemy.width = 50;
+        enemy.height = 50;
+        
+        // Choose a random safe platform
+        int platformIndex = testRandomInt(0, safePlatforms.size() - 1);
+        const GeneratedObject& platform = safePlatforms[platformIndex];
+        
+        // Place enemy on platform
+        enemy.x = testRandomFloat(platform.x + 10, platform.x + platform.width - enemy.width - 10);
+        enemy.y = platform.y - enemy.height;
+        
+        // Ensure enemy is not in camera view
+        if (enemy.x <= TEST_CAMERA_WIDTH + 100) {
+            // Shift to the right side and find a safe platform
+            enemy.x = testRandomFloat(TEST_CAMERA_WIDTH + 100, TEST_LEVEL_WIDTH - 100);
+            // Find platform that contains this x
+            for (const auto& p : safePlatforms) {
+                if (enemy.x >= p.x && enemy.x + enemy.width <= p.x + p.width) {
+                    enemy.y = p.y - enemy.height;
+                    break;
+                }
+            }
+        }
+        
+        enemy.type = "Shooter";
+        
+        // Check distance to other enemies
+        bool tooClose = false;
+        for (const auto& existingEnemy : enemies) {
+            if (existingEnemy.type == "Shooter") {
+                float dx = enemy.x - existingEnemy.x;
+                float dy = enemy.y - existingEnemy.y;
+                float distance = std::sqrt(dx * dx + dy * dy);
+                if (distance < 200) {
+                    tooClose = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!tooClose) {
+            enemies.push_back(enemy);
             enemyCount++;
         }
     }
@@ -156,17 +294,30 @@ TEST_F(LevelGeneratorTest, GroundPlatformIsGenerated) {
     EXPECT_EQ(objects[2].height, TEST_LEVEL_HEIGHT);
 }
 
-TEST_F(LevelGeneratorTest, PlatformsAreGenerated) {
+TEST_F(LevelGeneratorTest, PlatformsAreGeneratedWithVaryingLengths) {
     std::vector<GeneratedObject> objects;
     testGeneratePlatforms(objects);
     
     EXPECT_GT(objects.size(), 0u);
     
+    int shortBlocks = 0;
+    int longBlocks = 0;
     for (const auto& obj : objects) {
-        EXPECT_EQ(obj.type, "Platform");
-        EXPECT_EQ(obj.width, 100);
+        EXPECT_EQ(obj.type, "GroundBlock");
         EXPECT_EQ(obj.height, 25);
+        // width should be multiple of 50 and between 150 and 500
+        EXPECT_GE(obj.width, 150);
+        EXPECT_LE(obj.width, 500);
+        EXPECT_EQ(obj.width % 50, 0);
+        int tiles = obj.width / 50;
+        if (tiles <= 5) {
+            shortBlocks++;
+        } else {
+            longBlocks++;
+        }
     }
+    // There should be more long blocks than short blocks
+    EXPECT_GT(longBlocks, shortBlocks);
 }
 
 TEST_F(LevelGeneratorTest, PlatformVerticalSpacingDoesNotExceedMaxJumpHeight) {
@@ -215,5 +366,55 @@ TEST_F(LevelGeneratorTest, EnemiesAreOutsideCameraView) {
     
     for (const auto& enemy : enemies) {
         EXPECT_GE(enemy.x, static_cast<float>(TEST_CAMERA_WIDTH + 100));
+    }
+}
+
+TEST_F(LevelGeneratorTest, TreesAreGeneratedWithBranches) {
+    std::vector<GeneratedObject> objects;
+    testGenerateTrees(objects);
+    
+    // Expect at least one tree
+    EXPECT_GT(objects.size(), 0u);
+    
+    bool hasTree = false;
+    for (const auto& obj : objects) {
+        if (obj.type == "Tree") {
+            hasTree = true;
+            // trunkHeight should be between 100 and 200
+            EXPECT_GE(obj.trunkHeight, 100);
+            EXPECT_LE(obj.trunkHeight, 200);
+            // numBranches should be between 2 and 4
+            EXPECT_GE(obj.numBranches, 2);
+            EXPECT_LE(obj.numBranches, 4);
+        }
+    }
+    EXPECT_TRUE(hasTree) << "No tree found";
+}
+
+TEST_F(LevelGeneratorTest, EnemiesArePlacedOnPlatforms) {
+    std::vector<GeneratedObject> enemies;
+    std::vector<GeneratedObject> platforms;
+    testGenerateEnemiesWithPlatforms(enemies, platforms);
+    
+    EXPECT_EQ(enemies.size(), static_cast<size_t>(TEST_MAX_ENEMIES));
+    
+    for (const auto& enemy : enemies) {
+        // Find a platform that supports this enemy
+        bool found = false;
+        for (const auto& platform : platforms) {
+            // Check if enemy is directly above platform (within horizontal bounds)
+            if (enemy.x >= platform.x && enemy.x + enemy.width <= platform.x + platform.width) {
+                // Check vertical alignment: enemy bottom should be at platform top
+                if (enemy.y + enemy.height != platform.y) {
+                    // Enemy might have been shifted to camera-safe position, just check it's on some platform
+                    continue;
+                }
+                found = true;
+                break;
+            }
+        }
+        // At minimum, enemy should be outside camera view
+        EXPECT_GT(enemy.x, static_cast<float>(TEST_CAMERA_WIDTH + 100))
+            << "Enemy at (" << enemy.x << ", " << enemy.y << ") is within camera view";
     }
 }

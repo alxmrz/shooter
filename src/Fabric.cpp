@@ -12,6 +12,8 @@
 #include "objects/interactive/Heart.h"
 #include "objects/interactive/Ammunition.h"
 #include "objects/interactive/Platform.h"
+#include "objects/backgrounds/GroundBlock.h"
+#include "objects/interactive/Tree.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 
@@ -84,10 +86,24 @@ Platform* Fabric::createPlatform(float x, float y, int width, int height)
     sprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
     sprite->setScale(0.8f, 0.8f);*/
     
-    Platform* platform = new Platform(x, y, width, height);
+    // Black with black border for platforms
+    Platform* platform = new Platform(x, y, width, height, 
+                                      sf::Color::Black, sf::Color::Black);
     //platform->setMainSprite(sprite);
     
     return platform;
+}
+
+Tree* Fabric::createTree(float x, float y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength)
+{
+    Tree* tree = new Tree(x, y, trunkHeight, numBranches, minBranchLength, maxBranchLength);
+    return tree;
+}
+
+GroundBlock* Fabric::createGroundBlock(float x, float y, int width, int height)
+{
+    GroundBlock* groundBlock = new GroundBlock(x, y, width, height);
+    return groundBlock;
 }
 
 Shooter* Fabric::createShooter(float x, float y, int width, int height)

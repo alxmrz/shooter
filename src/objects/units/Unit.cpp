@@ -72,7 +72,7 @@ bool Unit::move(float x, float y) {
                         break;
                     }
                 } else if (Platform *obj = dynamic_cast<Platform *>(go->all[i])) {
-                    if (collideRect(obj)) {
+                    if (obj->isCollidable() && collideRect(obj)) {
                         if (y < 0) {
                             // Moving up into platform from below - revert and stop jump
                             this->x -= x;

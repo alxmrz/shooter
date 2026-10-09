@@ -41,7 +41,7 @@ void Scene::initMainMenu()
 void Scene::initNewGame()
 {
     gameState->objects->clear();
-    // map->generateLevel("resources/levels/training.tmx");
+    //map->generateLevel("resources/levels/training.tmx");
     LevelGenerator generator(gameState->objects);
     map->generateLevel(generator);
 }

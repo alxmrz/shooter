@@ -6,6 +6,7 @@ add_executable(tests
     Fabric_test.cpp
     EventHandler_test.cpp
     Ground_test.cpp
+    GroundBlock_test.cpp
     Crystal_test.cpp
     Heart_test.cpp
     Ammunition_test.cpp

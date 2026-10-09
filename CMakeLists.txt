@@ -18,10 +18,13 @@ set(PROJECT_HEADERS
         src/Resources.h
         src/LevelGenerator.h
         src/objects/backgrounds/Ground.h
-        src/objects/interactive/Crystal.h
+        src/objects/backgrounds/GroundBlock.h
+        src/objects/backgrounds/GroundBlock.h
+    src/objects/interactive/Crystal.h
         src/objects/interactive/Heart.h
         src/objects/interactive/Ammunition.h
         src/objects/interactive/Platform.h
+        src/objects/interactive/Tree.h
         src/objects/units/Unit.h
         src/objects/units/Shooter.h
         src/objects/interactive/Bullet.h
@@ -45,10 +48,13 @@ set(PROJECT_SOURCES
         src/Resources.cpp
         src/LevelGenerator.cpp
         src/objects/backgrounds/Ground.cpp
-        src/objects/interactive/Crystal.cpp
+        src/objects/backgrounds/GroundBlock.cpp
+        src/objects/backgrounds/GroundBlock.cpp
+    src/objects/interactive/Crystal.cpp
         src/objects/interactive/Heart.cpp
         src/objects/interactive/Ammunition.cpp
         src/objects/interactive/Platform.cpp
+        src/objects/interactive/Tree.cpp
         src/objects/units/Unit.cpp
         src/objects/units/Shooter.cpp
         src/objects/interactive/Bullet.cpp

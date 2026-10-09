@@ -11,6 +11,8 @@
 #include "objects/interactive/Heart.h"
 #include "objects/interactive/Ammunition.h"
 #include "objects/interactive/Platform.h"
+#include "objects/backgrounds/GroundBlock.h"
+#include "objects/interactive/Tree.h"
 #include "objects/units/Shooter.h"
 #include "Fabric.h"
 #include "LevelGenerator.h"
@@ -140,13 +142,36 @@ void Map::generatePlayable(tinyxml2::XMLElement* map)
                         50
                     )
                 ); 
-            } else if (type == "Platform") {
+            } else if (type == "Tree") {
+                int trunkHeight = atoi(object->Attribute("trunkHeight"));
+                int numBranches = atoi(object->Attribute("numBranches"));
+                int minBranchLength = atoi(object->Attribute("minBranchLength"));
+                int maxBranchLength = atoi(object->Attribute("maxBranchLength"));
+                Tree* tree = go->fabric->createTree(
+                    atoi(object->Attribute("x")),
+                    atoi(object->Attribute("y")),
+                    trunkHeight, numBranches, minBranchLength, maxBranchLength
+                );
+                // Add only branches to all (for collision)
+                for (Platform* branch : tree->getBranches()) {
+                    go->all.push_back(branch);
+                }
+                go->all.push_back(tree);
                 go->all.push_back(
                     go->fabric->createPlatform(
                         atoi(object->Attribute("x")),
                         atoi(object->Attribute("y")),
                         100,
                         25
+                    )
+                ); 
+            } else if (type == "GroundBlock") {
+                go->all.push_back(
+                    go->fabric->createGroundBlock(
+                        atoi(object->Attribute("x")),
+                        atoi(object->Attribute("y")),
+                        atoi(object->Attribute("width")),
+                        atoi(object->Attribute("height"))
                     )
                 ); 
             }
