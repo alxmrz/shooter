@@ -5,23 +5,10 @@
 #include <ctime>
 #include <string>
 #include <algorithm>
+#include "LevelGenerator.h"
 #include "objects/interactive/Platform.h"
 #include "objects/backgrounds/GroundBlock.h"
 #include "objects/units/Shooter.h"
-
-struct GeneratedObject {
-    float x;
-    float y;
-    int width;
-    int height;
-    std::string type;
-    
-    // Tree-specific parameters
-    int trunkHeight = 100;
-    int numBranches = 3;
-    int minBranchLength = 2;
-    int maxBranchLength = 6;
-};
 
 static const int TEST_LEVEL_WIDTH = 3000;
 static const int TEST_LEVEL_HEIGHT = 3000;
@@ -162,15 +149,13 @@ static void testGenerateEnemies(std::vector<GeneratedObject>& objects) {
 }
 
 static void testGenerateTrees(std::vector<GeneratedObject>& objects) {
-    const int TILE_WIDTH = 50;
-    const int BRANCH_HEIGHT = 25;
-    const int TRUNK_WIDTH = 25;
-    const int TREES_PER_1000 = 2;
-    int numTrees = (TEST_LEVEL_WIDTH / 1000) * TREES_PER_1000;
-    numTrees += testRandomInt(-1, 1);
-    
+    const int SEGMENT_WIDTH = 500;
+    const int RIGHT_MARGIN = 200;
+    int numTrees = TEST_LEVEL_WIDTH / SEGMENT_WIDTH;
+
     for (int i = 0; i < numTrees; i++) {
-        float x = testRandomFloat(200, TEST_LEVEL_WIDTH - 200);
+        int segmentStart = i * SEGMENT_WIDTH;
+        float x = testRandomFloat(segmentStart, segmentStart + SEGMENT_WIDTH - RIGHT_MARGIN);
         float y = TEST_GROUND_Y;
         int trunkHeight = testRandomInt(100, 200);
         int numBranches = testRandomInt(2, 4);
@@ -389,6 +374,29 @@ TEST_F(LevelGeneratorTest, TreesAreGeneratedWithBranches) {
         }
     }
     EXPECT_TRUE(hasTree) << "No tree found";
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneTreePer500Pixels) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    generator.generateTrees(objects);
+
+    const int SEGMENT_WIDTH = 500;
+    const int RIGHT_MARGIN = 200;
+    const int expectedTrees = LevelGenerator::LEVEL_WIDTH / SEGMENT_WIDTH;
+
+    ASSERT_EQ(objects.size(), static_cast<size_t>(expectedTrees));
+
+    for (int i = 0; i < expectedTrees; ++i) {
+        EXPECT_EQ(objects[i].type, "Tree");
+        EXPECT_GE(objects[i].x, i * SEGMENT_WIDTH);
+        EXPECT_LE(objects[i].x, i * SEGMENT_WIDTH + SEGMENT_WIDTH - RIGHT_MARGIN);
+    }
+
+    // First tree trunk x is within [0, 300]
+    ASSERT_FALSE(objects.empty());
+    EXPECT_GE(objects[0].x, 0);
+    EXPECT_LE(objects[0].x, SEGMENT_WIDTH - RIGHT_MARGIN);
 }
 
 TEST_F(LevelGeneratorTest, EnemiesArePlacedOnPlatforms) {

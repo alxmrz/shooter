@@ -8,6 +8,12 @@ class Platform;
 
 class Tree: public CObject {
 public:
+    static constexpr int TRUNK_WIDTH = 25;
+    static constexpr int BRANCH_HEIGHT = 25;
+    static constexpr int TILE_WIDTH = 50;
+    static constexpr int LEAVES_WIDTH_MULTIPLIER = 7;
+    static constexpr int LEAVES_X_OFFSET_MULTIPLIER = 3;
+
     Tree();
     Tree(const Tree& orig);
     Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength);
@@ -18,6 +24,8 @@ public:
     
     // Get all branches as platforms (for collision)
     std::vector<Platform*> getBranches() const;
+    Platform* getTrunk() const;
+    Platform* getLeaves() const;
     
 private:
     std::vector<Platform*> branches;
@@ -25,6 +33,7 @@ private:
     Platform* leaves;
     
     void generateBranches(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength);
+    void updateBounds();
 };
 
 #endif /* TREE_H */

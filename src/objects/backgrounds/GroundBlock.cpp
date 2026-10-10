@@ -16,7 +16,8 @@ GroundBlock::GroundBlock(int x, int y, int width, int height) : CObject(x, y, wi
     rect = new sf::RectangleShape;
     rect->setSize(sf::Vector2f(width, height));
     rect->setOutlineColor(sf::Color::Black);
-    rect->setFillColor(sf::Color(34, 139, 34)); // Dark green
+    //rect->setFillColor(sf::Color(34, 139, 34)); // Dark green
+    rect->setFillColor(sf::Color(0, 0, 100)); // Dark green
     rect->setPosition(x, y);
 }
 

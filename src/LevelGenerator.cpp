@@ -366,10 +366,12 @@ int LevelGenerator::findPlatformAtX(const std::vector<GeneratedObject>& platform
 
 void LevelGenerator::generateTrees(std::vector<GeneratedObject>& objects)
 {
-    // Generate trees: 2 trees per 1000 pixels of level width
-    const int TREES_PER_1000 = 2;
-    int numTrees = (LEVEL_WIDTH / 1000) * TREES_PER_1000;
-    numTrees += randomInt(-1, 1); // slight variation
+    // At most one tree per TREE_SEGMENT_WIDTH pixels of level width.
+    // The trunk stays at least TREE_RIGHT_MARGIN pixels away from the right edge
+    // of its segment, so leaves and branches have room (they may extend further right).
+    const int TREE_SEGMENT_WIDTH = 500;
+    const int TREE_RIGHT_MARGIN = 200;
+    int numTrees = LEVEL_WIDTH / TREE_SEGMENT_WIDTH;
 
     const int TRUNK_HEIGHT_MIN = 100;
     const int TRUNK_HEIGHT_MAX = 200;
@@ -380,8 +382,9 @@ void LevelGenerator::generateTrees(std::vector<GeneratedObject>& objects)
 
     for (int i = 0; i < numTrees; i++)
     {
-        // Random x position, ensure not too close to edges
-        float x = randomFloat(200, LEVEL_WIDTH - 200);
+        // Trunk x within its segment, at least TREE_RIGHT_MARGIN from the segment's right edge
+        int segmentStart = i * TREE_SEGMENT_WIDTH;
+        float x = randomFloat(segmentStart, segmentStart + TREE_SEGMENT_WIDTH - TREE_RIGHT_MARGIN);
         float y = GROUND_Y; // place on ground level
 
         int trunkHeight = randomInt(TRUNK_HEIGHT_MIN, TRUNK_HEIGHT_MAX);
