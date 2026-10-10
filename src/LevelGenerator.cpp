@@ -2,7 +2,9 @@
 #include <ctime>
 #include <algorithm>
 #include <cmath>
+#include <vector>
 #include "LevelGenerator.h"
+#include "SpacingGrid.h"
 #include "Map.h"
 #include "GameObjects.h"
 #include "Fabric.h"
@@ -19,7 +21,17 @@ constexpr int LevelGenerator::GROUND_Y;
 constexpr int LevelGenerator::MAX_ENEMIES;
 constexpr int LevelGenerator::CAMERA_WIDTH;
 constexpr int LevelGenerator::CAMERA_HEIGHT;
+constexpr int LevelGenerator::PLAYER_WIDTH;
+constexpr int LevelGenerator::PLAYER_HEIGHT;
+constexpr int LevelGenerator::GROUND_JUMP_HEIGHT;
+constexpr int LevelGenerator::AIR_JUMP_HEIGHT;
+constexpr int LevelGenerator::DOUBLE_JUMP_HEIGHT;
 constexpr int LevelGenerator::MAX_JUMP_HEIGHT;
+constexpr int LevelGenerator::START_BLOCK_X;
+constexpr int LevelGenerator::START_BLOCK_Y;
+constexpr int LevelGenerator::START_BLOCK_WIDTH;
+constexpr int LevelGenerator::START_BLOCK_HEIGHT;
+constexpr int LevelGenerator::TREE_MIN_BLOCK_WIDTH;
 
 LevelGenerator::LevelGenerator(GameObjects* go) : go(go)
 {
@@ -49,8 +61,10 @@ void LevelGenerator::generateLevel(Map* map)
     generateEnemies(objects);
 
 
-    // Create player first at starting position
-    Shooter* player = go->fabric->createShooter(100, GROUND_Y - 110, 50, 50);
+    // Create the player on top of the fixed start block in the bottom-left corner.
+    const int startBlockCenterX = START_BLOCK_X + (START_BLOCK_WIDTH - PLAYER_WIDTH) / 2;
+    Shooter* player = go->fabric->createShooter(
+        startBlockCenterX, START_BLOCK_Y - PLAYER_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT);
     player->setMain(true);
     go->player = player;
     go->all.push_back(player);
@@ -132,44 +146,123 @@ void LevelGenerator::generateGround(std::vector<GeneratedObject>& objects)
 
 void LevelGenerator::generatePlatforms(std::vector<GeneratedObject>& objects)
 {
-    // Generate ground blocks with varying lengths (3-10 tiles)
-    // Tile width assumed to be 50 pixels (same as ground height)
+    // Ground blocks with varying lengths, widened by a random factor.
+    // Tile width assumed to be 50 pixels (same as ground height).
     const int TILE_WIDTH = 50;
     const int BLOCK_HEIGHT = 25;
 
-    // Start from ground level and move upward
-    int currentY = GROUND_Y - 100; // Start above ground
+    // Minimum clearance between any two ground blocks: 2 widths / 2 heights of
+    // the Shooter (50x50) => 100 pixels along at least one axis.
+    const int MIN_BLOCK_GAP = 2 * PLAYER_WIDTH;
+    const int HALF_GAP = MIN_BLOCK_GAP / 2;
+    const int CELL_SIZE = MIN_BLOCK_GAP;
+    const int CANDIDATE_STEP = 50;
+
+    // Width multiplier applied to every generated block.
+    const float WIDTH_SCALE_MIN = 1.2f;
+    const float WIDTH_SCALE_MAX = 2.0f;
+
+    // Spatial hash grid: only blocks in nearby cells are checked for clearance,
+    // so the number of proximity checks stays linear in the number of blocks.
+    SpacingGrid grid(CELL_SIZE, static_cast<float>(HALF_GAP));
+
+    auto overlapsExisting = [&](const GeneratedObject& candidate) -> bool
+    {
+        SpacingBox box = {candidate.x, candidate.y, candidate.width, candidate.height};
+        return !grid.canPlace(box);
+    };
+
+    auto insertIntoGrid = [&](const GeneratedObject& block)
+    {
+        SpacingBox box = {block.x, block.y, block.width, block.height};
+        grid.insert(box);
+    };
+
+    // Candidate positions across the level (shared by all placement attempts).
+    std::vector<float> candidates;
+    for (float x = 100; x <= LEVEL_WIDTH - 200; x += CANDIDATE_STEP)
+    {
+        candidates.push_back(x);
+    }
+
+    auto tryPlaceWidth = [&](int y, int blockWidth) -> bool
+    {
+        std::vector<float> shuffled = candidates;
+        std::random_shuffle(shuffled.begin(), shuffled.end());
+
+        for (float x : shuffled)
+        {
+            GeneratedObject block;
+            block.x = x;
+            block.y = y;
+            block.width = blockWidth;
+            block.height = BLOCK_HEIGHT;
+            block.type = "GroundBlock";
+
+            if (!overlapsExisting(block))
+            {
+                insertIntoGrid(block);
+                objects.push_back(block);
+                return true;
+            }
+        }
+        return false;
+    };
+
+    auto generateBlockWidth = [&]() -> int
+    {
+        // Base length 3-10 tiles, more long than short, then widened 1.2-2x.
+        int baseTiles = (randomFloat(0, 1) < 0.6) ? randomInt(6, 10) : randomInt(3, 5);
+        float scale = randomFloat(WIDTH_SCALE_MIN, WIDTH_SCALE_MAX);
+        int tiles = static_cast<int>(baseTiles * scale + 0.5f);
+        if (tiles < 3)
+        {
+            tiles = 3;
+        }
+        return tiles * TILE_WIDTH;
+    };
+
+    auto tryPlaceBlock = [&](int y) -> bool
+    {
+        int blockWidth = generateBlockWidth();
+
+        if (tryPlaceWidth(y, blockWidth))
+        {
+            return true;
+        }
+
+        // Fall back to progressively shorter blocks only if the widened block
+        // does not fit, so every level keeps one reachable block.
+        int tiles = blockWidth / TILE_WIDTH;
+        for (int fallbackTiles = tiles - 1; fallbackTiles >= 3; --fallbackTiles)
+        {
+            if (tryPlaceWidth(y, fallbackTiles * TILE_WIDTH))
+            {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Fixed start block in the bottom-left corner, on the ground.
+    GeneratedObject startBlock;
+    startBlock.x = START_BLOCK_X;
+    startBlock.y = START_BLOCK_Y;
+    startBlock.width = START_BLOCK_WIDTH;
+    startBlock.height = START_BLOCK_HEIGHT;
+    startBlock.type = "GroundBlock";
+    insertIntoGrid(startBlock);
+    objects.push_back(startBlock);
+
+    // Start above ground and move upward.
+    int currentY = GROUND_Y - 100;
 
     while (currentY > 100)
     {
-        // Stop before reaching top
-        // Determine number of blocks at this level (1-3)
-        int numBlocks = randomInt(1, 3);
+        // Exactly one block per level.
+        tryPlaceBlock(currentY);
 
-        for (int i = 0; i < numBlocks; i++)
-        {
-            GeneratedObject block;
-            block.x = randomFloat(100, LEVEL_WIDTH - 200);
-            block.y = currentY;
-
-            // Generate block length: 3-10 tiles, with preference for longer blocks
-            // 60% chance for long blocks (6-10 tiles), 40% for short (3-5 tiles)
-            int tiles;
-            if (randomFloat(0, 1) < 0.6)
-            {
-                tiles = randomInt(6, 10); // long block
-            }
-            else
-            {
-                tiles = randomInt(3, 5); // short block
-            }
-            block.width = tiles * TILE_WIDTH;
-            block.height = BLOCK_HEIGHT;
-            block.type = "GroundBlock";
-            objects.push_back(block);
-        }
-
-        // Move up by random step (50-100 pixels), but ensure not more than MAX_JUMP_HEIGHT
+        // Move up by a random step not exceeding the maximum vertical distance.
         int step = randomInt(50, 100);
         if (step > MAX_JUMP_HEIGHT)
         {
@@ -282,69 +375,57 @@ void LevelGenerator::generateItems(std::vector<GeneratedObject>& objects, const 
 
 void LevelGenerator::generateEnemies(std::vector<GeneratedObject>& objects)
 {
-    int enemyCount = 0;
+    // Enemies are placed on ground blocks, at most one per every tenth platform.
+    const int PLATFORM_INTERVAL = 10;
+    const int ENEMY_WIDTH = 50;
+    const int ENEMY_HEIGHT = 50;
+    const int EDGE_MARGIN = 10;
+    const float CAMERA_SAFE_X = static_cast<float>(CAMERA_WIDTH + 100);
 
-    // Collect all platforms (type "Platform")
+    // Platforms are the generated ground blocks (including the start block).
     std::vector<GeneratedObject> platforms;
-    std::vector<GeneratedObject> shooters;
     for (const auto& obj : objects)
     {
-        if (obj.type == "Platform")
+        if (obj.type == "GroundBlock")
         {
             platforms.push_back(obj);
         }
-        else if (obj.type == "Shooter")
+    }
+
+    int enemyCount = 0;
+
+    for (size_t i = 0; i < platforms.size() && enemyCount < MAX_ENEMIES; ++i)
+    {
+        // At most one enemy per PLATFORM_INTERVAL platforms: only every tenth.
+        if ((i + 1) % PLATFORM_INTERVAL != 0)
         {
-            shooters.push_back(obj);
+            continue;
         }
-    }
 
-    // If no platforms, fall back to ground level (should not happen)
-    if (platforms.empty())
-    {
-        GeneratedObject groundPlatform;
-        groundPlatform.x = 0;
-        groundPlatform.y = GROUND_Y;
-        groundPlatform.width = LEVEL_WIDTH;
-        groundPlatform.height = 50;
-        platforms.push_back(groundPlatform);
-    }
+        const GeneratedObject& platform = platforms[i];
 
-    while (enemyCount < MAX_ENEMIES)
-    {
+        float minX = platform.x + EDGE_MARGIN;
+        float maxX = platform.x + platform.width - ENEMY_WIDTH - EDGE_MARGIN;
+        if (maxX < minX)
+        {
+            continue; // platform too narrow for an enemy
+        }
+
+        // Keep the enemy outside the camera view.
+        float spawnMinX = std::max(minX, CAMERA_SAFE_X);
+        if (spawnMinX > maxX)
+        {
+            continue; // whole platform is inside the camera view
+        }
+
         GeneratedObject enemy;
-        enemy.width = 50;
-        enemy.height = 50;
-
-        // Choose a random platform
-        int platformIndex = randomInt(0, platforms.size() - 1);
-        const GeneratedObject& platform = platforms[platformIndex];
-
-        // Place enemy on platform, ensuring enemy is within platform bounds
-        enemy.x = randomFloat(platform.x + 10, platform.x + platform.width - enemy.width - 10);
-        enemy.y = platform.y - enemy.height;
-
-        // Ensure enemy is not in camera view (x > CAMERA_WIDTH + 100)
-        if (enemy.x <= CAMERA_WIDTH + 100)
-        {
-            // Shift to the right side
-            enemy.x = randomFloat(CAMERA_WIDTH + 100, LEVEL_WIDTH - 100);
-            // Find a platform near this x (simple: choose random platform again)
-            // For simplicity, keep the same platform but adjust x if possible
-            if (enemy.x < platform.x || enemy.x > platform.x + platform.width - enemy.width)
-            {
-                // Choose another platform
-                platformIndex = randomInt(0, platforms.size() - 1);
-                const GeneratedObject& newPlatform = platforms[platformIndex];
-                enemy.x = randomFloat(newPlatform.x + 10, newPlatform.x + newPlatform.width - enemy.width - 10);
-                enemy.y = newPlatform.y - enemy.height;
-            }
-        }
-
+        enemy.x = randomFloat(spawnMinX, maxX);
+        enemy.y = platform.y - ENEMY_HEIGHT;
+        enemy.width = ENEMY_WIDTH;
+        enemy.height = ENEMY_HEIGHT;
         enemy.type = "Shooter";
 
         objects.push_back(enemy);
-        shooters.push_back(enemy);
         enemyCount++;
     }
 }
@@ -366,39 +447,53 @@ int LevelGenerator::findPlatformAtX(const std::vector<GeneratedObject>& platform
 
 void LevelGenerator::generateTrees(std::vector<GeneratedObject>& objects)
 {
-    // At most one tree per TREE_SEGMENT_WIDTH pixels of level width.
-    // The trunk stays at least TREE_RIGHT_MARGIN pixels away from the right edge
-    // of its segment, so leaves and branches have room (they may extend further right).
-    const int TREE_SEGMENT_WIDTH = 500;
-    const int TREE_RIGHT_MARGIN = 200;
-    int numTrees = LEVEL_WIDTH / TREE_SEGMENT_WIDTH;
-
+    // A tree appears on every third ground block at most. The block must also be
+    // wide enough; the trunk stands on its top edge and stays inside its bounds.
     const int TRUNK_HEIGHT_MIN = 100;
     const int TRUNK_HEIGHT_MAX = 200;
     const int BRANCHES_MIN = 2;
     const int BRANCHES_MAX = 4;
     const int MIN_BRANCH_LENGTH = 2; // tiles
     const int MAX_BRANCH_LENGTH = 6; // tiles
+    const int TRUNK_MARGIN = 100;
+    const int PLATFORM_INTERVAL = 3;
 
-    for (int i = 0; i < numTrees; i++)
+    // Snapshot blocks first: trees are appended to the same vector.
+    std::vector<GeneratedObject> blocks;
+    for (const auto& obj : objects)
     {
-        // Trunk x within its segment, at least TREE_RIGHT_MARGIN from the segment's right edge
-        int segmentStart = i * TREE_SEGMENT_WIDTH;
-        float x = randomFloat(segmentStart, segmentStart + TREE_SEGMENT_WIDTH - TREE_RIGHT_MARGIN);
-        float y = GROUND_Y; // place on ground level
+        if (obj.type == "GroundBlock")
+        {
+            blocks.push_back(obj);
+        }
+    }
 
-        int trunkHeight = randomInt(TRUNK_HEIGHT_MIN, TRUNK_HEIGHT_MAX);
-        int numBranches = randomInt(BRANCHES_MIN, BRANCHES_MAX);
+    for (size_t i = 0; i < blocks.size(); ++i)
+    {
+        // At most one tree per PLATFORM_INTERVAL blocks: only every third block.
+        if ((i + 1) % PLATFORM_INTERVAL != 0)
+        {
+            continue;
+        }
+        if (blocks[i].width < TREE_MIN_BLOCK_WIDTH)
+        {
+            continue;
+        }
 
-        // Add tree
+        const GeneratedObject& block = blocks[i];
+
+        // Trunk x within the block, leaving room on both sides.
+        float x = randomFloat(block.x + TRUNK_MARGIN, block.x + block.width - TRUNK_MARGIN);
+        float y = block.y; // trunk base on the block's top edge
+
         GeneratedObject treeObj;
         treeObj.x = x;
         treeObj.y = y;
         treeObj.width = 0;
         treeObj.height = 0;
         treeObj.type = "Tree";
-        treeObj.trunkHeight = trunkHeight;
-        treeObj.numBranches = numBranches;
+        treeObj.trunkHeight = randomInt(TRUNK_HEIGHT_MIN, TRUNK_HEIGHT_MAX);
+        treeObj.numBranches = randomInt(BRANCHES_MIN, BRANCHES_MAX);
         treeObj.minBranchLength = MIN_BRANCH_LENGTH;
         treeObj.maxBranchLength = MAX_BRANCH_LENGTH;
         objects.push_back(treeObj);

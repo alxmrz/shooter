@@ -17,6 +17,7 @@ set(PROJECT_HEADERS
         src/Fabric.h
         src/Resources.h
         src/LevelGenerator.h
+        src/SpacingGrid.h
         src/objects/backgrounds/Ground.h
         src/objects/backgrounds/GroundBlock.h
         src/objects/backgrounds/GroundBlock.h

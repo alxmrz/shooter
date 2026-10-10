@@ -31,13 +31,31 @@ public:
     void generateLevel(Map* map);
     
     // Public constants for testing
-    static constexpr int LEVEL_WIDTH = 1000;
-    static constexpr int LEVEL_HEIGHT = 1000;
-    static constexpr int GROUND_Y = 950;
+    static constexpr int LEVEL_WIDTH = 3000;
+    static constexpr int LEVEL_HEIGHT = 3000;
+    static constexpr int GROUND_Y = 2950;
     static constexpr int MAX_ENEMIES = 10;
     static constexpr int CAMERA_WIDTH = 800;
     static constexpr int CAMERA_HEIGHT = 600;
-    static constexpr int MAX_JUMP_HEIGHT = 110;
+
+    // Player and jump geometry
+    static constexpr int PLAYER_WIDTH = 50;
+    static constexpr int PLAYER_HEIGHT = 50;
+    static constexpr int GROUND_JUMP_HEIGHT = 100;
+    static constexpr int AIR_JUMP_HEIGHT = 60;
+    static constexpr int DOUBLE_JUMP_HEIGHT = GROUND_JUMP_HEIGHT + AIR_JUMP_HEIGHT;
+    // Maximum allowed vertical distance between blocks: the player must be able
+    // to reach the next block with a double jump, leaving room for its body.
+    static constexpr int MAX_JUMP_HEIGHT = DOUBLE_JUMP_HEIGHT - PLAYER_HEIGHT;
+
+    // Fixed starting block in the bottom-left corner; the player spawns on it.
+    static constexpr int START_BLOCK_X = 50;
+    static constexpr int START_BLOCK_Y = GROUND_Y;
+    static constexpr int START_BLOCK_WIDTH = 200;
+    static constexpr int START_BLOCK_HEIGHT = 25;
+
+    // A ground block must be at least this wide to carry a tree.
+    static constexpr int TREE_MIN_BLOCK_WIDTH = 500;
     
     // Public methods for testing
     void generateGround(std::vector<GeneratedObject>& objects);

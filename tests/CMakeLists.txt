@@ -7,6 +7,8 @@ add_executable(tests
     EventHandler_test.cpp
     Ground_test.cpp
     GroundBlock_test.cpp
+    GroundBlockCollision_test.cpp
+    SpacingGrid_test.cpp
     Crystal_test.cpp
     Heart_test.cpp
     Ammunition_test.cpp
