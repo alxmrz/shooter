@@ -135,8 +135,24 @@ void Shooter::attack()
 
 void Shooter::shiftSpritePositions()
 {
-    this->mainSprite->setPosition(this->x, this->y);
+    float originX = this->mainSprite ? this->mainSprite->getOrigin().x : 0.f;
+    float originY = this->mainSprite ? this->mainSprite->getOrigin().y : 0.f;
+    this->mainSprite->setPosition(this->x + originX, this->y + originY);
     this->explosionSprite->setPosition(this->x, this->y);
+}
+
+
+void Shooter::setMainSprite(sf::Sprite* mainSprite)
+{
+    Unit::setMainSprite(mainSprite);
+
+    if (this->mainSprite) {
+        this->mainSprite->setOrigin(this->getWidth() / 2.f, this->getHeight() / 2.f);
+        this->mainSprite->setPosition(
+            this->x + this->mainSprite->getOrigin().x,
+            this->y + this->mainSprite->getOrigin().y
+        );
+    }
 }
 
 

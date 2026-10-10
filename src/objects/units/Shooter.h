@@ -38,6 +38,8 @@ public:
     void setCrystalCountText(Text* text);
     
     void onSecondJump() override;
+    void setMainSprite(sf::Sprite* mainSprite);
+    void applyRotation(float dt);
 private:
     /* Sprites map for showing run images depending on direction (left, right) */
     std::map<std::string, std::vector<sf::IntRect>> runSprites
@@ -106,7 +108,6 @@ private:
     bool rotating = false;
     float rotationAngle = 0.f;
     void startRotation();
-    void applyRotation(float dt);
 };
 
 #endif /* SHOOTER_H */
