@@ -28,6 +28,25 @@ static int testRandomInt(int min, int max) {
     return min + std::rand() % (max - min + 1);
 }
 
+static GeneratedObject makeGroundBlock(float x, float y, int width) {
+    GeneratedObject block;
+    block.x = x;
+    block.y = y;
+    block.width = width;
+    block.height = 25;
+    block.type = "GroundBlock";
+    return block;
+}
+
+static const GeneratedObject* findTree(const std::vector<GeneratedObject>& objects) {
+    for (const auto& obj : objects) {
+        if (obj.type == "Tree") {
+            return &obj;
+        }
+    }
+    return nullptr;
+}
+
 static void testGenerateGround(std::vector<GeneratedObject>& objects) {
     // Bottom border (ground)
     GeneratedObject ground;
@@ -428,23 +447,49 @@ TEST_F(LevelGeneratorTest, PlatformVerticalSpacingDoesNotExceedMaxJumpHeight) {
     levels.erase(std::unique(levels.begin(), levels.end()), levels.end());
 
     for (size_t i = 1; i < levels.size(); ++i) {
-        EXPECT_LE(levels[i] - levels[i - 1], TEST_MAX_JUMP_HEIGHT)
+        // A block that carries a tree leaves a full tree height of room, which
+        // the tree's branches bridge; all other steps fit within a jump.
+        EXPECT_LE(levels[i] - levels[i - 1], LevelGenerator::TREE_HEIGHT)
             << "Vertical gap between levels " << levels[i - 1] << " and " << levels[i]
-            << " exceeds the maximum jump height";
+            << " exceeds the maximum tree-bridged height";
     }
 }
 
 // True when `upper` sits above `lower` within one jump and the player can cross
-// the horizontal gap between them.
+// the horizontal gap between them. A block that carries a tree may have its
+// upward neighbour a full tree height away, because the tree's branches bridge
+// the gap.
 static bool isReachableUpwardNeighbor(const GeneratedObject& lower,
-                                      const GeneratedObject& upper) {
+                                      const GeneratedObject& upper,
+                                      bool carriesTree) {
     if (upper.y >= lower.y) {
         return false;
     }
-    if (lower.y - upper.y > LevelGenerator::MAX_JUMP_HEIGHT) {
+    const float maxStep = carriesTree
+        ? static_cast<float>(LevelGenerator::TREE_HEIGHT)
+        : static_cast<float>(LevelGenerator::MAX_JUMP_HEIGHT);
+    if (lower.y - upper.y > maxStep) {
         return false;
     }
     return horizontalGap(lower, upper) <= static_cast<float>(LevelGenerator::MAX_HORIZONTAL_REACH);
+}
+
+// A ground block carries a tree when it is the third (or sixth, ...) ground
+// block and is wide enough, matching LevelGenerator's placement rule.
+static bool blockCarriesTree(const std::vector<GeneratedObject>& objects,
+                             const GeneratedObject& target) {
+    int index = 0;
+    for (const auto& obj : objects) {
+        if (obj.type != "GroundBlock") {
+            continue;
+        }
+        if (obj.x == target.x && obj.y == target.y) {
+            return (index + 1) % 3 == 0 &&
+                   target.width >= LevelGenerator::TREE_MIN_BLOCK_WIDTH;
+        }
+        index++;
+    }
+    return false;
 }
 
 // The topmost blocks have no level above them, so they are exempt from the
@@ -470,7 +515,7 @@ TEST_F(LevelGeneratorTest, RealGeneratorGivesEveryBlockAReachableUpwardNeighbor)
         }
         bool reachable = false;
         for (const auto& other : objects) {
-            if (isReachableUpwardNeighbor(block, other)) {
+            if (isReachableUpwardNeighbor(block, other, blockCarriesTree(objects, block))) {
                 reachable = true;
                 break;
             }
@@ -495,7 +540,7 @@ TEST_F(LevelGeneratorTest, RealGeneratorUpwardNeighborGapIsWithinReach) {
         // to satisfy the minimum block spacing and small enough to jump across.
         bool found = false;
         for (const auto& other : objects) {
-            if (!isReachableUpwardNeighbor(block, other)) {
+            if (!isReachableUpwardNeighbor(block, other, blockCarriesTree(objects, block))) {
                 continue;
             }
             float gap = horizontalGap(block, other);
@@ -554,7 +599,8 @@ TEST_F(LevelGeneratorTest, RealGeneratorHasClimbablePathFromStartBlock) {
             if (visited[i]) {
                 continue;
             }
-            if (isReachableUpwardNeighbor(objects[current], objects[i])) {
+            if (isReachableUpwardNeighbor(objects[current], objects[i],
+                                          blockCarriesTree(objects, objects[current]))) {
                 visited[i] = true;
                 queue.push_back(i);
             }
@@ -687,22 +733,77 @@ TEST_F(LevelGeneratorTest, TreesAreGeneratedWithBranches) {
     LevelGenerator generator(nullptr);
     std::vector<GeneratedObject> objects;
     std::srand(42);
-    generator.generatePlatforms(objects);
+    // Fillers occupy indices 0 and 1 so the wide target block is index 2,
+    // which is the only position considered for a tree.
+    objects.push_back(makeGroundBlock(900, 1300, 800));
+    objects.push_back(makeGroundBlock(2500, 100, 100));
+    objects.push_back(makeGroundBlock(1000, 2000, 600));
+
     generator.generateTrees(objects);
 
     bool hasTree = false;
     for (const auto& obj : objects) {
         if (obj.type == "Tree") {
             hasTree = true;
-            // trunkHeight should be between 100 and 200
-            EXPECT_GE(obj.trunkHeight, 100);
-            EXPECT_LE(obj.trunkHeight, 200);
-            // numBranches should be between 2 and 4
-            EXPECT_GE(obj.numBranches, 2);
-            EXPECT_LE(obj.numBranches, 4);
+            // Every tree has the fixed trunk height and a ladder branch step.
+            EXPECT_EQ(obj.trunkHeight, LevelGenerator::TREE_TRUNK_HEIGHT);
+            EXPECT_EQ(obj.branchStep, LevelGenerator::TREE_BRANCH_STEP);
+            EXPECT_GE(obj.minBranchLength, 2);
+            EXPECT_LE(obj.maxBranchLength, 6);
         }
     }
     EXPECT_TRUE(hasTree) << "No tree found";
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorTreeHeightIsFixed) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    // Overhead block is far away (clearance 675), so it is not raised.
+    objects.push_back(makeGroundBlock(900, 1300, 800));
+    objects.push_back(makeGroundBlock(2500, 100, 100));
+    objects.push_back(makeGroundBlock(1000, 2000, 600));
+
+    generator.generateTrees(objects);
+
+    const GeneratedObject* tree = findTree(objects);
+    ASSERT_NE(tree, nullptr);
+    const int totalHeight = tree->trunkHeight + tree->trunkHeight / 2;
+    EXPECT_GE(totalHeight, LevelGenerator::TREE_HEIGHT - 2);
+    EXPECT_LE(totalHeight, LevelGenerator::TREE_HEIGHT);
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorSkipsTreeWhenColumnBlocked) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    const float baseY = 2000;
+    const int gap = 150; // overhead block closer than TREE_HEIGHT, spanning the whole block
+    objects.push_back(makeGroundBlock(1000, baseY - gap - 25, 600));
+    objects.push_back(makeGroundBlock(2500, 100, 100));
+    objects.push_back(makeGroundBlock(1000, baseY, 600));
+
+    generator.generateTrees(objects);
+
+    EXPECT_EQ(findTree(objects), nullptr);
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorTreeHeightWithoutUpperBlock) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    // Both fillers sit below the target, so there is no block above it.
+    objects.push_back(makeGroundBlock(2000, 2500, 100));
+    objects.push_back(makeGroundBlock(2100, 2600, 100));
+    objects.push_back(makeGroundBlock(1000, 2000, 600));
+
+    generator.generateTrees(objects);
+
+    const GeneratedObject* tree = findTree(objects);
+    ASSERT_NE(tree, nullptr);
+    const int totalHeight = tree->trunkHeight + tree->trunkHeight / 2;
+    EXPECT_GE(totalHeight, LevelGenerator::TREE_HEIGHT - 2);
+    EXPECT_LE(totalHeight, LevelGenerator::TREE_HEIGHT);
 }
 
 TEST_F(LevelGeneratorTest, RealGeneratorPlacesTreesOnWideGroundBlocks) {
@@ -776,6 +877,90 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneTreePerThreeBlocks) {
     }
 
     EXPECT_LE(treeCount, blockCount / 3);
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorReservesRoomForEveryTreeCandidate) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    generator.generatePlatforms(objects);
+    generator.generateTrees(objects);
+
+    int candidates = 0;
+    int withTree = 0;
+    int index = 0;
+    for (const auto& block : objects) {
+        if (block.type != "GroundBlock") {
+            continue;
+        }
+        const bool candidate = (index + 1) % 3 == 0 &&
+                               block.width >= LevelGenerator::TREE_MIN_BLOCK_WIDTH;
+        index++;
+        if (!candidate) {
+            continue;
+        }
+        candidates++;
+
+        bool hasTree = false;
+        for (const auto& obj : objects) {
+            if (obj.type == "Tree" && obj.y == block.y &&
+                obj.x >= block.x && obj.x <= block.x + block.width) {
+                hasTree = true;
+                break;
+            }
+        }
+        withTree += hasTree ? 1 : 0;
+    }
+
+    EXPECT_GT(candidates, 0);
+    EXPECT_EQ(withTree, candidates)
+        << withTree << " of " << candidates << " tree candidates got a tree";
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesTreePlatformOnTopBranchSide) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    generator.generatePlatforms(objects);
+    generator.generateTrees(objects);
+
+    int checked = 0;
+    for (const auto& tree : objects) {
+        if (tree.type != "Tree") {
+            continue;
+        }
+
+        // Locate the ground block the tree stands on.
+        for (const auto& block : objects) {
+            if (block.type != "GroundBlock" || block.y != tree.y) {
+                continue;
+            }
+            if (tree.x < block.x || tree.x >= block.x + block.width) {
+                continue;
+            }
+
+            // The reserved platform is the only ground block above within a tree height.
+            for (const auto& up : objects) {
+                if (up.type != "GroundBlock") {
+                    continue;
+                }
+                const int gapY = static_cast<int>(block.y) - static_cast<int>(up.y);
+                if (gapY <= 0 || gapY > LevelGenerator::TREE_HEIGHT) {
+                    continue;
+                }
+                const bool platformOnLeft = (up.x + up.width <= block.x);
+                const bool platformOnRight = (up.x >= block.x + block.width);
+                if (!platformOnLeft && !platformOnRight) {
+                    continue;
+                }
+                const bool expectedLeft = (tree.topBranchSide == 0);
+                EXPECT_EQ(platformOnLeft, expectedLeft)
+                    << "platform is not on the tree's top-branch side";
+                checked++;
+            }
+        }
+    }
+    EXPECT_GT(checked, 0) << "no reserved platform was checked";
 }
 
 TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneEnemyPerTenPlatforms) {

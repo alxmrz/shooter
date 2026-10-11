@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <cstdlib>
+#include <algorithm>
 #include <set>
 #include <vector>
 #include "objects/interactive/Tree.h"
@@ -129,5 +130,89 @@ TEST_F(TreeTest, AtMostOneBranchPerSide) {
         EXPECT_LE(rightCount, 1) << "requested=" << requested;
         EXPECT_EQ(leftCount, 1) << "requested=" << requested;
         EXPECT_EQ(rightCount, 1) << "requested=" << requested;
+    }
+}
+
+TEST_F(TreeTest, LadderBranchesAreStepSpacedAndAlternateSides) {
+    const int trunkX = 500;
+    const int trunkHeight = 333;
+    const int branchStep = 90;
+
+    Tree tree(trunkX, 950, trunkHeight, 0, 2, 6, branchStep);
+
+    std::vector<Platform*> branches = tree.getBranches();
+    ASSERT_GT(branches.size(), 2u);
+
+    std::vector<int> ys;
+    for (Platform* branch : branches) {
+        ys.push_back(branch->getY());
+    }
+    std::sort(ys.begin(), ys.end());
+    for (size_t i = 1; i < ys.size(); ++i) {
+        EXPECT_LE(ys[i] - ys[i - 1], branchStep);
+    }
+
+    Platform* trunk = tree.getTrunk();
+    const float trunkLeft = trunk->getX();
+    const float trunkRight = trunk->getX() + trunk->getWidth();
+    int leftCount = 0;
+    int rightCount = 0;
+    for (Platform* branch : branches) {
+        if (branch->getX() < trunkLeft) leftCount++;
+        if (branch->getX() + branch->getWidth() > trunkRight) rightCount++;
+    }
+    EXPECT_GT(leftCount, 1);
+    EXPECT_GT(rightCount, 1);
+}
+
+TEST_F(TreeTest, LadderBranchesStayOnTrunk) {
+    const int trunkX = 500;
+    const int trunkHeight = 266;
+    const int branchStep = 90;
+
+    Tree tree(trunkX, 950, trunkHeight, 0, 2, 6, branchStep);
+
+    Platform* trunk = tree.getTrunk();
+    const int trunkTop = static_cast<int>(trunk->getY());
+
+    std::vector<Platform*> branches = tree.getBranches();
+    ASSERT_GT(branches.size(), 0u);
+
+    int highestBranchY = trunkTop;
+    for (Platform* branch : branches) {
+        EXPECT_GE(static_cast<int>(branch->getY()), trunkTop)
+            << "branch extends above the trunk into the foliage";
+        highestBranchY = std::min(highestBranchY, static_cast<int>(branch->getY()));
+    }
+
+    // The topmost branch must sit near the trunk top so the reserved platform
+    // above the tree stays within a double jump.
+    EXPECT_LE(highestBranchY - trunkTop, branchStep);
+}
+
+TEST_F(TreeTest, TopBranchIsOnRequestedSide) {
+    const int trunkX = 500;
+    const int trunkHeight = 266;
+
+    for (int side = 0; side <= 1; ++side) {
+        Tree tree(trunkX, 950, trunkHeight, 0, 2, 6, 90, side);
+        Platform* trunk = tree.getTrunk();
+        const float trunkLeft = trunk->getX();
+        const float trunkRight = trunk->getX() + trunk->getWidth();
+
+        Platform* top = nullptr;
+        for (Platform* branch : tree.getBranches()) {
+            if (!top || branch->getY() < top->getY()) {
+                top = branch;
+            }
+        }
+        ASSERT_NE(top, nullptr);
+
+        if (side == 0) {
+            EXPECT_LT(top->getX(), trunkLeft) << "top branch should extend left";
+        } else {
+            EXPECT_GT(top->getX() + top->getWidth(), trunkRight)
+                << "top branch should extend right";
+        }
     }
 }

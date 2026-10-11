@@ -20,6 +20,11 @@ struct GeneratedObject {
     int numBranches = 3;
     int minBranchLength = 2;
     int maxBranchLength = 6;
+    // If > 0 the tree grows evenly spaced "step" branches (a climbable ladder).
+    int branchStep = 0;
+    // Side of the topmost ladder branch: 0 = left, 1 = right. The reserved
+    // platform above a tree is placed on the same side.
+    int topBranchSide = 0;
 };
 
 class LevelGenerator {
@@ -63,6 +68,17 @@ public:
 
     // A ground block must be at least this wide to carry a tree.
     static constexpr int TREE_MIN_BLOCK_WIDTH = 500;
+
+    // Every generated tree is TREE_HEIGHT pixels tall from the trunk base to the
+    // top of the leaves. Its branches are evenly spaced by TREE_BRANCH_STEP so
+    // the player can climb the tree itself. A tree is only placed where a
+    // TREE_HEIGHT-tall column above the trunk is clear of ground blocks; the
+    // trunk position is chosen to fit, otherwise the block gets no tree.
+    static constexpr int TREE_HEIGHT = 400;
+    static constexpr int TREE_TRUNK_HEIGHT = 2 * TREE_HEIGHT / 3;
+    static constexpr int TREE_BRANCH_STEP = 90;
+    static constexpr int TREE_TRUNK_MARGIN = 100;
+    static constexpr int TREE_COLUMN_STEP = 25;
     
     // Every third platform gets Ammunition, every fourth a Heart and every
     // second a Crystal; a platform carrying a tree is skipped.
@@ -94,6 +110,19 @@ private:
     static bool isNthPlatform(size_t index, int step);
     static bool platformHasTree(const std::vector<GeneratedObject>& objects,
                                 const GeneratedObject& block);
+    static std::vector<size_t> groundBlockIndices(
+        const std::vector<GeneratedObject>& objects);
+    static bool isTreeCandidate(const GeneratedObject& block, size_t index);
+    static bool blocksOverhead(const GeneratedObject& candidate,
+                               const GeneratedObject& block, float trunkX,
+                               int trunkWidth);
+    static int clearanceAtX(const std::vector<GeneratedObject>& objects,
+                            const GeneratedObject& block, float trunkX,
+                            int trunkWidth);
+    static std::vector<float> clearTrunkPositions(
+        const std::vector<GeneratedObject>& objects,
+        const GeneratedObject& block);
+    bool buildTree(std::vector<GeneratedObject>& objects, size_t blockIndex);
     static std::vector<GeneratedObject> groundBlocks(
         const std::vector<GeneratedObject>& objects);
     static int itemMaskForIndex(size_t index);

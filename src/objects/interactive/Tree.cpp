@@ -38,6 +38,37 @@ Tree::Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, 
     updateBounds();
 }
 
+Tree::Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength,
+           int branchStep) : Tree(x, y, trunkHeight, numBranches, minBranchLength, maxBranchLength,
+                                  branchStep, 0) {
+}
+
+Tree::Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength,
+           int branchStep, int topBranchSide) : CObject(x, y, 0, 0) {
+    const int trunkTop = y - trunkHeight;
+
+    trunk = new Platform(x, trunkTop, TRUNK_WIDTH, trunkHeight,
+                         sf::Color(85, 45, 25), sf::Color::Black);
+    trunk->setCollidable(false);
+
+    if (branchStep > 0) {
+        generateLadderBranches(x, trunkTop, trunkHeight, branchStep, minBranchLength, maxBranchLength,
+                               topBranchSide);
+    } else {
+        generateBranches(x, trunkTop, trunkHeight, numBranches, minBranchLength, maxBranchLength);
+    }
+
+    const int leavesWidth = LEAVES_WIDTH_MULTIPLIER * TRUNK_WIDTH;
+    const int leavesHeight = trunkHeight / 2;
+    const int leavesX = x - LEAVES_X_OFFSET_MULTIPLIER * TRUNK_WIDTH;
+    const int leavesY = trunkTop - leavesHeight;
+    leaves = new Platform(leavesX, leavesY, leavesWidth, leavesHeight,
+                          sf::Color(144, 238, 144), sf::Color::Black);
+    leaves->setCollidable(false);
+
+    updateBounds();
+}
+
 Tree::~Tree() {
     delete trunk;
     for (Platform* branch : branches) {
@@ -119,5 +150,33 @@ void Tree::generateBranches(int x, int y, int trunkHeight, int numBranches, int 
         Platform* branch = new Platform(branchX, branchY, branchWidth, BRANCH_HEIGHT,
                                         sf::Color(160, 82, 45), sf::Color::Black);
         branches.push_back(branch);
+    }
+}
+
+void Tree::generateLadderBranches(int x, int trunkTop, int trunkHeight, int branchStep,
+                                  int minBranchLength, int maxBranchLength, int topBranchSide) {
+    // Evenly spaced "step" branches along the trunk only: the topmost branch sits
+    // at the trunk top so it never pokes into the leaves, while still staying
+    // within a double jump of the reserved block above. The topmost branch is on
+    // topBranchSide (0 = left, 1 = right); lower branches alternate. Every branch
+    // base stays inside the trunk x-range and extends outward.
+    const int baseY = trunkTop + trunkHeight;
+    int side = topBranchSide;
+
+    for (int height = trunkHeight; height > 0; height -= branchStep) {
+        const int branchY = baseY - height;
+
+        int tiles = minBranchLength + rand() % (maxBranchLength - minBranchLength + 1);
+        int branchWidth = tiles * TILE_WIDTH;
+
+        int baseX = x + rand() % (TRUNK_WIDTH + 1);
+        const bool leftSide = (side == 0);
+        const int branchX = leftSide ? baseX - branchWidth : baseX;
+
+        Platform* branch = new Platform(branchX, branchY, branchWidth, BRANCH_HEIGHT,
+                                        sf::Color(160, 82, 45), sf::Color::Black);
+        branches.push_back(branch);
+
+        side = (side + 1) % 2;
     }
 }

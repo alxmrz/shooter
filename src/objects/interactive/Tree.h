@@ -17,6 +17,10 @@ public:
     Tree();
     Tree(const Tree& orig);
     Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength);
+    Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength,
+         int branchStep);
+    Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength,
+         int branchStep, int topBranchSide);
     virtual ~Tree();
     
     void update(Event event) override;
@@ -33,6 +37,8 @@ private:
     Platform* leaves;
     
     void generateBranches(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength);
+    void generateLadderBranches(int x, int trunkTop, int trunkHeight, int branchStep,
+                                int minBranchLength, int maxBranchLength, int topBranchSide);
     void updateBounds();
 };
 

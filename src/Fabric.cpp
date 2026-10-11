@@ -100,6 +100,18 @@ Tree* Fabric::createTree(float x, float y, int trunkHeight, int numBranches, int
     return tree;
 }
 
+Tree* Fabric::createTree(float x, float y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength, int branchStep)
+{
+    Tree* tree = new Tree(x, y, trunkHeight, numBranches, minBranchLength, maxBranchLength, branchStep);
+    return tree;
+}
+
+Tree* Fabric::createTree(float x, float y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength, int branchStep, int topBranchSide)
+{
+    Tree* tree = new Tree(x, y, trunkHeight, numBranches, minBranchLength, maxBranchLength, branchStep, topBranchSide);
+    return tree;
+}
+
 GroundBlock* Fabric::createGroundBlock(float x, float y, int width, int height)
 {
     GroundBlock* groundBlock = new GroundBlock(x, y, width, height);
