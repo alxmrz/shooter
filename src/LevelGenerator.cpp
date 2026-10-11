@@ -156,7 +156,6 @@ void LevelGenerator::generatePlatforms(std::vector<GeneratedObject>& objects)
     const int MIN_BLOCK_GAP = 2 * PLAYER_WIDTH;
     const int HALF_GAP = MIN_BLOCK_GAP / 2;
     const int CELL_SIZE = MIN_BLOCK_GAP;
-    const int CANDIDATE_STEP = 50;
 
     // Width multiplier applied to every generated block.
     const float WIDTH_SCALE_MIN = 1.2f;
@@ -178,37 +177,6 @@ void LevelGenerator::generatePlatforms(std::vector<GeneratedObject>& objects)
         grid.insert(box);
     };
 
-    // Candidate positions across the level (shared by all placement attempts).
-    std::vector<float> candidates;
-    for (float x = 100; x <= LEVEL_WIDTH - 200; x += CANDIDATE_STEP)
-    {
-        candidates.push_back(x);
-    }
-
-    auto tryPlaceWidth = [&](int y, int blockWidth) -> bool
-    {
-        std::vector<float> shuffled = candidates;
-        std::random_shuffle(shuffled.begin(), shuffled.end());
-
-        for (float x : shuffled)
-        {
-            GeneratedObject block;
-            block.x = x;
-            block.y = y;
-            block.width = blockWidth;
-            block.height = BLOCK_HEIGHT;
-            block.type = "GroundBlock";
-
-            if (!overlapsExisting(block))
-            {
-                insertIntoGrid(block);
-                objects.push_back(block);
-                return true;
-            }
-        }
-        return false;
-    };
-
     auto generateBlockWidth = [&]() -> int
     {
         // Base length 3-10 tiles, more long than short, then widened 1.2-2x.
@@ -222,27 +190,22 @@ void LevelGenerator::generatePlatforms(std::vector<GeneratedObject>& objects)
         return tiles * TILE_WIDTH;
     };
 
-    auto tryPlaceBlock = [&](int y) -> bool
+    // Horizontal gap between two boxes; a negative value means they overlap.
+    auto horizontalGap = [](const GeneratedObject& a, const GeneratedObject& b) -> float
     {
-        int blockWidth = generateBlockWidth();
-
-        if (tryPlaceWidth(y, blockWidth))
-        {
-            return true;
-        }
-
-        // Fall back to progressively shorter blocks only if the widened block
-        // does not fit, so every level keeps one reachable block.
-        int tiles = blockWidth / TILE_WIDTH;
-        for (int fallbackTiles = tiles - 1; fallbackTiles >= 3; --fallbackTiles)
-        {
-            if (tryPlaceWidth(y, fallbackTiles * TILE_WIDTH))
-            {
-                return true;
-            }
-        }
-        return false;
+        float aRight = a.x + a.width;
+        float bRight = b.x + b.width;
+        return std::max(a.x, b.x) - std::min(aRight, bRight);
     };
+
+    // Candidate horizontal gaps between adjacent levels. The order is shuffled
+    // per placement so the spacing is dynamic: sometimes the minimum block gap,
+    // sometimes up to 50% wider, but always within jump reach.
+    std::vector<int> gapCandidates;
+    for (int gap = MIN_BLOCK_GAP; gap <= MAX_HORIZONTAL_REACH; gap += 10)
+    {
+        gapCandidates.push_back(gap);
+    }
 
     // Fixed start block in the bottom-left corner, on the ground.
     GeneratedObject startBlock;
@@ -254,13 +217,106 @@ void LevelGenerator::generatePlatforms(std::vector<GeneratedObject>& objects)
     insertIntoGrid(startBlock);
     objects.push_back(startBlock);
 
+    // Blocks of the level directly below the one being generated. Every one of
+    // them needs a reachable neighbour on the next level up.
+    std::vector<GeneratedObject> lower;
+    lower.push_back(startBlock);
+
     // Start above ground and move upward.
     int currentY = GROUND_Y - 100;
 
-    while (currentY > 100)
+    while (currentY > 100 && !lower.empty())
     {
-        // Exactly one block per level.
-        tryPlaceBlock(currentY);
+        std::vector<GeneratedObject> current;
+
+        // Indices into `lower` that still need a reachable upward neighbour.
+        std::vector<size_t> pending;
+        for (size_t i = 0; i < lower.size(); ++i)
+        {
+            pending.push_back(i);
+        }
+
+        // Place blocks until every lower block is covered by a neighbour within
+        // MAX_HORIZONTAL_REACH. A single block may cover several lower blocks.
+        int guard = 0;
+        const int GUARD_LIMIT = static_cast<int>(lower.size()) * 20 + 40;
+        while (!pending.empty() && guard < GUARD_LIMIT)
+        {
+            ++guard;
+
+            size_t pick = static_cast<size_t>(randomInt(0, static_cast<int>(pending.size()) - 1));
+            const GeneratedObject& source = lower[pending[pick]];
+
+            bool placed = false;
+            bool leftFirst = randomFloat(0, 1) < 0.5f;
+
+            // Randomise the gap order so the chosen spacing varies between
+            // attempts (sometimes minimal, sometimes up to 50% wider).
+            std::vector<int> gaps = gapCandidates;
+            for (size_t i = gaps.size(); i > 1; --i)
+            {
+                int j = randomInt(0, static_cast<int>(i) - 1);
+                std::swap(gaps[i - 1], gaps[j]);
+            }
+
+            // Try both sides and every jump-reachable gap.
+            for (int side = 0; side < 2 && !placed; ++side)
+            {
+                bool placeLeft = (side == 0) ? leftFirst : !leftFirst;
+
+                for (int gap : gaps)
+                {
+                    if (placed)
+                    {
+                        break;
+                    }
+
+                    int blockWidth = generateBlockWidth();
+
+                    float x = placeLeft
+                        ? source.x - static_cast<float>(gap) - blockWidth
+                        : source.x + source.width + static_cast<float>(gap);
+
+                    // Keep the block inside the level borders (50 pixels wide).
+                    if (x < 50.f || x + blockWidth > LEVEL_WIDTH - 50.f)
+                    {
+                        continue;
+                    }
+
+                    GeneratedObject candidate;
+                    candidate.x = x;
+                    candidate.y = currentY;
+                    candidate.width = blockWidth;
+                    candidate.height = BLOCK_HEIGHT;
+                    candidate.type = "GroundBlock";
+
+                    if (overlapsExisting(candidate))
+                    {
+                        continue;
+                    }
+
+                    insertIntoGrid(candidate);
+                    objects.push_back(candidate);
+                    current.push_back(candidate);
+                    placed = true;
+
+                    // Drop every lower block this candidate now covers.
+                    std::vector<size_t> remaining;
+                    for (size_t idx : pending)
+                    {
+                        float g = horizontalGap(candidate, lower[idx]);
+                        if (g < static_cast<float>(MIN_BLOCK_GAP) ||
+                            g > static_cast<float>(MAX_HORIZONTAL_REACH))
+                        {
+                            remaining.push_back(idx);
+                        }
+                    }
+                    pending.swap(remaining);
+                }
+            }
+        }
+
+        lower = current;
 
         // Move up by a random step not exceeding the maximum vertical distance.
         int step = randomInt(50, 100);

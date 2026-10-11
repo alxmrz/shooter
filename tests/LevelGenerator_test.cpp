@@ -5,6 +5,7 @@
 #include <ctime>
 #include <string>
 #include <map>
+#include <set>
 #include <algorithm>
 #include "LevelGenerator.h"
 #include "objects/interactive/Platform.h"
@@ -299,18 +300,20 @@ TEST_F(LevelGeneratorTest, PlatformsAreGeneratedWithVaryingLengths) {
     EXPECT_GT(longBlocks, shortBlocks);
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorPlacesSingleBlockPerLevel) {
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtLeastOneBlockPerLevel) {
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
     // Group blocks by their y level (the fixed start block is its own level).
+    // Several blocks per level are allowed now that every block gets an upward
+    // neighbour, so only "at least one" is required.
     std::map<float, int> blocksPerLevel;
     for (const auto& obj : objects) {
         blocksPerLevel[obj.y]++;
     }
 
     for (const auto& entry : blocksPerLevel) {
-        EXPECT_EQ(entry.second, 1)
+        EXPECT_GE(entry.second, 1)
             << "Level y=" << entry.first << " has " << entry.second << " blocks";
     }
 }
@@ -428,6 +431,221 @@ TEST_F(LevelGeneratorTest, PlatformVerticalSpacingDoesNotExceedMaxJumpHeight) {
         EXPECT_LE(levels[i] - levels[i - 1], TEST_MAX_JUMP_HEIGHT)
             << "Vertical gap between levels " << levels[i - 1] << " and " << levels[i]
             << " exceeds the maximum jump height";
+    }
+}
+
+// True when `upper` sits above `lower` within one jump and the player can cross
+// the horizontal gap between them.
+static bool isReachableUpwardNeighbor(const GeneratedObject& lower,
+                                      const GeneratedObject& upper) {
+    if (upper.y >= lower.y) {
+        return false;
+    }
+    if (lower.y - upper.y > LevelGenerator::MAX_JUMP_HEIGHT) {
+        return false;
+    }
+    return horizontalGap(lower, upper) <= static_cast<float>(LevelGenerator::MAX_HORIZONTAL_REACH);
+}
+
+// The topmost blocks have no level above them, so they are exempt from the
+// "reachable upward neighbour" rule.
+static bool hasLevelAbove(const std::vector<GeneratedObject>& blocks, const GeneratedObject& block) {
+    for (const auto& other : blocks) {
+        if (other.y < block.y) {
+            return true;
+        }
+    }
+    return false;
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorGivesEveryBlockAReachableUpwardNeighbor) {
+    std::vector<GeneratedObject> objects;
+    realGeneratePlatforms(objects);
+
+    ASSERT_GT(objects.size(), 0u);
+
+    for (const auto& block : objects) {
+        if (!hasLevelAbove(objects, block)) {
+            continue;
+        }
+        bool reachable = false;
+        for (const auto& other : objects) {
+            if (isReachableUpwardNeighbor(block, other)) {
+                reachable = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(reachable)
+            << "Block at (" << block.x << ", " << block.y << ") has no reachable upward neighbour";
+    }
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorUpwardNeighborGapIsWithinReach) {
+    std::vector<GeneratedObject> objects;
+    realGeneratePlatforms(objects);
+
+    ASSERT_GT(objects.size(), 0u);
+
+    for (const auto& block : objects) {
+        if (!hasLevelAbove(objects, block)) {
+            continue;
+        }
+
+        // Look for an upward neighbour whose horizontal gap is both large enough
+        // to satisfy the minimum block spacing and small enough to jump across.
+        bool found = false;
+        for (const auto& other : objects) {
+            if (!isReachableUpwardNeighbor(block, other)) {
+                continue;
+            }
+            float gap = horizontalGap(block, other);
+            if (gap >= 100.f &&
+                gap <= static_cast<float>(LevelGenerator::MAX_HORIZONTAL_REACH)) {
+                found = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(found)
+            << "Block at (" << block.x << ", " << block.y
+            << ") has no upward neighbour within the required horizontal gap range";
+    }
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorHasClimbablePathFromStartBlock) {
+    std::vector<GeneratedObject> objects;
+    realGeneratePlatforms(objects);
+
+    ASSERT_GT(objects.size(), 0u);
+
+    // Locate the fixed start block.
+    size_t startIndex = objects.size();
+    for (size_t i = 0; i < objects.size(); ++i) {
+        if (objects[i].x == LevelGenerator::START_BLOCK_X &&
+            objects[i].y == LevelGenerator::START_BLOCK_Y) {
+            startIndex = i;
+            break;
+        }
+    }
+    ASSERT_LT(startIndex, objects.size()) << "Start block not found";
+
+    // Highest (smallest y) block level.
+    float topY = objects[0].y;
+    for (const auto& obj : objects) {
+        topY = std::min(topY, obj.y);
+    }
+
+    // BFS over reachable upward edges.
+    std::vector<bool> visited(objects.size(), false);
+    std::vector<size_t> queue;
+    queue.push_back(startIndex);
+    visited[startIndex] = true;
+
+    bool reachedTop = false;
+    while (!queue.empty()) {
+        size_t current = queue.back();
+        queue.pop_back();
+
+        if (objects[current].y == topY) {
+            reachedTop = true;
+            break;
+        }
+
+        for (size_t i = 0; i < objects.size(); ++i) {
+            if (visited[i]) {
+                continue;
+            }
+            if (isReachableUpwardNeighbor(objects[current], objects[i])) {
+                visited[i] = true;
+                queue.push_back(i);
+            }
+        }
+    }
+
+    EXPECT_TRUE(reachedTop) << "Cannot climb from the start block to the top level";
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorVariesHorizontalGapBetweenLevels) {
+    // The gap to the upward neighbour must be dynamic: sometimes as small as the
+    // minimum block gap, sometimes up to 50% wider, never beyond jump reach.
+    std::set<float> observedGaps;
+    int totalGaps = 0;
+    int widerThanMinimum = 0;
+
+    for (unsigned seed = 1; seed <= 20; ++seed) {
+        std::vector<GeneratedObject> objects;
+        LevelGenerator generator(nullptr);
+        std::srand(seed);
+        generator.generatePlatforms(objects);
+
+        for (const auto& block : objects) {
+            // Find the nearest level above this block.
+            float nearestY = -1.f;
+            for (const auto& other : objects) {
+                if (other.y < block.y && (nearestY < 0.f || other.y > nearestY)) {
+                    nearestY = other.y;
+                }
+            }
+            if (nearestY < 0.f) {
+                continue;
+            }
+
+            float bestGap = -1.f;
+            for (const auto& other : objects) {
+                if (other.y != nearestY) {
+                    continue;
+                }
+                float gap = horizontalGap(block, other);
+                if (gap < 0.f || gap > static_cast<float>(LevelGenerator::MAX_HORIZONTAL_REACH)) {
+                    continue;
+                }
+                if (bestGap < 0.f || gap < bestGap) {
+                    bestGap = gap;
+                }
+            }
+            if (bestGap >= 0.f) {
+                observedGaps.insert(bestGap);
+                totalGaps++;
+                if (bestGap > 100.f) {
+                    widerThanMinimum++;
+                }
+            }
+        }
+    }
+
+    ASSERT_FALSE(observedGaps.empty());
+    for (float gap : observedGaps) {
+        EXPECT_GE(gap, 100.f);
+        EXPECT_LE(gap, static_cast<float>(LevelGenerator::MAX_HORIZONTAL_REACH));
+    }
+
+    // The gap must actually vary: a meaningful share of neighbours should sit
+    // wider than the minimum block gap, reaching up to 50% more.
+    EXPECT_GE(observedGaps.size(), 3u)
+        << "Horizontal gaps between levels are not varied enough";
+    EXPECT_GE(widerThanMinimum * 10, totalGaps * 4)
+        << "Only " << widerThanMinimum << " of " << totalGaps
+        << " gaps are wider than the minimum";
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorKeepsBlockCountBounded) {
+    // Covering lower blocks with upward neighbours must not blow up the number
+    // of blocks: a single upper block can cover several lower ones, so the
+    // count stays proportional to the number of levels across many seeds.
+    for (unsigned seed = 1; seed <= 20; ++seed) {
+        std::vector<GeneratedObject> objects;
+        LevelGenerator generator(nullptr);
+        std::srand(seed);
+        generator.generatePlatforms(objects);
+
+        std::map<float, int> blocksPerLevel;
+        for (const auto& obj : objects) {
+            blocksPerLevel[obj.y]++;
+        }
+
+        ASSERT_FALSE(blocksPerLevel.empty());
+        EXPECT_LE(objects.size(), blocksPerLevel.size() * 3)
+            << "Seed " << seed << " produced " << objects.size()
+            << " blocks over " << blocksPerLevel.size() << " levels";
     }
 }
 

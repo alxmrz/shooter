@@ -48,6 +48,13 @@ public:
     // to reach the next block with a double jump, leaving room for its body.
     static constexpr int MAX_JUMP_HEIGHT = DOUBLE_JUMP_HEIGHT - PLAYER_HEIGHT;
 
+    // Maximum horizontal gap between a ground block and its upward neighbour that
+    // the player can still cross during a jump. Derived from the horizontal
+    // movement physics: max horizontal speed is 5 pixels/frame at 60 FPS and a
+    // double jump keeps the player airborne for roughly 37 frames, giving a
+    // theoretical reach of about 185 pixels. A conservative 0.8 factor yields 150.
+    static constexpr int MAX_HORIZONTAL_REACH = 150;
+
     // Fixed starting block in the bottom-left corner; the player spawns on it.
     static constexpr int START_BLOCK_X = 50;
     static constexpr int START_BLOCK_Y = GROUND_Y;
