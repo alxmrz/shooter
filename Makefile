@@ -53,7 +53,13 @@ DIR_OBJECTS:=$(addprefix  build/, $(OBJECTS))
 DIR_OBJECTS_REMOVE:=$(addsuffix /*.o, $(DIRS))
 
 	
-all: clean dirs $(SOURCE) $(EXECUTABLE)
+all: dirs $(EXECUTABLE)
+
+# Clean rebuild must be serialized: running clean in parallel with the build
+# (make -j) deletes object files while they are being compiled/linked.
+rebuild:
+	$(MAKE) clean
+	$(MAKE) all
 
 play:
 	./$(EXECUTABLE)
@@ -82,4 +88,4 @@ test: test-build
 test-clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all exec dirs clean test test test-clean
+.PHONY: all exec dirs clean rebuild test test test-clean

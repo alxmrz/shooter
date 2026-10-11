@@ -12,6 +12,7 @@
 #include "objects/interactive/Platform.h"
 #include "objects/interactive/Heart.h"
 #include "objects/interactive/Ammunition.h"
+#include "objects/interactive/Crystal.h"
 #include "objects/interactive/Tree.h"
 #include "objects/backgrounds/GroundBlock.h"
 
@@ -56,7 +57,7 @@ void LevelGenerator::generateLevel(Map* map)
 
     generateTrees(objects);
 
-    generateItems(objects, objects);
+    generatePlatformItems(objects);
 
     generateEnemies(objects);
 
@@ -105,6 +106,10 @@ void LevelGenerator::generateLevel(Map* map)
         else if (obj.type == "Ammunition")
         {
             go->all.push_back(go->fabric->createAmmo(obj.x, obj.y, obj.width, obj.height));
+        }
+        else if (obj.type == "Crystal")
+        {
+            go->all.push_back(go->fabric->createCrystal(obj.x, obj.y, obj.width, obj.height));
         }
         else if (obj.type == "Shooter")
         {
@@ -328,105 +333,163 @@ void LevelGenerator::generatePlatforms(std::vector<GeneratedObject>& objects)
     }
 }
 
-void LevelGenerator::generateItems(std::vector<GeneratedObject>& objects, const std::vector<GeneratedObject>& platforms)
+bool LevelGenerator::isNthPlatform(size_t index, int step)
 {
-    // Limit maximum items per type
-    const int MAX_CRYSTALS = 20;
-    const int MAX_HEARTS = 10;
-    const int MAX_AMMO = 15;
+    return (index + 1) % static_cast<size_t>(step) == 0;
+}
 
-    int crystalCount = 0;
-    int heartCount = 0;
-    int ammoCount = 0;
-
-    // Place items on platforms
-    for (const auto& platform : platforms)
+bool LevelGenerator::platformHasTree(const std::vector<GeneratedObject>& objects,
+                                     const GeneratedObject& block)
+{
+    for (const auto& obj : objects)
     {
-        if (platform.type != "Platform") continue;
-
-        // 30% chance to place an item on each platform
-        if (randomFloat(0, 1) < 0.3)
+        if (obj.type == "Tree" && obj.y == block.y &&
+            obj.x >= block.x && obj.x <= block.x + block.width)
         {
-            int itemType = randomInt(0, 2);
-
-            GeneratedObject item;
-            item.x = platform.x + randomFloat(10, platform.width - 60);
-            item.y = platform.y - 50; // Place above platform
-            item.width = 50;
-            item.height = 50;
-
-            switch (itemType)
-            {
-            case 0: // Crystal
-                if (crystalCount < MAX_CRYSTALS)
-                {
-                    item.type = "Crystal";
-                    objects.push_back(item);
-                    crystalCount++;
-                }
-                break;
-            case 1: // Heart
-                if (heartCount < MAX_HEARTS)
-                {
-                    item.type = "Heart";
-                    objects.push_back(item);
-                    heartCount++;
-                }
-                break;
-            case 2: // Ammunition
-                if (ammoCount < MAX_AMMO)
-                {
-                    item.type = "Ammunition";
-                    objects.push_back(item);
-                    ammoCount++;
-                }
-                break;
-            }
+            return true;
         }
     }
+    return false;
+}
 
-    // Place items in air between platforms
-    for (int y = 200; y < GROUND_Y - 200; y += 200)
+std::vector<GeneratedObject> LevelGenerator::groundBlocks(
+    const std::vector<GeneratedObject>& objects)
+{
+    std::vector<GeneratedObject> blocks;
+    for (const auto& obj : objects)
     {
-        if (randomFloat(0, 1) < 0.1)
+        if (obj.type == "GroundBlock")
         {
-            // 10% chance
-            GeneratedObject item;
-            item.x = randomFloat(100, LEVEL_WIDTH - 200);
-            item.y = y;
-            item.width = 50;
-            item.height = 50;
-
-            int itemType = randomInt(0, 2);
-            switch (itemType)
-            {
-            case 0:
-                if (crystalCount < MAX_CRYSTALS)
-                {
-                    item.type = "Crystal";
-                    objects.push_back(item);
-                    crystalCount++;
-                }
-                break;
-            case 1:
-                if (heartCount < MAX_HEARTS)
-                {
-                    item.type = "Heart";
-                    objects.push_back(item);
-                    heartCount++;
-                }
-                break;
-            case 2:
-                if (ammoCount < MAX_AMMO)
-                {
-                    item.type = "Ammunition";
-                    objects.push_back(item);
-                    ammoCount++;
-                }
-                break;
-            }
+            blocks.push_back(obj);
         }
     }
+    return blocks;
+}
+
+int LevelGenerator::itemMaskForIndex(size_t index)
+{
+    const int ammo = static_cast<int>(isNthPlatform(index, AMMUNITION_STEP));
+    const int heart = static_cast<int>(isNthPlatform(index, HEART_STEP));
+    const int crystal = static_cast<int>(isNthPlatform(index, CRYSTAL_STEP));
+    return ammo * ITEM_AMMO + heart * ITEM_HEART + crystal * ITEM_CRYSTAL;
+}
+
+int LevelGenerator::popcount3(int mask)
+{
+    return (mask & 1) + ((mask >> 1) & 1) + ((mask >> 2) & 1);
+}
+
+int LevelGenerator::slotForItem(int mask, int item)
+{
+    return popcount3(mask & (item - 1));
+}
+
+int LevelGenerator::effectiveItemMask(const std::vector<GeneratedObject>& objects,
+                                      const GeneratedObject& block, size_t index) const
+{
+    if (platformHasTree(objects, block))
+    {
+        return 0;
+    }
+    return itemMaskForIndex(index);
+}
+
+float LevelGenerator::itemSlotX(const GeneratedObject& block, int slot, int count)
+{
+    if (count <= 1)
+    {
+        return block.x + (block.width - ITEM_SIZE) / 2.0f;
+    }
+    return block.x + static_cast<float>(slot) * (block.width - ITEM_SIZE) /
+        static_cast<float>(count - 1);
+}
+
+void LevelGenerator::placeAmmunition(std::vector<GeneratedObject>& objects,
+                                     const GeneratedObject& block, float x)
+{
+    GeneratedObject item;
+    item.x = x;
+    item.y = block.y - ITEM_SIZE;
+    item.width = ITEM_SIZE;
+    item.height = ITEM_SIZE;
+    item.type = "Ammunition";
+    objects.push_back(item);
+}
+
+void LevelGenerator::placeHeart(std::vector<GeneratedObject>& objects,
+                                const GeneratedObject& block, float x)
+{
+    GeneratedObject item;
+    item.x = x;
+    item.y = block.y - ITEM_SIZE;
+    item.width = ITEM_SIZE;
+    item.height = ITEM_SIZE;
+    item.type = "Heart";
+    objects.push_back(item);
+}
+
+void LevelGenerator::placeCrystal(std::vector<GeneratedObject>& objects,
+                                  const GeneratedObject& block, float x)
+{
+    GeneratedObject item;
+    item.x = x;
+    item.y = block.y - ITEM_SIZE;
+    item.width = ITEM_SIZE;
+    item.height = ITEM_SIZE;
+    item.type = "Crystal";
+    objects.push_back(item);
+}
+
+void LevelGenerator::generateGuaranteedAmmo(std::vector<GeneratedObject>& objects) const
+{
+    const std::vector<GeneratedObject> blocks = groundBlocks(objects);
+    for (size_t i = 0; i < blocks.size(); ++i)
+    {
+        const int mask = effectiveItemMask(objects, blocks[i], i);
+        if (mask & ITEM_AMMO)
+        {
+            const int count = popcount3(mask);
+            const int slot = slotForItem(mask, ITEM_AMMO);
+            placeAmmunition(objects, blocks[i], itemSlotX(blocks[i], slot, count));
+        }
+    }
+}
+
+void LevelGenerator::generateGuaranteedHeart(std::vector<GeneratedObject>& objects) const
+{
+    const std::vector<GeneratedObject> blocks = groundBlocks(objects);
+    for (size_t i = 0; i < blocks.size(); ++i)
+    {
+        const int mask = effectiveItemMask(objects, blocks[i], i);
+        if (mask & ITEM_HEART)
+        {
+            const int count = popcount3(mask);
+            const int slot = slotForItem(mask, ITEM_HEART);
+            placeHeart(objects, blocks[i], itemSlotX(blocks[i], slot, count));
+        }
+    }
+}
+
+void LevelGenerator::generateGuaranteedCrystal(std::vector<GeneratedObject>& objects) const
+{
+    const std::vector<GeneratedObject> blocks = groundBlocks(objects);
+    for (size_t i = 0; i < blocks.size(); ++i)
+    {
+        const int mask = effectiveItemMask(objects, blocks[i], i);
+        if (mask & ITEM_CRYSTAL)
+        {
+            const int count = popcount3(mask);
+            const int slot = slotForItem(mask, ITEM_CRYSTAL);
+            placeCrystal(objects, blocks[i], itemSlotX(blocks[i], slot, count));
+        }
+    }
+}
+
+void LevelGenerator::generatePlatformItems(std::vector<GeneratedObject>& objects)
+{
+    generateGuaranteedAmmo(objects);
+    generateGuaranteedHeart(objects);
+    generateGuaranteedCrystal(objects);
 }
 
 void LevelGenerator::generateEnemies(std::vector<GeneratedObject>& objects)

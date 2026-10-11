@@ -854,3 +854,209 @@ TEST_F(LevelGeneratorTest, EnemiesArePlacedOnPlatforms) {
             << "Enemy at (" << enemy.x << ", " << enemy.y << ") is within camera view";
     }
 }
+
+// ---------------------------------------------------------------------------
+// Deterministic platform item placement
+// ---------------------------------------------------------------------------
+
+static const int TEST_ITEM_SIZE = 50;
+
+static GeneratedObject makePlatform(float x, float y, int width = 300) {
+    GeneratedObject block;
+    block.x = x;
+    block.y = y;
+    block.width = width;
+    block.height = 25;
+    block.type = "GroundBlock";
+    return block;
+}
+
+static std::vector<GeneratedObject> makePlatforms(int count) {
+    std::vector<GeneratedObject> objects;
+    for (int i = 0; i < count; ++i) {
+        objects.push_back(makePlatform(100.0f + i * 400.0f, 2000.0f));
+    }
+    return objects;
+}
+
+static GeneratedObject makeTreeOn(const GeneratedObject& block) {
+    GeneratedObject tree;
+    tree.x = block.x + 10.0f;
+    tree.y = block.y;
+    tree.width = 0;
+    tree.height = 0;
+    tree.type = "Tree";
+    return tree;
+}
+
+static std::vector<GeneratedObject> platformsOf(const std::vector<GeneratedObject>& objects) {
+    std::vector<GeneratedObject> blocks;
+    for (const auto& obj : objects) {
+        if (obj.type == "GroundBlock") {
+            blocks.push_back(obj);
+        }
+    }
+    return blocks;
+}
+
+static int countByType(const std::vector<GeneratedObject>& objects, const std::string& type) {
+    int count = 0;
+    for (const auto& obj : objects) {
+        if (obj.type == type) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Index (0-based) of the platform whose top edge supports the item, or -1.
+static int platformIndexForItem(const std::vector<GeneratedObject>& blocks,
+                                const GeneratedObject& item) {
+    for (size_t i = 0; i < blocks.size(); ++i) {
+        if (item.y == blocks[i].y - TEST_ITEM_SIZE &&
+            item.x >= blocks[i].x &&
+            item.x + item.width <= blocks[i].x + blocks[i].width) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}
+
+static bool isItemType(const GeneratedObject& obj) {
+    return obj.type == "Ammunition" || obj.type == "Heart" || obj.type == "Crystal";
+}
+
+TEST_F(LevelGeneratorTest, EveryThirdPlatformGetsAmmunition) {
+    std::vector<GeneratedObject> objects = makePlatforms(6);
+    LevelGenerator generator(nullptr);
+    generator.generatePlatformItems(objects);
+
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    EXPECT_EQ(countByType(objects, "Ammunition"), 2);
+    for (const auto& obj : objects) {
+        if (obj.type != "Ammunition") {
+            continue;
+        }
+        int index = platformIndexForItem(blocks, obj);
+        ASSERT_GE(index, 0) << "Ammunition is not on a platform";
+        EXPECT_EQ((index + 1) % 3, 0) << "Ammunition on platform " << index + 1;
+    }
+}
+
+TEST_F(LevelGeneratorTest, EveryFourthPlatformGetsHeart) {
+    std::vector<GeneratedObject> objects = makePlatforms(8);
+    LevelGenerator generator(nullptr);
+    generator.generatePlatformItems(objects);
+
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    EXPECT_EQ(countByType(objects, "Heart"), 2);
+    for (const auto& obj : objects) {
+        if (obj.type != "Heart") {
+            continue;
+        }
+        int index = platformIndexForItem(blocks, obj);
+        ASSERT_GE(index, 0) << "Heart is not on a platform";
+        EXPECT_EQ((index + 1) % 4, 0) << "Heart on platform " << index + 1;
+    }
+}
+
+TEST_F(LevelGeneratorTest, EverySecondPlatformGetsCrystal) {
+    std::vector<GeneratedObject> objects = makePlatforms(10);
+    LevelGenerator generator(nullptr);
+    generator.generatePlatformItems(objects);
+
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    EXPECT_EQ(countByType(objects, "Crystal"), 5);
+    for (const auto& obj : objects) {
+        if (obj.type != "Crystal") {
+            continue;
+        }
+        int index = platformIndexForItem(blocks, obj);
+        ASSERT_GE(index, 0) << "Crystal is not on a platform";
+        EXPECT_EQ((index + 1) % 2, 0) << "Crystal on platform " << index + 1;
+    }
+}
+
+TEST_F(LevelGeneratorTest, PlatformsWithTreesGetNoItems) {
+    std::vector<GeneratedObject> objects = makePlatforms(10);
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    // Trees on the 3rd, 4th and 5th platforms (multiples of 3, 4 and 5).
+    objects.push_back(makeTreeOn(blocks[2]));
+    objects.push_back(makeTreeOn(blocks[3]));
+    objects.push_back(makeTreeOn(blocks[4]));
+
+    LevelGenerator generator(nullptr);
+    generator.generatePlatformItems(objects);
+
+    // Ammunition on 3rd, 6th, 9th; 3rd is skipped.
+    EXPECT_EQ(countByType(objects, "Ammunition"), 2);
+    // Heart on 4th, 8th; 4th is skipped.
+    EXPECT_EQ(countByType(objects, "Heart"), 1);
+    // Crystal on 2nd, 4th, 6th, 8th, 10th; 4th is skipped.
+    EXPECT_EQ(countByType(objects, "Crystal"), 4);
+
+    for (const auto& obj : objects) {
+        if (!isItemType(obj)) {
+            continue;
+        }
+        int index = platformIndexForItem(blocks, obj);
+        ASSERT_GE(index, 0) << obj.type << " is not on a platform";
+        EXPECT_NE(index, 2) << obj.type << " placed on the tree platform";
+        EXPECT_NE(index, 3) << obj.type << " placed on the tree platform";
+        EXPECT_NE(index, 4) << obj.type << " placed on the tree platform";
+    }
+}
+
+TEST_F(LevelGeneratorTest, ItemPlacementIsDeterministic) {
+    std::vector<GeneratedObject> objects = makePlatforms(20);
+    LevelGenerator generator(nullptr);
+    generator.generatePlatformItems(objects);
+
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    // 20 platforms: every 3rd -> 6 ammo, every 4th -> 5 hearts, every 2nd -> 10 crystals.
+    EXPECT_EQ(countByType(objects, "Ammunition"), 6);
+    EXPECT_EQ(countByType(objects, "Heart"), 5);
+    EXPECT_EQ(countByType(objects, "Crystal"), 10);
+
+    for (const auto& obj : objects) {
+        if (!isItemType(obj)) {
+            continue;
+        }
+        int index = platformIndexForItem(blocks, obj);
+        ASSERT_GE(index, 0) << obj.type << " is not on a platform";
+        int step = (obj.type == "Ammunition") ? 3 : (obj.type == "Heart") ? 4 : 2;
+        EXPECT_EQ((index + 1) % step, 0)
+            << obj.type << " on platform " << index + 1 << " (step " << step << ")";
+    }
+}
+
+TEST_F(LevelGeneratorTest, ItemsRestOnPlatformTopWithoutOverlap) {
+    std::vector<GeneratedObject> objects = makePlatforms(12);
+    LevelGenerator generator(nullptr);
+    generator.generatePlatformItems(objects);
+
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    std::vector<GeneratedObject> onTwelfth;
+    for (const auto& obj : objects) {
+        if (!isItemType(obj)) {
+            continue;
+        }
+        int index = platformIndexForItem(blocks, obj);
+        ASSERT_GE(index, 0) << obj.type << " is not on a platform";
+        EXPECT_EQ(obj.y, blocks[index].y - TEST_ITEM_SIZE)
+            << obj.type << " does not rest on the platform top";
+        if (index == 11) {
+            onTwelfth.push_back(obj);
+        }
+    }
+
+    // The 12th platform is divisible by 2, 3 and 4, so it gets all three items.
+    ASSERT_EQ(onTwelfth.size(), 3u);
+    for (size_t i = 0; i < onTwelfth.size(); ++i) {
+        for (size_t j = i + 1; j < onTwelfth.size(); ++j) {
+            bool overlap = onTwelfth[i].x < onTwelfth[j].x + onTwelfth[j].width &&
+                           onTwelfth[j].x < onTwelfth[i].x + onTwelfth[i].width;
+            EXPECT_FALSE(overlap) << "Items overlap on the 12th platform";
+        }
+    }
+}

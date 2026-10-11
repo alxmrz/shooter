@@ -64,10 +64,20 @@ public:
     // A ground block must be at least this wide to carry a tree.
     static constexpr int TREE_MIN_BLOCK_WIDTH = 500;
     
+    // Every third platform gets Ammunition, every fourth a Heart and every
+    // second a Crystal; a platform carrying a tree is skipped.
+    static constexpr int ITEM_SIZE = 50;
+    static constexpr int AMMUNITION_STEP = 3;
+    static constexpr int HEART_STEP = 4;
+    static constexpr int CRYSTAL_STEP = 2;
+    static constexpr int ITEM_AMMO = 1;
+    static constexpr int ITEM_HEART = 2;
+    static constexpr int ITEM_CRYSTAL = 4;
+
     // Public methods for testing
     void generateGround(std::vector<GeneratedObject>& objects);
     void generatePlatforms(std::vector<GeneratedObject>& objects);
-    void generateItems(std::vector<GeneratedObject>& objects, const std::vector<GeneratedObject>& platforms);
+    void generatePlatformItems(std::vector<GeneratedObject>& objects);
     void generateEnemies(std::vector<GeneratedObject>& objects);
     void generateTrees(std::vector<GeneratedObject>& objects);
     
@@ -77,6 +87,30 @@ public:
 private:
     GameObjects* go;
     int findPlatformAtX(const std::vector<GeneratedObject>& platforms, float x);
+
+    // Deterministic item placement helpers. Each function keeps to at most a
+    // single loop and a single branch to stay within the project's complexity
+    // budget.
+    static bool isNthPlatform(size_t index, int step);
+    static bool platformHasTree(const std::vector<GeneratedObject>& objects,
+                                const GeneratedObject& block);
+    static std::vector<GeneratedObject> groundBlocks(
+        const std::vector<GeneratedObject>& objects);
+    static int itemMaskForIndex(size_t index);
+    static int popcount3(int mask);
+    static int slotForItem(int mask, int item);
+    int effectiveItemMask(const std::vector<GeneratedObject>& objects,
+                          const GeneratedObject& block, size_t index) const;
+    static float itemSlotX(const GeneratedObject& block, int slot, int count);
+    static void placeAmmunition(std::vector<GeneratedObject>& objects,
+                                const GeneratedObject& block, float x);
+    static void placeHeart(std::vector<GeneratedObject>& objects,
+                           const GeneratedObject& block, float x);
+    static void placeCrystal(std::vector<GeneratedObject>& objects,
+                             const GeneratedObject& block, float x);
+    void generateGuaranteedAmmo(std::vector<GeneratedObject>& objects) const;
+    void generateGuaranteedHeart(std::vector<GeneratedObject>& objects) const;
+    void generateGuaranteedCrystal(std::vector<GeneratedObject>& objects) const;
 };
 
 #endif /* LEVELGENERATOR_H */

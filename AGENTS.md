@@ -48,7 +48,7 @@ CObject → Button, Text (UI)
 - New objects go under `src/objects/{backgrounds,interactive,interfaces,units}/`
 - UI components in `src/ui/`
 - Core systems in `src/core/` (Application, GameState, etc.)
-
+- The Cyclomatic complexity of the code MUST NOT exceed 2
 ## TDD Workflow (Test-Driven Development)
 All new code must be written following TDD:
 1. **Red** — Write a failing test first. Run it and confirm it fails.
