@@ -69,6 +69,13 @@ public:
     // A ground block must be at least this wide to carry a tree.
     static constexpr int TREE_MIN_BLOCK_WIDTH = 500;
 
+    // Enemies: one per every second crystal-carrying ground block, placed
+    // centered and kept outside the initial camera view.
+    static constexpr int ENEMY_WIDTH = 50;
+    static constexpr int ENEMY_HEIGHT = 50;
+    static constexpr int ENEMY_CRYSTAL_STEP = 2;
+    static constexpr int CAMERA_SAFE_X = CAMERA_WIDTH + 100;
+
     // Every generated tree is TREE_HEIGHT pixels tall from the trunk base to the
     // top of the leaves. Its branches are evenly spaced by TREE_BRANCH_STEP so
     // the player can climb the tree itself. A tree is only placed where a
@@ -113,6 +120,12 @@ private:
     static std::vector<size_t> groundBlockIndices(
         const std::vector<GeneratedObject>& objects);
     static bool isTreeCandidate(const GeneratedObject& block, size_t index);
+    static bool isEverySecondCrystalPlatform(int crystalOrdinal);
+    static bool shouldPlaceEnemy(const GeneratedObject& platform, bool hasCrystal,
+                                 int crystalOrdinal);
+    static bool isEnemyOutsideCamera(const GeneratedObject& platform);
+    static float enemySpawnX(const GeneratedObject& platform);
+    static GeneratedObject makeEnemy(const GeneratedObject& platform);
     static bool blocksOverhead(const GeneratedObject& candidate,
                                const GeneratedObject& block, float trunkX,
                                int trunkWidth);
@@ -130,6 +143,8 @@ private:
     static int slotForItem(int mask, int item);
     int effectiveItemMask(const std::vector<GeneratedObject>& objects,
                           const GeneratedObject& block, size_t index) const;
+    bool platformHasCrystal(const std::vector<GeneratedObject>& objects,
+                            const GeneratedObject& block, size_t index) const;
     static float itemSlotX(const GeneratedObject& block, int slot, int count);
     static void placeAmmunition(std::vector<GeneratedObject>& objects,
                                 const GeneratedObject& block, float x);

@@ -5,6 +5,8 @@
 
 class GameObjects;
 class Unit;
+class Platform;
+class CObject;
 
 class AI {
 public:
@@ -13,20 +15,32 @@ public:
     AI(const AI& orig);
     virtual ~AI();
     virtual void think();
+
+    // Public for testing: expose the perception and edge probes.
+    bool detectsPlayer();
+    bool hasSupportAhead(const std::string& direction);
+    void setPatrolDirection(const std::string& direction);
+
 private:
     GameObjects* go;
     Unit* unit;
-    
-    bool isMoveRight = true;
-    bool isMoveLeft = false;
-    
-    bool move(std::string direction);
-    
-    bool isNextFalling(std::string direction);
+
+    std::string patrolDirection = "right";
+
+    bool isActive();
+    void act();
+    void engage();
+    void advanceOrFire(const std::string& direction);
+    void patrol();
     bool isPlayerOnY();
-    bool isPlayerOnXLeft();
-    bool isPlayerOnXRight();
+    bool isPlayerOnX();
+    std::string desiredDirection();
+    float distanceToPlayer();
+    bool shouldApproach(const std::string& direction);
+    float stepOffset(const std::string& direction);
+    bool isSolidGroundBelow(float x, float y);
+    bool isSolidBelow(Platform* platform, CObject& probe);
+    static std::string opposite(const std::string& direction);
 };
 
 #endif /* AI_H */
-

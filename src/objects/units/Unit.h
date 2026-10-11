@@ -15,6 +15,7 @@ struct GameObjects;
 class Window;
 class Text;
 class AI;
+class Platform;
 
 class Unit : public Movable {
 public:
@@ -34,6 +35,7 @@ public:
     bool isMustBeDeleted();
 
     using Movable::move;
+    using Movable::setDirection;
     
     void update(Event event);
     bool move(float x, float y) override;
@@ -143,6 +145,18 @@ protected:
     void resetJumpCount();
     
     void animateMoving();
+
+private:
+    void collectItems();
+    bool resolvePlatformCollision(float x, float y);
+    Platform* findCollidingPlatform();
+    bool isSolidCollision(Platform* platform);
+    bool applyPlatformCollision(Platform* platform, float x, float y);
+    bool applyVerticalCollision(Platform* platform, float x, float y);
+    bool landOnPlatform(Platform* platform);
+    bool blockMoveUp(float x, float y);
+    bool blockMoveHorizontal(float x, float y);
+    void revertMove(float x, float y);
 };
 
 #endif /* UNIT_H */

@@ -34,6 +34,10 @@ constexpr int LevelGenerator::START_BLOCK_Y;
 constexpr int LevelGenerator::START_BLOCK_WIDTH;
 constexpr int LevelGenerator::START_BLOCK_HEIGHT;
 constexpr int LevelGenerator::TREE_MIN_BLOCK_WIDTH;
+constexpr int LevelGenerator::ENEMY_WIDTH;
+constexpr int LevelGenerator::ENEMY_HEIGHT;
+constexpr int LevelGenerator::ENEMY_CRYSTAL_STEP;
+constexpr int LevelGenerator::CAMERA_SAFE_X;
 constexpr int LevelGenerator::TREE_HEIGHT;
 constexpr int LevelGenerator::TREE_TRUNK_HEIGHT;
 constexpr int LevelGenerator::TREE_BRANCH_STEP;
@@ -486,59 +490,64 @@ void LevelGenerator::generatePlatformItems(std::vector<GeneratedObject>& objects
 
 void LevelGenerator::generateEnemies(std::vector<GeneratedObject>& objects)
 {
-    // Enemies are placed on ground blocks, at most one per every tenth platform.
-    const int PLATFORM_INTERVAL = 10;
-    const int ENEMY_WIDTH = 50;
-    const int ENEMY_HEIGHT = 50;
-    const int EDGE_MARGIN = 10;
-    const float CAMERA_SAFE_X = static_cast<float>(CAMERA_WIDTH + 100);
+    // One enemy on every second crystal-carrying ground block (in creation
+    // order), placed on its own platform. Platforms with a tree carry no
+    // crystal and are therefore skipped. The crystal ordinal is deterministic,
+    // so no enemy lands in mid-air and no two enemies share a platform.
+    const std::vector<size_t> indices = groundBlockIndices(objects);
+    int crystalOrdinal = 0;
 
-    // Platforms are the generated ground blocks (including the start block).
-    std::vector<GeneratedObject> platforms;
-    for (const auto& obj : objects)
+    for (size_t k = 0; k < indices.size(); ++k)
     {
-        if (obj.type == "GroundBlock")
+        const GeneratedObject& platform = objects[indices[k]];
+        const bool hasCrystal = platformHasCrystal(objects, platform, k);
+        crystalOrdinal += hasCrystal ? 1 : 0;
+
+        if (shouldPlaceEnemy(platform, hasCrystal, crystalOrdinal))
         {
-            platforms.push_back(obj);
+            objects.push_back(makeEnemy(platform));
         }
     }
+}
 
-    int enemyCount = 0;
+bool LevelGenerator::platformHasCrystal(const std::vector<GeneratedObject>& objects,
+                                        const GeneratedObject& block, size_t index) const
+{
+    return (effectiveItemMask(objects, block, index) & ITEM_CRYSTAL) != 0;
+}
 
-    for (size_t i = 0; i < platforms.size() && enemyCount < MAX_ENEMIES; ++i)
-    {
-        // At most one enemy per PLATFORM_INTERVAL platforms: only every tenth.
-        if ((i + 1) % PLATFORM_INTERVAL != 0)
-        {
-            continue;
-        }
+bool LevelGenerator::isEverySecondCrystalPlatform(int crystalOrdinal)
+{
+    return crystalOrdinal > 0 && crystalOrdinal % ENEMY_CRYSTAL_STEP == 0;
+}
 
-        const GeneratedObject& platform = platforms[i];
+bool LevelGenerator::shouldPlaceEnemy(const GeneratedObject& platform, bool hasCrystal,
+                                      int crystalOrdinal)
+{
+    return hasCrystal
+        && isEverySecondCrystalPlatform(crystalOrdinal)
+        && isEnemyOutsideCamera(platform);
+}
 
-        float minX = platform.x + EDGE_MARGIN;
-        float maxX = platform.x + platform.width - ENEMY_WIDTH - EDGE_MARGIN;
-        if (maxX < minX)
-        {
-            continue; // platform too narrow for an enemy
-        }
+bool LevelGenerator::isEnemyOutsideCamera(const GeneratedObject& platform)
+{
+    return enemySpawnX(platform) >= static_cast<float>(CAMERA_SAFE_X);
+}
 
-        // Keep the enemy outside the camera view.
-        float spawnMinX = std::max(minX, CAMERA_SAFE_X);
-        if (spawnMinX > maxX)
-        {
-            continue; // whole platform is inside the camera view
-        }
+float LevelGenerator::enemySpawnX(const GeneratedObject& platform)
+{
+    return platform.x + (platform.width - ENEMY_WIDTH) / 2.0f;
+}
 
-        GeneratedObject enemy;
-        enemy.x = randomFloat(spawnMinX, maxX);
-        enemy.y = platform.y - ENEMY_HEIGHT;
-        enemy.width = ENEMY_WIDTH;
-        enemy.height = ENEMY_HEIGHT;
-        enemy.type = "Shooter";
-
-        objects.push_back(enemy);
-        enemyCount++;
-    }
+GeneratedObject LevelGenerator::makeEnemy(const GeneratedObject& platform)
+{
+    GeneratedObject enemy;
+    enemy.x = enemySpawnX(platform);
+    enemy.y = platform.y - ENEMY_HEIGHT;
+    enemy.width = ENEMY_WIDTH;
+    enemy.height = ENEMY_HEIGHT;
+    enemy.type = "Shooter";
+    return enemy;
 }
 
 int LevelGenerator::findPlatformAtX(const std::vector<GeneratedObject>& platforms, float x)

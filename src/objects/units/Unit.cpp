@@ -43,73 +43,122 @@ sf::Drawable *Unit::getDrawForm() {
 }
 
 bool Unit::move(float x, float y) {
-    if (Movable::move(x, y)) {
-        shiftSpritePositions();
+    if (!Movable::move(x, y)) {
+        return false;
+    }
 
-        if (isPlayer()) {
-            for (unsigned i = 0; i < go->all.size(); i++) {
-                if (Crystal *obj = dynamic_cast<Crystal *>(go->all[i])) {
-                    if (collideRect(obj)) {
-                        crystals++;
-                        crystalSound->play();
-                        go->all.erase(go->all.begin() + i);
+    shiftSpritePositions();
+    collectItems();
+    return resolvePlatformCollision(x, y);
+}
 
-                        break;
-                    }
-                } else if (Ammunition *obj = dynamic_cast<Ammunition *>(go->all[i])) {
-                    if (collideRect(obj) && getAmmo() < 10) {
-                        ammo += 3;
-                        if (ammo > 10) ammo = 10;
-                        go->all.erase(go->all.begin() + i);
+void Unit::collectItems() {
+    if (!isPlayer()) {
+        return;
+    }
 
-                        break;
-                    }
-                } else if (Heart *obj = dynamic_cast<Heart *>(go->all[i])) {
-                    if (collideRect(obj) && getHealth() < 3) {
-                        health++;
-                        go->all.erase(go->all.begin() + i);
+    for (unsigned i = 0; i < go->all.size(); i++) {
+        if (Crystal *obj = dynamic_cast<Crystal *>(go->all[i])) {
+            if (collideRect(obj)) {
+                crystals++;
+                crystalSound->play();
+                go->all.erase(go->all.begin() + i);
 
-                        break;
-                    }
-                } else if (Platform *obj = dynamic_cast<Platform *>(go->all[i])) {
-                    if (obj->isCollidable() && collideRect(obj)) {
-                        if (y < 0) {
-                            // Moving up into platform from below - revert and stop jump
-                            this->x -= x;
-                            this->y -= y;
-                            shiftSpritePositions();
-                            jumping = false;
-                            velocityHorizontal = 0.f;
-                            currentJumpHeight = 0.f;
-                            gravitationalVelocity = 0.0;
-                            gravitationalTime = 0.0;
-                            return true;
-                        } else if (y > 0) {
-                            // Falling down onto platform - snap to top and stop
-                            this->y = obj->getY() - this->height;
-                            shiftSpritePositions();
-                            gravitationalVelocity = 0.0;
-                            gravitationalTime = 0.0;
-                            currentJumpHeight = 0.f;
-                            resetJumpCount();
-                            return false;
-                        } else {
-                            // Horizontal collision - revert movement
-                            this->x -= x;
-                            this->y -= y;
-                            shiftSpritePositions();
-                            return false;
-                        }
-                    }
-                }
+                break;
+            }
+        } else if (Ammunition *obj = dynamic_cast<Ammunition *>(go->all[i])) {
+            if (collideRect(obj) && getAmmo() < 10) {
+                ammo += 3;
+                if (ammo > 10) ammo = 10;
+                go->all.erase(go->all.begin() + i);
+
+                break;
+            }
+        } else if (Heart *obj = dynamic_cast<Heart *>(go->all[i])) {
+            if (collideRect(obj) && getHealth() < 3) {
+                health++;
+                go->all.erase(go->all.begin() + i);
+
+                break;
             }
         }
+    }
+}
 
+bool Unit::resolvePlatformCollision(float x, float y) {
+    Platform* platform = findCollidingPlatform();
+    if (platform == nullptr) {
         return true;
     }
 
+    return applyPlatformCollision(platform, x, y);
+}
+
+Platform* Unit::findCollidingPlatform() {
+    for (CObject* object : go->all) {
+        Platform* platform = dynamic_cast<Platform*>(object);
+        if (isSolidCollision(platform)) {
+            return platform;
+        }
+    }
+
+    return nullptr;
+}
+
+bool Unit::isSolidCollision(Platform* platform) {
+    return platform != nullptr && platform->isCollidable() && collideRect(platform);
+}
+
+bool Unit::applyPlatformCollision(Platform* platform, float x, float y) {
+    if (y != 0) {
+        return applyVerticalCollision(platform, x, y);
+    }
+
+    return blockMoveHorizontal(x, y);
+}
+
+bool Unit::applyVerticalCollision(Platform* platform, float x, float y) {
+    if (y > 0) {
+        return landOnPlatform(platform);
+    }
+
+    return blockMoveUp(x, y);
+}
+
+bool Unit::landOnPlatform(Platform* platform) {
+    this->y = platform->getY() - this->height;
+    shiftSpritePositions();
+    gravitationalVelocity = 0.0;
+    gravitationalTime = 0.0;
+    currentJumpHeight = 0.f;
+    resetJumpCount();
+
     return false;
 }
+
+bool Unit::blockMoveUp(float x, float y) {
+    revertMove(x, y);
+    jumping = false;
+    velocityHorizontal = 0.f;
+    currentJumpHeight = 0.f;
+    gravitationalVelocity = 0.0;
+    gravitationalTime = 0.0;
+
+    return true;
+}
+
+bool Unit::blockMoveHorizontal(float x, float y) {
+    revertMove(x, y);
+
+    return false;
+}
+
+void Unit::revertMove(float x, float y) {
+    this->x -= x;
+    this->y -= y;
+    shiftSpritePositions();
+}
+
 
 void Unit::jump() {
     if (jumping) {

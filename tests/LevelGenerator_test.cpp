@@ -963,25 +963,64 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesTreePlatformOnTopBranchSide) {
     EXPECT_GT(checked, 0) << "no reserved platform was checked";
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneEnemyPerTenPlatforms) {
+static bool hasTreeOn(const std::vector<GeneratedObject>& objects, const GeneratedObject& block) {
+    for (const auto& obj : objects) {
+        if (obj.type == "Tree" && obj.y == block.y &&
+            obj.x >= block.x && obj.x <= block.x + block.width) {
+            return true;
+        }
+    }
+    return false;
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemyOnEverySecondCrystalPlatform) {
     LevelGenerator generator(nullptr);
     std::vector<GeneratedObject> objects;
     std::srand(42);
     generator.generatePlatforms(objects);
+    generator.generateTrees(objects);
     generator.generateEnemies(objects);
 
-    int blockCount = 0;
-    int enemyCount = 0;
+    std::vector<GeneratedObject> blocks;
     for (const auto& obj : objects) {
         if (obj.type == "GroundBlock") {
-            blockCount++;
-        } else if (obj.type == "Shooter") {
-            enemyCount++;
+            blocks.push_back(obj);
         }
     }
 
-    EXPECT_LE(enemyCount, blockCount / 10);
-    EXPECT_LE(enemyCount, LevelGenerator::MAX_ENEMIES);
+    std::vector<int> enemyIndices;
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        int index = -1;
+        for (size_t i = 0; i < blocks.size(); ++i) {
+            if (obj.y + obj.height == blocks[i].y &&
+                obj.x >= blocks[i].x &&
+                obj.x + obj.width <= blocks[i].x + blocks[i].width) {
+                index = static_cast<int>(i);
+                break;
+            }
+        }
+        ASSERT_GE(index, 0) << "enemy is not on any ground block";
+        EXPECT_GE(obj.x, static_cast<float>(LevelGenerator::CAMERA_SAFE_X));
+        enemyIndices.push_back(index);
+    }
+    EXPECT_GT(enemyIndices.size(), 0u) << "real generator produced no enemies";
+
+    // Independent oracle: a platform carries a crystal when it is an even 1-based
+    // platform without a tree; enemies must sit on every second such platform.
+    int crystalOrdinal = 0;
+    for (size_t i = 0; i < blocks.size(); ++i) {
+        const bool hasCrystal = ((i + 1) % 2 == 0) && !hasTreeOn(objects, blocks[i]);
+        crystalOrdinal += hasCrystal ? 1 : 0;
+        const bool hasEnemy =
+            std::find(enemyIndices.begin(), enemyIndices.end(), static_cast<int>(i)) != enemyIndices.end();
+        if (hasEnemy) {
+            EXPECT_TRUE(hasCrystal) << "enemy on platform without crystal";
+            EXPECT_EQ(crystalOrdinal % 2, 0) << "enemy not on every second crystal platform";
+        }
+    }
 }
 
 TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemiesOnPlatformsOutsideCamera) {
@@ -1243,5 +1282,146 @@ TEST_F(LevelGeneratorTest, ItemsRestOnPlatformTopWithoutOverlap) {
                            onTwelfth[j].x < onTwelfth[i].x + onTwelfth[i].width;
             EXPECT_FALSE(overlap) << "Items overlap on the 12th platform";
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Deterministic enemy placement
+// ---------------------------------------------------------------------------
+
+static std::vector<GeneratedObject> makeFarPlatforms(int count, int width = 300) {
+    std::vector<GeneratedObject> objects;
+    for (int i = 0; i < count; ++i) {
+        objects.push_back(makePlatform(1000.0f + i * 400.0f, 2000.0f, width));
+    }
+    return objects;
+}
+
+// Index (0-based) of the platform whose top edge supports the enemy, or -1.
+static int enemyPlatformIndex(const std::vector<GeneratedObject>& blocks,
+                              const GeneratedObject& enemy) {
+    for (size_t i = 0; i < blocks.size(); ++i) {
+        if (enemy.y + enemy.height == blocks[i].y &&
+            enemy.x >= blocks[i].x &&
+            enemy.x + enemy.width <= blocks[i].x + blocks[i].width) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}
+
+TEST_F(LevelGeneratorTest, EnemyOnEverySecondCrystalPlatform) {
+    std::vector<GeneratedObject> objects = makeFarPlatforms(9);
+    LevelGenerator generator(nullptr);
+    generator.generateEnemies(objects);
+
+    // Crystal platforms (no trees) are 0-based indices 1,3,5,7; every second of
+    // them is index 3 and 7.
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    ASSERT_EQ(countByType(objects, "Shooter"), 2);
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        int index = enemyPlatformIndex(blocks, obj);
+        ASSERT_GE(index, 0) << "enemy is not on a platform";
+        EXPECT_EQ((index + 1) % 4, 0)
+            << "enemy not on every second crystal platform: index " << index;
+    }
+}
+
+TEST_F(LevelGeneratorTest, EnemySkippedWithoutCrystal) {
+    std::vector<GeneratedObject> objects = makeFarPlatforms(9);
+    LevelGenerator generator(nullptr);
+    generator.generateEnemies(objects);
+
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        int index = enemyPlatformIndex(blocks, obj);
+        ASSERT_GE(index, 0) << "enemy is not on a platform";
+        EXPECT_EQ((index + 1) % 2, 0)
+            << "enemy on platform without a crystal: index " << index;
+    }
+}
+
+TEST_F(LevelGeneratorTest, EnemySkippedOnTreePlatform) {
+    std::vector<GeneratedObject> objects = makeFarPlatforms(9);
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    objects.push_back(makeTreeOn(blocks[3])); // 4th platform: a crystal platform
+
+    LevelGenerator generator(nullptr);
+    generator.generateEnemies(objects);
+
+    std::vector<GeneratedObject> afterBlocks = platformsOf(objects);
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        int index = enemyPlatformIndex(afterBlocks, obj);
+        ASSERT_GE(index, 0);
+        EXPECT_NE(index, 3) << "enemy placed on the tree platform";
+    }
+}
+
+TEST_F(LevelGeneratorTest, OneEnemyPerPlatform) {
+    std::vector<GeneratedObject> objects = makeFarPlatforms(12);
+    LevelGenerator generator(nullptr);
+    generator.generateEnemies(objects);
+
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    std::map<int, int> enemiesPerPlatform;
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        int index = enemyPlatformIndex(blocks, obj);
+        ASSERT_GE(index, 0);
+        enemiesPerPlatform[index]++;
+    }
+    for (const auto& entry : enemiesPerPlatform) {
+        EXPECT_EQ(entry.second, 1) << "platform " << entry.first;
+    }
+}
+
+TEST_F(LevelGeneratorTest, NoMaxEnemiesCap) {
+    // 84 platforms -> 42 crystal platforms -> 21 enemies, well above the old cap.
+    std::vector<GeneratedObject> objects = makeFarPlatforms(84);
+    LevelGenerator generator(nullptr);
+    generator.generateEnemies(objects);
+
+    EXPECT_EQ(countByType(objects, "Shooter"), 21);
+    EXPECT_GT(countByType(objects, "Shooter"), LevelGenerator::MAX_ENEMIES);
+}
+
+TEST_F(LevelGeneratorTest, EnemyStandsOnPlatformTop) {
+    std::vector<GeneratedObject> objects = makeFarPlatforms(6);
+    LevelGenerator generator(nullptr);
+    generator.generateEnemies(objects);
+
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        int index = enemyPlatformIndex(blocks, obj);
+        ASSERT_GE(index, 0);
+        EXPECT_EQ(obj.y, blocks[index].y - LevelGenerator::ENEMY_HEIGHT);
+    }
+}
+
+TEST_F(LevelGeneratorTest, EnemyOutsideCameraView) {
+    std::vector<GeneratedObject> objects = makeFarPlatforms(9);
+    LevelGenerator generator(nullptr);
+    generator.generateEnemies(objects);
+
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        EXPECT_GE(obj.x, static_cast<float>(LevelGenerator::CAMERA_SAFE_X))
+            << "enemy at " << obj.x << " is inside the camera view";
     }
 }

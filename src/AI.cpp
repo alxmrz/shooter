@@ -1,6 +1,16 @@
+#include <cmath>
 #include "AI.h"
 #include "objects/units/Unit.h"
+#include "objects/interactive/Platform.h"
+#include "CObject.h"
 #include "GameObjects.h"
+
+namespace {
+const int DETECTION_RANGE_X = 300;
+const int DETECTION_RANGE_Y = 25;
+const float ENGAGEMENT_DISTANCE = 100.f;
+const float SUPPORT_PROBE_DROP = 5.f;
+}
 
 AI::AI() {
 }
@@ -16,71 +26,119 @@ AI::~AI() {
 
 void AI::think()
 {
-    if (unit->isPlayer() || unit->isDead()) {
+    if (isActive()) {
+        act();
+    }
+}
+
+bool AI::isActive()
+{
+    return !unit->isPlayer() && !unit->isDead();
+}
+
+void AI::act()
+{
+    if (detectsPlayer()) {
+        engage();
         return;
     }
 
-    if (isPlayerOnY() && isPlayerOnXLeft()) {
-        isMoveRight = false;
-        isMoveLeft = true;
-    } else if (isPlayerOnY() && isPlayerOnXRight()) {
-       isMoveRight = true;
-       isMoveLeft = false;
-    }
-
-    bool isPlayerOnFireLine = (isPlayerOnXRight() || isPlayerOnXLeft()) && isPlayerOnY();
-
-    if (isMoveRight) {
-        isMoveRight = move("right");
-
-        if (isPlayerOnFireLine) {
-            unit->attack();
-        }
-
-        isMoveLeft = !isMoveRight;
-    } else if (isMoveLeft) {
-        isMoveLeft = move("left");
-
-        if (isPlayerOnFireLine) {
-            unit->attack();
-        }
-        isMoveRight = !isMoveLeft;
-    }
+    patrol();
 }
 
-bool AI::move(std::string direction)
+void AI::engage()
 {
-    return unit->move(direction) && !isNextFalling(direction);
+    advanceOrFire(desiredDirection());
 }
 
-bool AI::isNextFalling(std::string direction)
+void AI::advanceOrFire(const std::string& direction)
 {
-    int offsetX = 0;
-    if (direction == "left") {
-        offsetX = -25;
-    } else if (direction == "right") {
-        offsetX = 25;
+    unit->setDirection(direction);
+
+    if (shouldApproach(direction)) {
+        unit->move(direction);
+        return;
     }
-    Unit fake = Unit(this->go, unit->getX()+offsetX, unit->getY(), unit->getWidth(), unit->getHeight());
-    if (!fake.collideObjectAfterMove(0.f, 5.f)) {
-        unit->setVelocity(0);
-        return true;
-    } 
-    return false;
+
+    unit->attack();
+}
+
+bool AI::shouldApproach(const std::string& direction)
+{
+    return distanceToPlayer() > ENGAGEMENT_DISTANCE && hasSupportAhead(direction);
+}
+
+void AI::patrol()
+{
+    if (!hasSupportAhead(patrolDirection)) {
+        patrolDirection = opposite(patrolDirection);
+    }
+
+    unit->move(patrolDirection);
+}
+
+bool AI::detectsPlayer()
+{
+    return isPlayerOnX() && isPlayerOnY();
+}
+
+bool AI::isPlayerOnX()
+{
+    return std::fabs(go->player->getX() - unit->getX()) <= DETECTION_RANGE_X;
 }
 
 bool AI::isPlayerOnY()
 {
-    return unit->getY() - 25 <= go->player->getY() && 
-        go->player->getY() <= unit->getY() + 25;
+    return std::fabs(go->player->getY() - unit->getY()) <= DETECTION_RANGE_Y;
 }
 
-bool AI::isPlayerOnXLeft()
+std::string AI::desiredDirection()
 {
-    return unit->getX() - 300 <= go->player->getX() && go->player->getX() <= unit->getX();
+    return go->player->getX() < unit->getX() ? "left" : "right";
 }
 
-bool AI::isPlayerOnXRight()
+float AI::distanceToPlayer()
 {
-    return unit->getX()<= go->player->getX() && go->player->getX() <= unit->getX() + 300;;
+    return std::fabs(go->player->getX() - unit->getX());
+}
+
+bool AI::hasSupportAhead(const std::string& direction)
+{
+    return isSolidGroundBelow(unit->getX() + stepOffset(direction), unit->getY());
+}
+
+float AI::stepOffset(const std::string& direction)
+{
+    return direction == "left"
+        ? -static_cast<float>(unit->getWidth())
+        : static_cast<float>(unit->getWidth());
+}
+
+bool AI::isSolidGroundBelow(float x, float y)
+{
+    CObject probe(x, y + SUPPORT_PROBE_DROP, unit->getWidth(), unit->getHeight());
+
+    for (CObject* object : go->all) {
+        Platform* platform = dynamic_cast<Platform*>(object);
+        if (isSolidBelow(platform, probe)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool AI::isSolidBelow(Platform* platform, CObject& probe)
+{
+    return platform != nullptr && platform->isCollidable() && probe.collideRect(platform);
+}
+
+std::string AI::opposite(const std::string& direction)
+{
+    return direction == "left" ? "right" : "left";
+}
+
+void AI::setPatrolDirection(const std::string& direction)
+{
+    patrolDirection = direction;
 }
