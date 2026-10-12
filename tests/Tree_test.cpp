@@ -190,6 +190,81 @@ TEST_F(TreeTest, LadderBranchesStayOnTrunk) {
     EXPECT_LE(highestBranchY - trunkTop, branchStep);
 }
 
+TEST_F(TreeTest, LadderTopBranchUsesRequestedLength) {
+    const int trunkX = 500;
+    const int trunkHeight = 266;
+    const int branchStep = 90;
+    const int topBranchLength = 300;
+
+    Tree tree(trunkX, 950, trunkHeight, 0, 2, 6, branchStep, 0, topBranchLength);
+
+    std::vector<Platform*> branches = tree.getBranches();
+    ASSERT_GT(branches.size(), 0u);
+
+    Platform* top = nullptr;
+    for (Platform* branch : branches) {
+        if (top == nullptr || branch->getY() < top->getY()) {
+            top = branch;
+        }
+    }
+    ASSERT_NE(top, nullptr);
+    EXPECT_EQ(top->getWidth(), topBranchLength);
+
+    for (Platform* branch : branches) {
+        if (branch == top) {
+            continue;
+        }
+        const int tiles = branch->getWidth() / Tree::TILE_WIDTH;
+        EXPECT_GE(tiles, 2);
+        EXPECT_LE(tiles, 6);
+    }
+}
+
+TEST_F(TreeTest, LadderTopBranchBaseStaysInsideTrunk) {
+    const int trunkX = 500;
+    const int trunkHeight = 266;
+    const int topBranchLength = 320;
+
+    for (int side = 0; side <= 1; ++side) {
+        Tree tree(trunkX, 950, trunkHeight, 0, 2, 6, 90, side, topBranchLength);
+
+        Platform* trunk = tree.getTrunk();
+        const float trunkLeft = trunk->getX();
+        const float trunkRight = trunk->getX() + trunk->getWidth();
+
+        Platform* top = nullptr;
+        for (Platform* branch : tree.getBranches()) {
+            if (top == nullptr || branch->getY() < top->getY()) {
+                top = branch;
+            }
+        }
+        ASSERT_NE(top, nullptr);
+
+        const float left = top->getX();
+        const float right = top->getX() + top->getWidth();
+        const bool leftInside = left >= trunkLeft && left <= trunkRight;
+        const bool rightInside = right >= trunkLeft && right <= trunkRight;
+        EXPECT_TRUE(leftInside || rightInside) << "side=" << side;
+        EXPECT_TRUE(left < trunkLeft || right > trunkRight) << "side=" << side;
+        EXPECT_EQ(top->getWidth(), topBranchLength);
+    }
+}
+
+TEST_F(TreeTest, LegacyTreeBranchesKeepRandomLength) {
+    const int trunkX = 500;
+    const int trunkHeight = 120;
+
+    Tree tree(trunkX, 950, trunkHeight, 4, 2, 6);
+
+    std::vector<Platform*> branches = tree.getBranches();
+    ASSERT_GT(branches.size(), 0u);
+    for (Platform* branch : branches) {
+        const int tiles = branch->getWidth() / Tree::TILE_WIDTH;
+        EXPECT_GE(tiles, 2);
+        EXPECT_LE(tiles, 6);
+    }
+}
+
 TEST_F(TreeTest, TopBranchIsOnRequestedSide) {
     const int trunkX = 500;
     const int trunkHeight = 266;

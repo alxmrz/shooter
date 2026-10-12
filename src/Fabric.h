@@ -38,6 +38,7 @@ public:
     Tree* createTree(float x, float y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength);
     Tree* createTree(float x, float y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength, int branchStep);
     Tree* createTree(float x, float y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength, int branchStep, int topBranchSide);
+    Tree* createTree(float x, float y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength, int branchStep, int topBranchSide, int topBranchLength);
     CObject* createBorder(float x, float y, int width, int height);
     Text* createText(std::string text, int x, int y);
     Button* createButton(std::string id, std::string text, float x, float y, int width, int height);

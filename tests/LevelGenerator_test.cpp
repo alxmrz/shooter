@@ -9,6 +9,7 @@
 #include <algorithm>
 #include "LevelGenerator.h"
 #include "objects/interactive/Platform.h"
+#include "objects/interactive/Tree.h"
 #include "objects/backgrounds/GroundBlock.h"
 #include "objects/units/Shooter.h"
 
@@ -45,6 +46,45 @@ static const GeneratedObject* findTree(const std::vector<GeneratedObject>& objec
         }
     }
     return nullptr;
+}
+
+static const GeneratedObject* hostBlockOf(const std::vector<GeneratedObject>& objects,
+                                          const GeneratedObject& tree) {
+    for (const auto& obj : objects) {
+        if (obj.type != "GroundBlock" || obj.y != tree.y) {
+            continue;
+        }
+        if (tree.x >= obj.x && tree.x <= obj.x + obj.width) {
+            return &obj;
+        }
+    }
+    return nullptr;
+}
+
+// Outer end of the topmost branch: left end for side 0, right end for side 1.
+struct TopBranchGeometry {
+    float outerEnd;
+    int width;
+};
+
+static TopBranchGeometry topBranchGeometry(const GeneratedObject& treeObj) {
+    Tree tree(static_cast<int>(treeObj.x), static_cast<int>(treeObj.y), treeObj.trunkHeight,
+              treeObj.numBranches, treeObj.minBranchLength, treeObj.maxBranchLength,
+              treeObj.branchStep, treeObj.topBranchSide, treeObj.topBranchLength);
+
+    Platform* top = nullptr;
+    for (Platform* branch : tree.getBranches()) {
+        if (top == nullptr || branch->getY() < top->getY()) {
+            top = branch;
+        }
+    }
+
+    TopBranchGeometry geometry;
+    geometry.width = (top == nullptr) ? 0 : top->getWidth();
+    geometry.outerEnd = (treeObj.topBranchSide == 0)
+        ? top->getX()
+        : top->getX() + top->getWidth();
+    return geometry;
 }
 
 static void testGenerateGround(std::vector<GeneratedObject>& objects) {
@@ -961,6 +1001,113 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesTreePlatformOnTopBranchSide) {
         }
     }
     EXPECT_GT(checked, 0) << "no reserved platform was checked";
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorSetsTopBranchLengthToPlatformEdgeLeft) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    GeneratedObject host = makeGroundBlock(1000, 2000, 600);
+    host.topBranchSide = 0;
+    objects.push_back(makeGroundBlock(900, 1300, 800));
+    objects.push_back(makeGroundBlock(2500, 100, 100));
+    objects.push_back(host);
+
+    generator.generateTrees(objects);
+
+    const GeneratedObject* tree = findTree(objects);
+    ASSERT_NE(tree, nullptr);
+    const int expected = static_cast<int>(tree->x) + Tree::TRUNK_WIDTH -
+                         static_cast<int>(host.x);
+    EXPECT_EQ(tree->topBranchLength, expected);
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorSetsTopBranchLengthToPlatformEdgeRight) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    GeneratedObject host = makeGroundBlock(1000, 2000, 600);
+    host.topBranchSide = 1;
+    objects.push_back(makeGroundBlock(900, 1300, 800));
+    objects.push_back(makeGroundBlock(2500, 100, 100));
+    objects.push_back(host);
+
+    generator.generateTrees(objects);
+
+    const GeneratedObject* tree = findTree(objects);
+    ASSERT_NE(tree, nullptr);
+    const int expected = static_cast<int>(host.x + host.width) - static_cast<int>(tree->x);
+    EXPECT_EQ(tree->topBranchLength, expected);
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorTopBranchReachesPlatformEdge) {
+    int checked = 0;
+    for (unsigned seed = 1; seed <= 10; ++seed) {
+        LevelGenerator generator(nullptr);
+        std::vector<GeneratedObject> objects;
+        std::srand(seed);
+        generator.generatePlatforms(objects);
+        generator.generateTrees(objects);
+
+        for (const auto& tree : objects) {
+            if (tree.type != "Tree") {
+                continue;
+            }
+            const GeneratedObject* block = hostBlockOf(objects, tree);
+            ASSERT_NE(block, nullptr) << "seed " << seed;
+            const TopBranchGeometry geometry = topBranchGeometry(tree);
+            const float edge = (tree.topBranchSide == 0)
+                ? block->x
+                : block->x + block->width;
+            EXPECT_FLOAT_EQ(geometry.outerEnd, edge) << "seed " << seed;
+            checked++;
+        }
+    }
+    EXPECT_GT(checked, 0) << "no trees were generated";
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorReservedPlatformWithinReachFromTopBranch) {
+    int checked = 0;
+    for (unsigned seed = 1; seed <= 20; ++seed) {
+        LevelGenerator generator(nullptr);
+        std::vector<GeneratedObject> objects;
+        std::srand(seed);
+        generator.generatePlatforms(objects);
+        generator.generateTrees(objects);
+
+        for (const auto& tree : objects) {
+            if (tree.type != "Tree") {
+                continue;
+            }
+            const GeneratedObject* block = hostBlockOf(objects, tree);
+            ASSERT_NE(block, nullptr) << "seed " << seed;
+            const TopBranchGeometry geometry = topBranchGeometry(tree);
+
+            for (const auto& up : objects) {
+                if (up.type != "GroundBlock") {
+                    continue;
+                }
+                const int gapY = static_cast<int>(block->y) - static_cast<int>(up.y);
+                if (gapY <= 0 || gapY > LevelGenerator::TREE_HEIGHT) {
+                    continue;
+                }
+                const bool onLeft = up.x + up.width <= block->x;
+                const bool onRight = up.x >= block->x + block->width;
+                if ((tree.topBranchSide == 0 && !onLeft) ||
+                    (tree.topBranchSide == 1 && !onRight)) {
+                    continue;
+                }
+                const float platformNearEdge = (tree.topBranchSide == 0)
+                    ? up.x + up.width
+                    : up.x;
+                const float gap = std::abs(geometry.outerEnd - platformNearEdge);
+                EXPECT_LE(gap, static_cast<float>(LevelGenerator::MAX_HORIZONTAL_REACH))
+                    << "seed " << seed;
+                checked++;
+            }
+        }
+    }
+    EXPECT_GT(checked, 0) << "no reserved platforms were checked";
 }
 
 static bool hasTreeOn(const std::vector<GeneratedObject>& objects, const GeneratedObject& block) {

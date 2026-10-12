@@ -25,6 +25,9 @@ struct GeneratedObject {
     // Side of the topmost ladder branch: 0 = left, 1 = right. The reserved
     // platform above a tree is placed on the same side.
     int topBranchSide = 0;
+    // Length in pixels the topmost ladder branch must span from the trunk to the
+    // edge of the host ground block. 0 keeps the legacy random length.
+    int topBranchLength = 0;
 };
 
 class LevelGenerator {
@@ -136,6 +139,7 @@ private:
         const std::vector<GeneratedObject>& objects,
         const GeneratedObject& block);
     bool buildTree(std::vector<GeneratedObject>& objects, size_t blockIndex);
+    static int topBranchLengthFor(const GeneratedObject& block, float trunkX, int side);
     static std::vector<GeneratedObject> groundBlocks(
         const std::vector<GeneratedObject>& objects);
     static int itemMaskForIndex(size_t index);

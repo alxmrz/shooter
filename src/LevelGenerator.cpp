@@ -101,7 +101,8 @@ void LevelGenerator::generateLevel(Map* map)
         else if (obj.type == "Tree")
         {
             Tree* tree = go->fabric->createTree(obj.x, obj.y, obj.trunkHeight, obj.numBranches, obj.minBranchLength,
-                                                obj.maxBranchLength, obj.branchStep, obj.topBranchSide);
+                                                obj.maxBranchLength, obj.branchStep, obj.topBranchSide,
+                                                obj.topBranchLength);
             // Add only branches to all (for collision)
             for (Platform* branch : tree->getBranches())
             {
@@ -660,8 +661,21 @@ bool LevelGenerator::buildTree(std::vector<GeneratedObject>& objects, size_t blo
     treeObj.maxBranchLength = MAX_BRANCH_LENGTH;
     treeObj.branchStep = TREE_BRANCH_STEP;
     treeObj.topBranchSide = block.topBranchSide;
+    treeObj.topBranchLength = topBranchLengthFor(block, x, block.topBranchSide);
     objects.push_back(treeObj);
     return true;
+}
+
+int LevelGenerator::topBranchLengthFor(const GeneratedObject& block, float trunkX, int side)
+{
+    // The top branch base sits at the far trunk edge and reaches the host block
+    // edge on the branch side, so the player can walk out to the edge and jump
+    // across the reserved gap to the platform above.
+    const float outerEnd = (side == 0)
+        ? trunkX + Tree::TRUNK_WIDTH
+        : block.x + block.width;
+    const float innerEnd = (side == 0) ? block.x : trunkX;
+    return static_cast<int>(outerEnd - innerEnd);
 }
 
 void LevelGenerator::generateTrees(std::vector<GeneratedObject>& objects)

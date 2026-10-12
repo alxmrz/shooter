@@ -63,3 +63,7 @@ Never skip the test step. If a change has no tests, it is not done.
 
 ### Test Style
 - Tests MUST be written through a DSL: generalize assertions and fixture setup instead of duplicating raw construction/setup code.
+- Test code MUST NOT contain loops or conditions. If a check needs a loop, extract it into a dedicated assert function and call that from the test.
+
+## Git
+- Whenever a file is created, edited, or deleted, run `git add` on it so the change is staged and ready to commit.

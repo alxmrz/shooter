@@ -20,7 +20,7 @@ public:
     Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength,
          int branchStep);
     Tree(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength,
-         int branchStep, int topBranchSide);
+         int branchStep, int topBranchSide, int topBranchLength = 0);
     virtual ~Tree();
     
     void update(Event event) override;
@@ -38,7 +38,8 @@ private:
     
     void generateBranches(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength);
     void generateLadderBranches(int x, int trunkTop, int trunkHeight, int branchStep,
-                                int minBranchLength, int maxBranchLength, int topBranchSide);
+                                int minBranchLength, int maxBranchLength, int topBranchSide,
+                                int topBranchLength);
     void updateBounds();
 };
 
