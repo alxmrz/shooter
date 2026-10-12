@@ -40,66 +40,118 @@ void Shooter::destroy()
 
 void Shooter::draw(Window* window, float dt)
 {
-    // Если игра окончена, останавливаем все анимации
     if (go->gameOver) {
-        // Просто отрисовываем текущий спрайт без обновления анимации
         this->CObject::draw(window, dt);
         return;
     }
-    
-    bool showNextFrame = elapsedTime >= animationTime;
+
     if (!dead) {
-        if (falling || jumping) {
-            mainSprite->setTextureRect(this->jumpSprites[direction]);
-        } else if (moving && showNextFrame) {
-            animateRun();
-        } else if (!moving && !falling && !jumping) {
-            mainSprite->setTextureRect(this->noMotionSprites[direction]);
-        }
-    }  else if (showNextFrame && !mustBeDeleted){
-        animateExplosion();
+        refreshSpriteFrame(dt);
+    } else if (!mustBeDeleted) {
+        animateExplosion(dt);
     }
-    
-    // Если анимация смерти завершена, останавливаем обновление таймеров
+
     if (!(dead && mustBeDeleted)) {
-        elapsedTime += dt;
         fireTime += dt;
         gravitationalTime += dt;
     }
-    
+
     bool aliveNPC = health > 0 && !isPlayer();
     if (aliveNPC) {
         drawHearts(window);
     }
-    
-    // Apply rotation for double jump
+
     applyRotation(dt);
-    
+
     this->CObject::draw(window, dt);
-    
 }
 
-void Shooter::animateRun()
+void Shooter::refreshSpriteFrame(float dt)
 {
-    mainSprite->setTextureRect(this->runSprites[direction][currentFrame]);
+    elapsedTime += dt;
+
+    if (isAirborne()) {
+        refreshJumpFrame();
+        return;
+    }
+
+    refreshGroundFrame();
+}
+
+bool Shooter::isAirborne()
+{
+    return falling || jumping;
+}
+
+void Shooter::refreshGroundFrame()
+{
+    if (moving) {
+        refreshMovingFrame();
+        return;
+    }
+
+    refreshIdleFrame();
+}
+
+void Shooter::refreshMovingFrame()
+{
+    if (elapsedTime >= animationTime) {
+        advanceRunFrame();
+    }
+
+    showRunFrame();
+}
+
+void Shooter::advanceRunFrame()
+{
     currentFrame++;
+
     if (currentFrame >= this->runSprites[direction].size()) {
         currentFrame = 0;
     }
+
     elapsedTime = 0.0;
 }
 
-void Shooter::animateExplosion()
+void Shooter::showRunFrame()
+{
+    mainSprite->setTextureRect(this->runSprites[direction][currentFrame]);
+}
+
+void Shooter::refreshJumpFrame()
+{
+    mainSprite->setTextureRect(this->jumpSprites[direction]);
+}
+
+void Shooter::refreshIdleFrame()
+{
+    mainSprite->setTextureRect(this->noMotionSprites[direction]);
+}
+
+void Shooter::animateExplosion(float dt)
+{
+    elapsedTime += dt;
+
+    if (elapsedTime >= animationTime) {
+        showNextExplosionFrame();
+    }
+}
+
+void Shooter::showNextExplosionFrame()
 {
     explosionSprite->setTextureRect(this->explosionSprites[currentFrame]);
+    advanceExplosionFrame();
+    elapsedTime = 0.0;
+}
+
+void Shooter::advanceExplosionFrame()
+{
     currentFrame++;
+
     if (currentFrame >= this->explosionSprites.size()) {
-        // Достигли конца анимации, остаёмся на последнем кадре
         currentFrame = this->explosionSprites.size() - 1;
         mustBeDeleted = true;
     }
-
-    elapsedTime = 0.0;
 }
 
 void Shooter::drawHearts(Window* window)
@@ -152,6 +204,7 @@ void Shooter::setMainSprite(sf::Sprite* mainSprite)
             this->x + this->mainSprite->getOrigin().x,
             this->y + this->mainSprite->getOrigin().y
         );
+        this->mainSprite->setTextureRect(this->noMotionSprites[this->direction]);
     }
 }
 

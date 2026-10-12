@@ -40,6 +40,7 @@ public:
     void onSecondJump() override;
     void setMainSprite(sf::Sprite* mainSprite);
     void applyRotation(float dt);
+    void refreshSpriteFrame(float dt);
 private:
     /* Sprites map for showing run images depending on direction (left, right) */
     std::map<std::string, std::vector<sf::IntRect>> runSprites
@@ -99,8 +100,16 @@ private:
         sf::IntRect(400,0,0, 75),
     };
     
-    void animateRun();
-    void animateExplosion();
+    bool isAirborne();
+    void refreshGroundFrame();
+    void refreshMovingFrame();
+    void advanceRunFrame();
+    void showRunFrame();
+    void refreshJumpFrame();
+    void refreshIdleFrame();
+    void animateExplosion(float dt);
+    void showNextExplosionFrame();
+    void advanceExplosionFrame();
     void drawHearts(Window* window);
     
 private:

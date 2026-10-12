@@ -18,6 +18,7 @@ add_executable(tests
     Movable_test.cpp
     Unit_test.cpp
     Shooter_test.cpp
+    ShooterSprite_test.cpp
     Bullet_test.cpp
     LevelGenerator_test.cpp
     PlatformCollision_test.cpp
