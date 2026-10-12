@@ -12,6 +12,7 @@
 #include "objects/interactive/Platform.h"
 #include "objects/backgrounds/GroundBlock.h"
 #include "objects/units/Shooter.h"
+#include "objects/interactive/Bullet.h"
 
 // Shared DSL fixture for tests that need a live GameObjects container.
 // It owns the raw storage for GameObjects (whose heavy members are placed
@@ -78,6 +79,40 @@ protected:
         player->setMain(true);
         go->player = player;
         return player;
+    }
+
+    sf::Sprite* makeSprite() {
+        return new sf::Sprite(dummyTexture);
+    }
+
+    Bullet* spawnBullet(float x, float y, Unit* shooter = nullptr, int width = 10, int height = 10) {
+        Bullet* bullet = new Bullet(shooter, go, x, y, width, height);
+        bullet->setMainSprite(makeSprite());
+        bullet->setExplosionSprite(makeSprite());
+        go->all.push_back(bullet);
+        return bullet;
+    }
+
+    CObject* placeBorder(float x, float y, int width = 10, int height = 10) {
+        CObject* border = new CObject(go, x, y, width, height);
+        go->borders[(int)x] = border;
+        go->all.push_back(border);
+        return border;
+    }
+
+    void driveUpdates(Bullet* bullet, int count) {
+        for (int i = 0; i < count; i++) {
+            bullet->update(Event());
+        }
+    }
+
+    bool containsObject(CObject* object) {
+        for (CObject* item : go->all) {
+            if (item == object) {
+                return true;
+            }
+        }
+        return false;
     }
 };
 

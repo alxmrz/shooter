@@ -2,8 +2,10 @@
 #define BULLET_H
 
 #include <string>
+#include <vector>
 #include <SFML/Audio.hpp>
 #include "../../CObject.h"
+#include "ExplosionFrames.h"
 
 #include "../../Event.h"
 
@@ -31,14 +33,27 @@ public:
     bool move(float x, float y);
     void update(Event event) override;
     /**
+     * Draw the object with it's specific algorithm
+     * 
+     * @param window
+     * @param dt Delayed time after last frame (in milliseconds / 1000)
+     */
+    void draw(Window* window, float dt) override;
+    /**
      * Set direction the objects will be moving
      * 
      * @param direction
      */
     void setDirection(std::string direction);
     
-    sf::Sound* explosionSound;
+    sf::Sound* explosionSound = nullptr;
     void setExplosionSound(sf::Sound* sound);
+    void setExplosionSprite(sf::Sprite* explosionSprite);
+    
+    bool isExploding();
+    unsigned getExplosionFrame();
+    int getExplosionSoundPlays();
+    sf::Sprite* getExplosionSprite();
 private:
     /** Shooter, that did the bullet */
     Unit* shooter;
@@ -49,6 +64,30 @@ private:
     /** When the object will be at this position the object will be deleted */
     std::vector<int> endPosition;
 
+    /** Movement step per simulation frame (20% less than the original 10) */
+    static constexpr float BULLET_SPEED = 8.f;
+
+    /** Number of updates between two explosion animation frames */
+    static constexpr int EXPLOSION_FRAME_DELAY = 5;
+
+    /** Whether the bullet reached its target and plays the explosion */
+    bool exploding = false;
+
+    /** Current frame of the explosion animation */
+    unsigned explosionFrame = 0;
+
+    /** Updates elapsed since the current explosion frame was shown */
+    int explosionTick = 0;
+
+    /** How many times the explosion sound was requested to play */
+    int explosionSoundPlays = 0;
+
+    /** Sprite used to render the explosion animation */
+    sf::Sprite* explosionSprite = nullptr;
+
+    /** Sprites map for explosion animation */
+    std::vector<sf::IntRect> explosionFrames = explosionFrameRects();
+
     /**
      * Check, is current object collide Playable object when moving
      * 
@@ -57,7 +96,38 @@ private:
      * @return bool
      */
     bool collidePlayableAfterMove(float x, float y);
+
+    /**
+     * Check, is the next position beyond the maximum flight distance
+     * 
+     * @param nextX
+     * @return bool
+     */
+    bool isEndPositionReached(float nextX);
+
+    /** Advance the explosion animation while it is playing */
+    void updateExplosion();
+
+    /** Check, is a new explosion frame due */
+    bool shouldAdvanceExplosion();
+
+    /** Switch to the next explosion frame or remove the bullet when done */
+    void advanceExplosion();
+
+    /** Apply the current explosion frame to the sprite */
+    void applyExplosionFrame();
+
+    /** Move the bullet while it is flying */
+    void updateFlight();
+
+    /** Begin the explosion: stop moving, play sound and show the first frame */
+    void startExplosion();
+
+    /** Play the explosion sound at most once */
+    void playExplosionSound();
+
+    /** Place the explosion sprite at the bullet position */
+    void positionExplosionSprite();
 };
 
 #endif /* BULLET_H */
-

@@ -20,6 +20,7 @@ add_executable(tests
     Shooter_test.cpp
     ShooterSprite_test.cpp
     Bullet_test.cpp
+    BulletExplosion_test.cpp
     LevelGenerator_test.cpp
     PlatformCollision_test.cpp
     ShooterPlatformCollision_test.cpp

@@ -4,9 +4,13 @@
 #include "Bullet.h"
 #include "../units/Unit.h"
 #include "../../GameObjects.h"
+#include "../../Window.h"
 
 #include "../../Event.h"
 
+
+constexpr float Bullet::BULLET_SPEED;
+constexpr int Bullet::EXPLOSION_FRAME_DELAY;
 
 Bullet::Bullet()
 {
@@ -18,7 +22,7 @@ Bullet::Bullet(const Bullet& orig)
 
 Bullet::~Bullet()
 {
-    delete mainSprite;
+    delete explosionSprite;
 }
 
 Bullet::Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int height)
@@ -31,9 +35,121 @@ Bullet::Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int heig
 
 void Bullet::update(Event event)
 { 
-    if (!move(10.f, 0.f)) {
-        destroy();
+    if (exploding) {
+        updateExplosion();
+        return;
     }
+
+    updateFlight();
+}
+
+void Bullet::updateExplosion()
+{
+    if (!shouldAdvanceExplosion()) {
+        return;
+    }
+
+    advanceExplosion();
+}
+
+bool Bullet::shouldAdvanceExplosion()
+{
+    explosionTick++;
+
+    return explosionTick >= EXPLOSION_FRAME_DELAY;
+}
+
+void Bullet::advanceExplosion()
+{
+    explosionTick = 0;
+    explosionFrame++;
+
+    if (explosionFrame >= explosionFrames.size()) {
+        destroy();
+        return;
+    }
+
+    applyExplosionFrame();
+}
+
+void Bullet::applyExplosionFrame()
+{
+    if (explosionSprite == nullptr) {
+        return;
+    }
+
+    explosionSprite->setTextureRect(explosionFrames[explosionFrame]);
+}
+
+void Bullet::updateFlight()
+{
+    if (!move(BULLET_SPEED, 0.f)) {
+        startExplosion();
+    }
+}
+
+void Bullet::startExplosion()
+{
+    if (exploding) {
+        return;
+    }
+
+    exploding = true;
+    explosionFrame = 0;
+    explosionTick = 0;
+    playExplosionSound();
+    positionExplosionSprite();
+    applyExplosionFrame();
+}
+
+void Bullet::playExplosionSound()
+{
+    explosionSoundPlays++;
+
+    if (explosionSound == nullptr) {
+        return;
+    }
+
+    explosionSound->play();
+}
+
+void Bullet::positionExplosionSprite()
+{
+    if (explosionSprite == nullptr) {
+        return;
+    }
+
+    explosionSprite->setPosition(this->x, this->y);
+}
+
+void Bullet::draw(Window* window, float dt)
+{
+    if (!exploding) {
+        CObject::draw(window, dt);
+        return;
+    }
+
+    window->draw(*explosionSprite);
+}
+
+bool Bullet::isExploding()
+{
+    return exploding;
+}
+
+unsigned Bullet::getExplosionFrame()
+{
+    return explosionFrame;
+}
+
+int Bullet::getExplosionSoundPlays()
+{
+    return explosionSoundPlays;
+}
+
+sf::Sprite* Bullet::getExplosionSprite()
+{
+    return explosionSprite;
 }
 
 bool Bullet::move(float x, float y)
@@ -42,7 +158,7 @@ bool Bullet::move(float x, float y)
         x *= -1;
     }
 
-    bool isEndPosition = endPosition[0] == this->x + x && endPosition[1] == this->y + y;
+    bool isEndPosition = isEndPositionReached(this->x + x);
     
     if (!isEndPosition && !collidePlayableAfterMove(x, y) && !collideObjectAfterMove(x, y)) {
         this->x += x;
@@ -53,6 +169,15 @@ bool Bullet::move(float x, float y)
     }
 
     return false;
+}
+
+bool Bullet::isEndPositionReached(float nextX)
+{
+    if (direction == "left") {
+        return nextX <= endPosition[0];
+    }
+
+    return nextX >= endPosition[0];
 }
 
 void Bullet::setDirection(std::string direction)
@@ -83,8 +208,6 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
            bool playerEnvolved = shooter->isPlayer() || this->shooter->isPlayer();
 
            if (playerEnvolved && collider.collideRect(shooter)) { 
-               explosionSound->play();
-
                shooter->decreaseHealth();
                if (shooter->getHealth() == 0) {
                    shooter->setDead(true);
@@ -96,6 +219,18 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
     }
 
     return false;
+}
+
+void Bullet::setExplosionSprite(sf::Sprite* explosionSprite)
+{
+    this->explosionSprite = explosionSprite;
+
+    if (this->explosionSprite == nullptr) {
+        return;
+    }
+
+    this->explosionSprite->setScale(0.5f, 0.5f);
+    this->explosionSprite->setTextureRect(explosionFrames[0]);
 }
 
 void Bullet::setExplosionSound(sf::Sound* sound)

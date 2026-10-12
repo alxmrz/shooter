@@ -8,6 +8,7 @@
 #include <SFML/Audio.hpp>
 #include "../../GameObjects.h"
 #include "../units/Unit.h"
+#include "../interactive/ExplosionFrames.h"
 
 struct GameObjects;
 class Window;
@@ -90,15 +91,7 @@ private:
     };
     
     /* Sprites map for explosion animation */
-    std::vector<sf::IntRect> explosionSprites 
-    {
-        sf::IntRect(2,0,80, 75),
-        sf::IntRect(80,0,80, 75),
-        sf::IntRect(160,0,80, 75),
-        sf::IntRect(240,0,80, 75),
-        sf::IntRect(320,0,75, 75),
-        sf::IntRect(400,0,0, 75),
-    };
+    std::vector<sf::IntRect> explosionSprites = explosionFrameRects();
     
     bool isAirborne();
     void refreshGroundFrame();

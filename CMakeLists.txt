@@ -29,6 +29,7 @@ set(PROJECT_HEADERS
         src/objects/units/Unit.h
         src/objects/units/Shooter.h
         src/objects/interactive/Bullet.h
+        src/objects/interactive/ExplosionFrames.h
         src/objects/interfaces/Movable.h
         src/ui/Button.h
         src/ui/Text.h

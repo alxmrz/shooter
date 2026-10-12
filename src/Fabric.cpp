@@ -40,6 +40,7 @@ Bullet* Fabric::createBullet(Shooter* shooter, float x, float y, int width, int 
     
     Bullet* bullet = new Bullet(shooter, go, x, y, width, height);
     bullet->setMainSprite(sprite);
+    bullet->setExplosionSprite(createSprite("explosion", x, y));
     bullet->setExplosionSound(resources->getSound("explosion"));
     return bullet;
 }
