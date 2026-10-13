@@ -6,10 +6,10 @@
 #include "GameObjects.h"
 
 namespace {
-const int DETECTION_RANGE_X = 300;
-const int DETECTION_RANGE_Y = 25;
+const float DETECTION_RADIUS = 300.f;
 const float ENGAGEMENT_DISTANCE = 100.f;
 const float SUPPORT_PROBE_DROP = 5.f;
+const float LINE_OF_SIGHT_STEP = 10.f;
 }
 
 AI::AI() {
@@ -48,7 +48,14 @@ void AI::act()
 
 void AI::engage()
 {
+    aimAtPlayer();
     advanceOrFire(desiredDirection());
+}
+
+void AI::aimAtPlayer()
+{
+    sf::Vector2f target = playerCenter();
+    unit->setAimTarget(target.x, target.y);
 }
 
 void AI::advanceOrFire(const std::string& direction)
@@ -65,7 +72,7 @@ void AI::advanceOrFire(const std::string& direction)
 
 bool AI::shouldApproach(const std::string& direction)
 {
-    return distanceToPlayer() > ENGAGEMENT_DISTANCE && hasSupportAhead(direction);
+    return horizontalDistanceToPlayer() > ENGAGEMENT_DISTANCE && hasSupportAhead(direction);
 }
 
 void AI::patrol()
@@ -79,27 +86,92 @@ void AI::patrol()
 
 bool AI::detectsPlayer()
 {
-    return isPlayerOnX() && isPlayerOnY();
+    return isPlayerInRange() && hasLineOfSight();
 }
 
-bool AI::isPlayerOnX()
+bool AI::isPlayerInRange()
 {
-    return std::fabs(go->player->getX() - unit->getX()) <= DETECTION_RANGE_X;
+    return distanceToPlayer() <= DETECTION_RADIUS;
 }
 
-bool AI::isPlayerOnY()
+bool AI::hasLineOfSight()
 {
-    return std::fabs(go->player->getY() - unit->getY()) <= DETECTION_RANGE_Y;
+    int steps = lineOfSightSteps();
+
+    for (int i = 1; i < steps; i++) {
+        if (isSightBlockedAt(pointOnPath(i, steps))) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int AI::lineOfSightSteps()
+{
+    return static_cast<int>(distanceToPlayer() / LINE_OF_SIGHT_STEP);
+}
+
+sf::Vector2f AI::pointOnPath(int step, int steps)
+{
+    sf::Vector2f from = unitCenter();
+    sf::Vector2f to = playerCenter();
+    float t = static_cast<float>(step) / static_cast<float>(steps);
+
+    return sf::Vector2f(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t);
+}
+
+bool AI::isSightBlockedAt(sf::Vector2f point)
+{
+    for (CObject* object : go->all) {
+        Platform* platform = dynamic_cast<Platform*>(object);
+        if (isSolidSightBlocker(platform, point)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool AI::isSolidSightBlocker(Platform* platform, sf::Vector2f point)
+{
+    return platform != nullptr && platform->isCollidable() && platform->collidePoint(point.x, point.y);
+}
+
+float AI::distanceToPlayer()
+{
+    sf::Vector2f from = unitCenter();
+    sf::Vector2f to = playerCenter();
+    float dx = to.x - from.x;
+    float dy = to.y - from.y;
+
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+float AI::horizontalDistanceToPlayer()
+{
+    return std::fabs(go->player->getX() - unit->getX());
+}
+
+sf::Vector2f AI::unitCenter()
+{
+    return sf::Vector2f(
+        unit->getX() + unit->getWidth() / 2.f,
+        unit->getY() + unit->getHeight() / 2.f
+    );
+}
+
+sf::Vector2f AI::playerCenter()
+{
+    return sf::Vector2f(
+        go->player->getX() + go->player->getWidth() / 2.f,
+        go->player->getY() + go->player->getHeight() / 2.f
+    );
 }
 
 std::string AI::desiredDirection()
 {
     return go->player->getX() < unit->getX() ? "left" : "right";
-}
-
-float AI::distanceToPlayer()
-{
-    return std::fabs(go->player->getX() - unit->getX());
 }
 
 bool AI::hasSupportAhead(const std::string& direction)

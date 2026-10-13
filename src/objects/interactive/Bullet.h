@@ -45,6 +45,15 @@ public:
      * @param direction
      */
     void setDirection(std::string direction);
+
+    /**
+     * Set the (unit) direction the bullet flies along and rotate its sprite.
+     */
+    void setFlightDirection(sf::Vector2f direction);
+
+    float getVelocityX();
+    float getVelocityY();
+    float getRotation();
     
     sf::Sound* explosionSound = nullptr;
     void setExplosionSound(sf::Sound* sound);
@@ -58,11 +67,14 @@ private:
     /** Shooter, that did the bullet */
     Unit* shooter;
     
-    /** Direction of the object to move */
-    std::string direction;
-    
-    /** When the object will be at this position the object will be deleted */
-    std::vector<int> endPosition;
+    /** Unit direction (unit vector) the bullet flies along */
+    sf::Vector2f flightDir = sf::Vector2f(1.f, 0.f);
+
+    /** Position where the bullet was spawned */
+    sf::Vector2f startPosition;
+
+    /** Maximum flight distance from the spawn position */
+    static constexpr float MAX_DISTANCE = 500.f;
 
     /** Movement step per simulation frame (20% less than the original 10) */
     static constexpr float BULLET_SPEED = 8.f;
@@ -101,9 +113,19 @@ private:
      * Check, is the next position beyond the maximum flight distance
      * 
      * @param nextX
+     * @param nextY
      * @return bool
      */
-    bool isEndPositionReached(float nextX);
+    bool isMaxDistanceReached(float nextX, float nextY);
+
+    /** Keep the sprite centered on the bullet collider */
+    void positionSprite();
+
+    /** Rotate the sprite to match the current flight direction */
+    void applySpriteRotation();
+
+    /** Return a unit-length copy of the given direction or the default one */
+    sf::Vector2f normalizedDirection(sf::Vector2f direction);
 
     /** Advance the explosion animation while it is playing */
     void updateExplosion();

@@ -2,6 +2,7 @@
 #define AI_H
 
 #include <string>
+#include <SFML/Graphics.hpp>
 
 class GameObjects;
 class Unit;
@@ -30,12 +31,20 @@ private:
     bool isActive();
     void act();
     void engage();
+    void aimAtPlayer();
     void advanceOrFire(const std::string& direction);
     void patrol();
-    bool isPlayerOnY();
-    bool isPlayerOnX();
-    std::string desiredDirection();
+    bool isPlayerInRange();
+    bool hasLineOfSight();
+    bool isSightBlockedAt(sf::Vector2f point);
+    bool isSolidSightBlocker(Platform* platform, sf::Vector2f point);
     float distanceToPlayer();
+    float horizontalDistanceToPlayer();
+    sf::Vector2f unitCenter();
+    sf::Vector2f playerCenter();
+    int lineOfSightSteps();
+    sf::Vector2f pointOnPath(int step, int steps);
+    std::string desiredDirection();
     bool shouldApproach(const std::string& direction);
     float stepOffset(const std::string& direction);
     bool isSolidGroundBelow(float x, float y);

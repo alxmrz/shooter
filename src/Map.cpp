@@ -13,6 +13,7 @@
 #include "objects/interactive/Platform.h"
 #include "objects/backgrounds/GroundBlock.h"
 #include "objects/interactive/Tree.h"
+#include "objects/interactive/Aim.h"
 #include "objects/units/Shooter.h"
 #include "Fabric.h"
 #include "LevelGenerator.h"
@@ -108,6 +109,9 @@ void Map::generatePlayable(tinyxml2::XMLElement* map)
                 if (name == "Player") {
                     shooter->setMain(true);
                     go->player = shooter;
+                    go->aim = go->fabric->createAim(
+                        atoi(object->Attribute("x")), atoi(object->Attribute("y")), 10, 10);
+                    go->all.push_back(go->aim);
                 }
 
                 go->all.push_back(shooter);

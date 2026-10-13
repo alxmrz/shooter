@@ -8,6 +8,8 @@
 #include "Scene.h"
 #include "Application.h"
 #include "GameState.h"
+#include "GameObjects.h"
+#include "objects/interactive/Aim.h"
 #include "ui/Button.h"
 
 EventHandler::EventHandler()
@@ -29,6 +31,8 @@ Event EventHandler::handle()
     Event result;
     sf::Event event;
 
+    updateAimTarget();
+
     while (app->window->pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             app->close();
@@ -43,7 +47,7 @@ Event EventHandler::handle()
             result.SetType(Event::Type::MouseWheelScrolled, event);
         } else if (event.type == sf::Event::MouseButtonPressed) {
             if (event.mouseButton.button == sf::Mouse::Left) {
-                handleUiButtonsClick(event);
+                handleLeftClick(event);
             }
             result.SetType(Event::Type::MouseButtonPressed, event);
         } else if (event.type == sf::Event::MouseMoved) {
@@ -84,7 +88,7 @@ void EventHandler::handleMouseEvents(sf::Event& event)
     }
 }
 
-void EventHandler::handleUiButtonsClick(sf::Event& event)
+bool EventHandler::handleUiButtonsClick(sf::Event& event)
 {
     // Преобразуем координаты мыши в мировые координаты (учитывая view)
     sf::Vector2f mousePos = app->window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
@@ -100,16 +104,60 @@ void EventHandler::handleUiButtonsClick(sf::Event& event)
             if (id == "start") {
                 gameState->startNewGame();
                 this->player = gameState->objects->player;
-                break;
             } else if (id == "exit") {
                 app->close();
             } else if (id == "restart") {
                 gameState->objects->restartGame();
                 this->player = gameState->objects->player;
-                break;
             }
+            return true;
         }
     }
+
+    return false;
+}
+
+void EventHandler::handleLeftClick(sf::Event& event)
+{
+    if (handleUiButtonsClick(event)) {
+        return;
+    }
+
+    handlePlayerFire();
+}
+
+void EventHandler::handlePlayerFire()
+{
+    if (!isGameplayActive()) {
+        return;
+    }
+
+    player->attack();
+}
+
+void EventHandler::updateAimTarget()
+{
+    if (!isGameplayActive() || gameState->objects->aim == nullptr) {
+        return;
+    }
+
+    sf::Vector2f mouseWorld = currentMouseWorld();
+    gameState->objects->aim->setTarget(mouseWorld.x, mouseWorld.y);
+    player->setAimTarget(mouseWorld.x, mouseWorld.y);
+}
+
+sf::Vector2f EventHandler::currentMouseWorld()
+{
+    sf::Vector2i pixel = sf::Mouse::getPosition(*app->window);
+    return app->window->mapPixelToCoords(pixel);
+}
+
+bool EventHandler::isGameplayActive()
+{
+    return gameState->isGameStarted
+        && !gameState->objects->gameOver
+        && player != nullptr
+        && !player->isDead();
 }
 
 void EventHandler::handleUiButtonsHover(sf::Event& event)
@@ -132,11 +180,16 @@ void EventHandler::handleUiButtonsHover(sf::Event& event)
 void EventHandler::handleRealTimeKeyboardState()
 {
     // Если игра окончена (gameOver) или игрок умер, не обрабатываем ввод
-    if (gameState->objects->gameOver || (player && player->isDead())) {
+    if (!isGameplayActive()) {
         return;
     }
     
     handleArrowKeys();
+    handleSpaceKey();
+}
+
+void EventHandler::handleSpaceKey()
+{
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
         player->attack();
     }

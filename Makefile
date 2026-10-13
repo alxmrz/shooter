@@ -29,6 +29,7 @@ src/objects/interactive/Tree.cpp \
 src/objects/units/Unit.cpp \
 src/objects/units/Shooter.cpp \
 src/objects/interactive/Bullet.cpp \
+src/objects/interactive/Aim.cpp \
 src/objects/interfaces/Movable.cpp \
 src/ui/Button.cpp \
 src/ui/Text.cpp \

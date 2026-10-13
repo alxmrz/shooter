@@ -29,6 +29,7 @@ set(PROJECT_HEADERS
         src/objects/units/Unit.h
         src/objects/units/Shooter.h
         src/objects/interactive/Bullet.h
+        src/objects/interactive/Aim.h
         src/objects/interactive/ExplosionFrames.h
         src/objects/interfaces/Movable.h
         src/ui/Button.h
@@ -60,6 +61,7 @@ set(PROJECT_SOURCES
         src/objects/units/Unit.cpp
         src/objects/units/Shooter.cpp
         src/objects/interactive/Bullet.cpp
+        src/objects/interactive/Aim.cpp
         src/objects/interfaces/Movable.cpp
         src/ui/Button.cpp
         src/ui/Text.cpp

@@ -15,6 +15,7 @@
 #include "objects/interactive/Ammunition.h"
 #include "objects/interactive/Crystal.h"
 #include "objects/interactive/Tree.h"
+#include "objects/interactive/Aim.h"
 #include "objects/backgrounds/GroundBlock.h"
 
 constexpr int LevelGenerator::LEVEL_WIDTH;
@@ -79,6 +80,9 @@ void LevelGenerator::generateLevel(Map* map)
     player->setMain(true);
     go->player = player;
     go->all.push_back(player);
+
+    go->aim = go->fabric->createAim(startBlockCenterX, START_BLOCK_Y - PLAYER_HEIGHT, 10, 10);
+    go->all.push_back(go->aim);
 
     // Create objects using Fabric and add to GameObjects
     for (const auto& obj : objects)

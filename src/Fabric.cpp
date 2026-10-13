@@ -14,6 +14,7 @@
 #include "objects/interactive/Platform.h"
 #include "objects/backgrounds/GroundBlock.h"
 #include "objects/interactive/Tree.h"
+#include "objects/interactive/Aim.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 
@@ -37,6 +38,8 @@ Bullet* Fabric::createBullet(Shooter* shooter, float x, float y, int width, int 
 {
     sf::Sprite* sprite = createSprite("bullet", x, y);
     sprite->setTextureRect(sf::IntRect(0, 0, 18, 7));
+    sprite->setOrigin(9.f, 3.5f);
+    sprite->setPosition(x + width / 2.f, y + height / 2.f);
     
     Bullet* bullet = new Bullet(shooter, go, x, y, width, height);
     bullet->setMainSprite(sprite);
@@ -55,6 +58,20 @@ Crystal* Fabric::createCrystal(float x, float y, int width, int height)
     crystal->setMainSprite(sprite);
     
     return crystal;
+}
+
+Aim* Fabric::createAim(float x, float y, int width, int height)
+{
+    sf::Sprite* sprite = createSprite("aim", x, y);
+    sprite->setTextureRect(sf::IntRect(0, 0, 292, 305));
+    sprite->setScale(0.15f, 0.15f);
+    sprite->setOrigin(146.f, 152.5f);
+
+    Aim* aim = new Aim(go, x, y, width, height);
+    aim->setMainSprite(sprite);
+    aim->setTarget(x, y);
+
+    return aim;
 }
 
 Ammunition* Fabric::createAmmo(float x, float y, int width, int height)

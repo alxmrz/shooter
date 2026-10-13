@@ -44,6 +44,7 @@ GameObjects::GameObjects(GameState* gs)
     gameOverContainer->setOutlineThickness(2);
     gameOverContainer->setOutlineColor(sf::Color::Black);
     gameOver = false;
+    aim = NULL;
     
     grounds = new sf::RenderTexture;
 }
@@ -57,6 +58,7 @@ void GameObjects::clear()
     buttons.clear();
     all.clear();
     player = NULL;
+    aim = NULL;
 }
 
 void GameObjects::draw(Window* window, float dt)

@@ -13,6 +13,26 @@
 #include "objects/backgrounds/GroundBlock.h"
 #include "objects/units/Shooter.h"
 #include "objects/interactive/Bullet.h"
+#include "objects/interactive/Aim.h"
+
+// Test double that records the bullets a Shooter creates instead of using
+// Fabric, so firing can be exercised without loading resources.
+class RecordingShooter : public Shooter {
+public:
+    std::vector<Bullet*> spawned;
+
+    RecordingShooter(GameObjects* go, float x, float y, int width, int height)
+        : Shooter(go, x, y, width, height) {
+        fireTime = 1.f;
+    }
+
+protected:
+    Bullet* createBullet(float x, float y, int width, int height) override {
+        Bullet* bullet = new Bullet(this, go, x, y, width, height);
+        spawned.push_back(bullet);
+        return bullet;
+    }
+};
 
 // Shared DSL fixture for tests that need a live GameObjects container.
 // It owns the raw storage for GameObjects (whose heavy members are placed
@@ -40,6 +60,7 @@ protected:
         new (&go->borders) std::map<int, CObject*>();
         go->player = nullptr;
         go->fabric = nullptr;
+        go->aim = nullptr;
         go->gameOver = false;
     }
 
@@ -76,6 +97,27 @@ protected:
 
     Shooter* spawnPlayer(float x, float y, int width = ACTOR_W, int height = ACTOR_H) {
         Shooter* player = spawnEnemy(x, y, width, height);
+        player->setMain(true);
+        go->player = player;
+        return player;
+    }
+
+    Aim* spawnAim(float x, float y) {
+        Aim* aim = new Aim(go, x, y, 10, 10);
+        aim->setMainSprite(makeSprite());
+        aim->setTarget(x, y);
+        go->aim = aim;
+        go->all.push_back(aim);
+        return aim;
+    }
+
+    RecordingShooter* spawnRecordingActor(float x, float y) {
+        RecordingShooter* actor = new RecordingShooter(go, x, y, ACTOR_W, ACTOR_H);
+        return static_cast<RecordingShooter*>(registerActor(actor));
+    }
+
+    RecordingShooter* spawnRecordingPlayer(float x, float y) {
+        RecordingShooter* player = spawnRecordingActor(x, y);
         player->setMain(true);
         go->player = player;
         return player;

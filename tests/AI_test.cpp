@@ -37,16 +37,44 @@ TEST_F(GameObjectsFixture, HasSupportAheadPastEdge) {
 
 // --- Perception ---
 
-TEST_F(GameObjectsFixture, EnemyDetection) {
+TEST_F(GameObjectsFixture, EnemyDetectsPlayerWithinRadius) {
     placeGroundBlock(100, 300, 900);
     Shooter* enemy = spawnEnemy(150, 300 - ACTOR_H);
-    Shooter* player = spawnPlayer(150 + 400, 300 - ACTOR_H);
+    spawnPlayer(150, 300 - ACTOR_H - 120);
+    AI ai(go, enemy);
+
+    EXPECT_TRUE(ai.detectsPlayer());
+}
+
+TEST_F(GameObjectsFixture, EnemyDoesNotDetectBeyondRadius) {
+    placeGroundBlock(100, 300, 900);
+    Shooter* enemy = spawnEnemy(0, 300 - ACTOR_H);
+    spawnPlayer(500, 300 - ACTOR_H);
     AI ai(go, enemy);
 
     EXPECT_FALSE(ai.detectsPlayer());
+}
 
-    player->setCoords(200, 300 - ACTOR_H - 100);
+TEST_F(GameObjectsFixture, EnemyDetectionBlockedByObstacle) {
+    placeGroundBlock(100, 300, 900);
+    Shooter* enemy = spawnEnemy(150, 300 - ACTOR_H);
+    spawnPlayer(350, 300 - ACTOR_H);
+    placeGroundBlock(240, 240, 20, 80);
+    AI ai(go, enemy);
+
     EXPECT_FALSE(ai.detectsPlayer());
+}
+
+TEST_F(GameObjectsFixture, EnemyFiresAtPlayerAtAngle) {
+    placeGroundBlock(100, 300, 900);
+    RecordingShooter* enemy = spawnRecordingActor(150, 300 - ACTOR_H);
+    spawnPlayer(180, 300 - ACTOR_H - 120);
+    AI ai(go, enemy);
+
+    ai.think();
+
+    ASSERT_EQ(enemy->spawned.size(), 1u);
+    EXPECT_NE(enemy->spawned[0]->getVelocityY(), 0.f);
 }
 
 // --- Patrolling ---

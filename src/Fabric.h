@@ -20,6 +20,7 @@ class Tree;
 class CObject;
 class Button;
 class Text;
+class Aim;
 
 class Fabric {
 public:
@@ -31,6 +32,7 @@ public:
     Shooter* createShooter(float x, float y, int width, int height);
     Ground* createGround(float x, float y, int width, int height);
     Crystal* createCrystal(float x, float y, int width, int height);
+    Aim* createAim(float x, float y, int width, int height);
     Ammunition* createAmmo(float x, float y, int width, int height);
     Heart* createHeart(float x, float y, int width, int height);
     Platform* createPlatform(float x, float y, int width, int height);

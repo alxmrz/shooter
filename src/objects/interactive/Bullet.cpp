@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <cmath>
 #include <SFML/Audio.hpp>
 #include "Bullet.h"
 #include "../units/Unit.h"
@@ -10,7 +11,13 @@
 
 
 constexpr float Bullet::BULLET_SPEED;
+constexpr float Bullet::MAX_DISTANCE;
 constexpr int Bullet::EXPLOSION_FRAME_DELAY;
+
+namespace {
+const float MIN_DIRECTION_LENGTH = 0.0001f;
+const float RAD_TO_DEG = 57.2957795f;
+}
 
 Bullet::Bullet()
 {
@@ -29,8 +36,7 @@ Bullet::Bullet(Unit* shooter, GameObjects* go, int x, int y, int width, int heig
 : CObject(go, x, y, width, height)
 {
     this->shooter = shooter;
-    endPosition.push_back(x + 500);
-    endPosition.push_back(y);
+    startPosition = sf::Vector2f(x, y);
 }
 
 void Bullet::update(Event event)
@@ -83,7 +89,7 @@ void Bullet::applyExplosionFrame()
 
 void Bullet::updateFlight()
 {
-    if (!move(BULLET_SPEED, 0.f)) {
+    if (!move(flightDir.x * BULLET_SPEED, flightDir.y * BULLET_SPEED)) {
         startExplosion();
     }
 }
@@ -154,44 +160,93 @@ sf::Sprite* Bullet::getExplosionSprite()
 
 bool Bullet::move(float x, float y)
 {
-    if ((direction == "right" && x < 0 )|| direction == "left") {
-        x *= -1;
+    if (isMaxDistanceReached(this->x + x, this->y + y)) {
+        return false;
     }
 
-    bool isEndPosition = isEndPositionReached(this->x + x);
-    
-    if (!isEndPosition && !collidePlayableAfterMove(x, y) && !collideObjectAfterMove(x, y)) {
-        this->x += x;
-        this->y += y;
-        this->mainSprite->setPosition(this->x, this->y);
-
-        return true;
+    if (collidePlayableAfterMove(x, y) || collideObjectAfterMove(x, y)) {
+        return false;
     }
 
-    return false;
+    this->x += x;
+    this->y += y;
+    positionSprite();
+
+    return true;
 }
 
-bool Bullet::isEndPositionReached(float nextX)
+bool Bullet::isMaxDistanceReached(float nextX, float nextY)
 {
-    if (direction == "left") {
-        return nextX <= endPosition[0];
+    float dx = nextX - startPosition.x;
+    float dy = nextY - startPosition.y;
+
+    return std::sqrt(dx * dx + dy * dy) >= MAX_DISTANCE;
+}
+
+void Bullet::positionSprite()
+{
+    if (mainSprite == nullptr) {
+        return;
     }
 
-    return nextX >= endPosition[0];
+    mainSprite->setPosition(this->x + this->width / 2.f, this->y + this->height / 2.f);
 }
 
 void Bullet::setDirection(std::string direction)
 {
     if (direction == "left") {
-        /**
-         * In constructor we make endPosition.push_back(x + 500); 
-         * So, to make a left border for bullet we should make this.
-         * It is a hack, so TODO: remake it
-         */
-        endPosition[0] -= 1000;
-        mainSprite->rotate(180);
+        setFlightDirection(sf::Vector2f(-1.f, 0.f));
+        return;
     }
-    this->direction = direction;
+
+    setFlightDirection(sf::Vector2f(1.f, 0.f));
+}
+
+void Bullet::setFlightDirection(sf::Vector2f direction)
+{
+    flightDir = normalizedDirection(direction);
+    applySpriteRotation();
+}
+
+sf::Vector2f Bullet::normalizedDirection(sf::Vector2f direction)
+{
+    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+    if (length < MIN_DIRECTION_LENGTH) {
+        return sf::Vector2f(1.f, 0.f);
+    }
+
+    return sf::Vector2f(direction.x / length, direction.y / length);
+}
+
+void Bullet::applySpriteRotation()
+{
+    if (mainSprite == nullptr) {
+        return;
+    }
+
+    float angle = std::atan2(flightDir.y, flightDir.x) * RAD_TO_DEG;
+    mainSprite->setRotation(angle);
+}
+
+float Bullet::getVelocityX()
+{
+    return flightDir.x * BULLET_SPEED;
+}
+
+float Bullet::getVelocityY()
+{
+    return flightDir.y * BULLET_SPEED;
+}
+
+float Bullet::getRotation()
+{
+    if (mainSprite == nullptr) {
+        return 0.f;
+    }
+
+    float angle = mainSprite->getRotation();
+    return std::fmod(angle + 180.f, 360.f) - 180.f;
 }
 
 bool Bullet::collidePlayableAfterMove(float x, float y)

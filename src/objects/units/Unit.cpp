@@ -309,6 +309,24 @@ void Unit::setDead(bool dead) {
     this->dead = dead;
 }
 
+void Unit::setAimTarget(float x, float y) {
+    aimTarget.x = x;
+    aimTarget.y = y;
+    aimTargetSet = true;
+}
+
+bool Unit::hasAimTarget() {
+    return aimTargetSet;
+}
+
+float Unit::getAimTargetX() {
+    return aimTarget.x;
+}
+
+float Unit::getAimTargetY() {
+    return aimTarget.y;
+}
+
 void Unit::decreaseHealth() {
     health--;
 }

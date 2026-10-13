@@ -12,6 +12,12 @@
 #include "../../Fabric.h"
 #include "../../ui/Text.h"
 
+constexpr float Shooter::FIRE_INTERVAL;
+constexpr float Shooter::MIN_AIM_LENGTH;
+constexpr float Shooter::BULLET_SPAWN_OFFSET;
+constexpr int Shooter::BULLET_WIDTH;
+constexpr int Shooter::BULLET_HEIGHT;
+
 Shooter::Shooter(GameObjects* go, float x, float y, int width, int height) 
 : Unit(go, x, y, width, height)
 {
@@ -165,24 +171,90 @@ void Shooter::drawHearts(Window* window)
 
 void Shooter::attack()
 {
-    if (fireTime >= 0.5f && getAmmo() > 0) {
-        shotgunSound->play();
-        fireTime = 0.f;
-        if (isPlayer()) {
-            --ammo;
-        }
-        Bullet* bullet;
-        std::vector<float> coords;
-        if (direction == "right") {
-            coords = {getX() + getWidth() + 20.f, getY() + 10.f, 10, 10};
-            bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
-        } else {
-            coords = {getX() - 20.f, getY() + 20.f, 10, 10};
-            bullet = go->fabric->createBullet(this, coords[0], coords[1], coords[2], coords[3]);
-        }
-        bullet->setDirection(direction); 
-        go->all.push_back(bullet);
+    if (!canFire()) {
+        return;
     }
+
+    playShotgunSound();
+    fireTime = 0.f;
+    if (isPlayer()) {
+        --ammo;
+    }
+    fireBullet();
+}
+
+bool Shooter::canFire()
+{
+    return fireTime >= FIRE_INTERVAL && getAmmo() > 0;
+}
+
+void Shooter::playShotgunSound()
+{
+    if (shotgunSound == nullptr) {
+        return;
+    }
+
+    shotgunSound->play();
+}
+
+void Shooter::fireBullet()
+{
+    sf::Vector2f direction = firingDirection();
+    sf::Vector2f spawn = bulletSpawn(direction);
+    Bullet* bullet = createBullet(spawn.x, spawn.y, BULLET_WIDTH, BULLET_HEIGHT);
+    bullet->setFlightDirection(direction);
+    go->all.push_back(bullet);
+}
+
+Bullet* Shooter::createBullet(float x, float y, int width, int height)
+{
+    return go->fabric->createBullet(this, x, y, width, height);
+}
+
+sf::Vector2f Shooter::firingDirection()
+{
+    if (aimTargetSet) {
+        return aimDirectionOrFallback();
+    }
+
+    return facingDirection();
+}
+
+sf::Vector2f Shooter::aimDirectionOrFallback()
+{
+    sf::Vector2f center = shooterCenter();
+    sf::Vector2f delta(aimTarget.x - center.x, aimTarget.y - center.y);
+    float length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
+
+    if (length < MIN_AIM_LENGTH) {
+        return facingDirection();
+    }
+
+    return sf::Vector2f(delta.x / length, delta.y / length);
+}
+
+sf::Vector2f Shooter::facingDirection()
+{
+    if (direction == "left") {
+        return sf::Vector2f(-1.f, 0.f);
+    }
+
+    return sf::Vector2f(1.f, 0.f);
+}
+
+sf::Vector2f Shooter::shooterCenter()
+{
+    return sf::Vector2f(getX() + getWidth() / 2.f, getY() + getHeight() / 2.f);
+}
+
+sf::Vector2f Shooter::bulletSpawn(sf::Vector2f direction)
+{
+    sf::Vector2f center = shooterCenter();
+
+    return sf::Vector2f(
+        center.x + direction.x * BULLET_SPAWN_OFFSET,
+        center.y + direction.y * BULLET_SPAWN_OFFSET
+    );
 }
 
 void Shooter::shiftSpritePositions()

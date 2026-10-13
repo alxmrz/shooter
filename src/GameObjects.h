@@ -12,6 +12,7 @@ class Window;
 class Text;
 class Button;
 class GameState;
+class Aim;
 
 struct GameObjects {
     GameObjects(GameState* gs);
@@ -26,6 +27,7 @@ struct GameObjects {
     GameState* gs;
     Unit* player;
     Fabric* fabric;
+    Aim* aim;
     
     sf::Sprite* backgroundSprite;
     sf::Sprite* groundSprite;

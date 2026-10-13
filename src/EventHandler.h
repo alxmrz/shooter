@@ -49,9 +49,32 @@ private:
      * 
      * @param event
      */
-    void handleUiButtonsClick(sf::Event& event);
+    bool handleUiButtonsClick(sf::Event& event);
     void handleUiButtonsHover(sf::Event& event);
     void handleRealTimeKeyboardState();
+
+    /**
+     * Handle a left mouse button press: UI buttons first, then a shot.
+     */
+    void handleLeftClick(sf::Event& event);
+
+    /**
+     * Fire the player weapon if a game is running and the player is alive.
+     */
+    void handlePlayerFire();
+
+    /**
+     * Update the crosshair and the player aim target from the mouse position.
+     */
+    void updateAimTarget();
+    sf::Vector2f currentMouseWorld();
+
+    /**
+     * Is there an active game with a living player?
+     */
+    bool isGameplayActive();
+
+    void handleSpaceKey();
 };
 
 #endif /* EVENT_HANDLER_H */

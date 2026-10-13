@@ -74,6 +74,14 @@ public:
     
     void setMain(bool main);
     void setDead(bool dead);
+
+    /**
+     * Set the point this unit aims its shot at.
+     */
+    void setAimTarget(float x, float y);
+    bool hasAimTarget();
+    float getAimTargetX();
+    float getAimTargetY();
     
     void think();
     void setMainSprite(sf::Sprite* mainSprite);
@@ -114,13 +122,17 @@ protected:
     /* is current object falling */
     bool falling = false;
     
-    sf::Sound* jumpSound;
-    sf::Sound* shotgunSound;
-    sf::Sound* crystalSound;
+    sf::Sound* jumpSound = nullptr;
+    sf::Sound* shotgunSound = nullptr;
+    sf::Sound* crystalSound = nullptr;
 
     sf::Sprite* mainSprite;
     sf::Sprite* heartSprite;
     sf::Sprite* explosionSprite;
+
+    /* Optional point the unit aims its shot at */
+    bool aimTargetSet = false;
+    sf::Vector2f aimTarget;
     
 
     

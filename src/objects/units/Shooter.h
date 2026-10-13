@@ -13,6 +13,7 @@
 struct GameObjects;
 class Window;
 class Text;
+class Bullet;
 
 class Shooter : public Unit {
 public:
@@ -42,6 +43,11 @@ public:
     void setMainSprite(sf::Sprite* mainSprite);
     void applyRotation(float dt);
     void refreshSpriteFrame(float dt);
+protected:
+    /**
+     * Create the bullet instance for a shot. Overridable for tests.
+     */
+    virtual Bullet* createBullet(float x, float y, int width, int height);
 private:
     /* Sprites map for showing run images depending on direction (left, right) */
     std::map<std::string, std::vector<sf::IntRect>> runSprites
@@ -104,6 +110,21 @@ private:
     void showNextExplosionFrame();
     void advanceExplosionFrame();
     void drawHearts(Window* window);
+
+    void fireBullet();
+    bool canFire();
+    void playShotgunSound();
+    sf::Vector2f firingDirection();
+    sf::Vector2f aimDirectionOrFallback();
+    sf::Vector2f facingDirection();
+    sf::Vector2f shooterCenter();
+    sf::Vector2f bulletSpawn(sf::Vector2f direction);
+
+    static constexpr float FIRE_INTERVAL = 0.5f;
+    static constexpr float MIN_AIM_LENGTH = 0.001f;
+    static constexpr float BULLET_SPAWN_OFFSET = 30.f;
+    static constexpr int BULLET_WIDTH = 10;
+    static constexpr int BULLET_HEIGHT = 10;
     
 private:
     // Double jump rotation
