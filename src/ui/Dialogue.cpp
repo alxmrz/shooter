@@ -4,6 +4,15 @@
 #include "Dialogue.h"
 
 namespace {
+struct PointInChoice {
+    float x;
+    float y;
+
+    bool operator()(const sf::FloatRect& rect) const {
+        return rect.contains(x, y);
+    }
+};
+
 const float BOX_WIDTH_RATIO = 0.8f;
 const float BOX_HEIGHT_RATIO = 0.3f;
 const float TOP_MARGIN = 20.f;
@@ -169,9 +178,9 @@ bool Dialogue::hasChoices() const
 
 int Dialogue::choiceAt(float x, float y) const
 {
+    PointInChoice hit = {x, y};
     std::vector<sf::FloatRect>::const_iterator it =
-        std::find_if(choiceRects.begin(), choiceRects.end(),
-                     [x, y](const sf::FloatRect& rect) { return rect.contains(x, y); });
+        std::find_if(choiceRects.begin(), choiceRects.end(), hit);
 
     if (it == choiceRects.end()) {
         return -1;

@@ -1,4 +1,5 @@
 #include <cmath>
+#include <algorithm>
 #include "AI.h"
 #include "objects/units/Unit.h"
 #include "objects/interactive/Platform.h"
@@ -10,6 +11,38 @@ const float DETECTION_RADIUS = 300.f;
 const float ENGAGEMENT_DISTANCE = 100.f;
 const float SUPPORT_PROBE_DROP = 5.f;
 const float LINE_OF_SIGHT_STEP = 10.f;
+
+bool isSolidSightBlocker(Platform* platform, const sf::Vector2f& point) {
+    return platform != nullptr && platform->isCollidable() && platform->collidePoint(point.x, point.y);
+}
+
+struct BlocksSight {
+    sf::Vector2f point;
+
+    bool operator()(CObject* object) const {
+        return isSolidSightBlocker(dynamic_cast<Platform*>(object), point);
+    }
+};
+
+bool sightBlockedByPlatforms(const std::vector<CObject*>& objects, const sf::Vector2f& point) {
+    return std::any_of(objects.begin(), objects.end(), BlocksSight{point});
+}
+
+bool isSolidBelow(Platform* platform, CObject& probe) {
+    return platform != nullptr && platform->isCollidable() && probe.collideRect(platform);
+}
+
+struct BlocksSupport {
+    CObject* probe;
+
+    bool operator()(CObject* object) const {
+        return isSolidBelow(dynamic_cast<Platform*>(object), *probe);
+    }
+};
+
+bool supportBelow(const std::vector<CObject*>& objects, CObject& probe) {
+    return std::any_of(objects.begin(), objects.end(), BlocksSupport{&probe});
+}
 }
 
 AI::AI() {
@@ -96,15 +129,26 @@ bool AI::isPlayerInRange()
 
 bool AI::hasLineOfSight()
 {
-    int steps = lineOfSightSteps();
+    std::vector<sf::Vector2f> points = pathPoints();
+
+    return std::none_of(points.begin(), points.end(), SightBlocker{this});
+}
+
+std::vector<sf::Vector2f> AI::pathPoints()
+{
+    const int steps = lineOfSightSteps();
+    std::vector<sf::Vector2f> points;
 
     for (int i = 1; i < steps; i++) {
-        if (isSightBlockedAt(pointOnPath(i, steps))) {
-            return false;
-        }
+        points.push_back(pointOnPath(i, steps));
     }
 
-    return true;
+    return points;
+}
+
+bool AI::SightBlocker::operator()(const sf::Vector2f& point) const
+{
+    return ai->isSightBlockedAt(point);
 }
 
 int AI::lineOfSightSteps()
@@ -123,19 +167,7 @@ sf::Vector2f AI::pointOnPath(int step, int steps)
 
 bool AI::isSightBlockedAt(sf::Vector2f point)
 {
-    for (CObject* object : go->all) {
-        Platform* platform = dynamic_cast<Platform*>(object);
-        if (isSolidSightBlocker(platform, point)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool AI::isSolidSightBlocker(Platform* platform, sf::Vector2f point)
-{
-    return platform != nullptr && platform->isCollidable() && platform->collidePoint(point.x, point.y);
+    return sightBlockedByPlatforms(go->all, point);
 }
 
 float AI::distanceToPlayer()
@@ -190,19 +222,7 @@ bool AI::isSolidGroundBelow(float x, float y)
 {
     CObject probe(x, y + SUPPORT_PROBE_DROP, unit->getWidth(), unit->getHeight());
 
-    for (CObject* object : go->all) {
-        Platform* platform = dynamic_cast<Platform*>(object);
-        if (isSolidBelow(platform, probe)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool AI::isSolidBelow(Platform* platform, CObject& probe)
-{
-    return platform != nullptr && platform->isCollidable() && probe.collideRect(platform);
+    return supportBelow(go->all, probe);
 }
 
 std::string AI::opposite(const std::string& direction)

@@ -110,15 +110,10 @@ Heart* Fabric::createHeart(float x, float y, int width, int height)
 
 Platform* Fabric::createPlatform(float x, float y, int width, int height)
 {
-    /*sf::Sprite* sprite = createSprite("heart", x, y);
-    sprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
-    sprite->setScale(0.8f, 0.8f);*/
-    
     // Black with black border for platforms
-    Platform* platform = new Platform(x, y, width, height, 
+    Platform* platform = new Platform(x, y, width, height,
                                       sf::Color::Black, sf::Color::Black);
-    //platform->setMainSprite(sprite);
-    
+
     return platform;
 }
 

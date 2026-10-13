@@ -110,10 +110,24 @@ private:
     void showNextExplosionFrame();
     void advanceExplosionFrame();
     void drawHearts(Window* window);
+    void updateAnimation(float dt);
+    void animateExplosionIfPending(float dt);
+    void advanceTimers(float dt);
+    bool isActiveAnimation();
+    void drawHeartsIfNpc(Window* window);
+    bool isAliveNpc();
+    float spriteOriginX();
+    float spriteOriginY();
+    void rotateStep(float dt);
+    float rotationSpeedPerSecond();
+    void stopRotationIfComplete();
+    void applySpriteRotationIfPresent();
 
     void fireBullet();
     bool canFire();
     void playShotgunSound();
+    void performFire();
+    void consumeAmmoIfPlayer();
     sf::Vector2f firingDirection();
     sf::Vector2f aimDirectionOrFallback();
     sf::Vector2f facingDirection();

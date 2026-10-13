@@ -213,44 +213,93 @@ std::string GameObjects::replaceToken(const std::string& line, const std::string
 
 void GameObjects::draw(Window* window, float dt)
 {
+    drawBackground(window);
+
+    if (gs->isGameStarted) {
+        drawWorld(window, dt);
+    }
+
+    drawDialogue(window);
+
+    // Кнопки отрисовываются поверх всего (включая экран смерти)
+    drawButtons(window, dt);
+}
+
+void GameObjects::drawWorld(Window* window, float dt)
+{
+    drawGrounds(window);
+    drawVisibleObjects(window, dt);
+    drawPlayerUi(window);
+}
+
+void GameObjects::drawBackground(Window* window)
+{
     sf::Vector2f backgroundCoords = window->mapPixelToCoords(sf::Vector2i(0, 0));
-    CObject currentWindow (backgroundCoords.x, backgroundCoords.y, 900, 600);
 
     //y must be up 300px, because background images is very low
     backgroundSprite->setPosition(backgroundCoords.x, backgroundCoords.y-300);
 
     window->draw(*backgroundSprite);
-    
-    if (gs->isGameStarted) {
-        if (groundsSprite == nullptr) {
-            grounds->create(5000, 2500);
+}
 
-            for (unsigned i = 0; i < background.size(); i++) {
-                groundSprite->setTextureRect(sf::IntRect(background[i][2], background[i][3], 25, 25));
-                groundSprite->setPosition(background[i][0], background[i][1]);
-                grounds->draw(*groundSprite);
-            }
+void GameObjects::drawGrounds(Window* window)
+{
+    ensureGroundsSprite();
 
-            grounds->display();
-            const sf::Texture& texture = grounds->getTexture();
-            
-            groundsSprite = new sf::Sprite(texture);
-        }
-        
-       window->draw(*groundsSprite);
-        
-        for (unsigned i = 0; i < all.size(); i++) {
-            if (currentWindow.collideRect(all[i])) {
-                all[i]->draw(window, dt);
-            }
-        }
-        
-        drawPlayerUi(window);
+    window->draw(*groundsSprite);
+}
+
+void GameObjects::ensureGroundsSprite()
+{
+    if (groundsSprite != nullptr) {
+        return;
     }
-    
-    drawDialogue(window);
-    
-    // Кнопки отрисовываются поверх всего (включая экран смерти)
+
+    buildGroundsSprite();
+}
+
+void GameObjects::buildGroundsSprite()
+{
+    grounds->create(5000, 2500);
+    drawBackgroundTiles();
+    grounds->display();
+
+    groundsSprite = new sf::Sprite(grounds->getTexture());
+}
+
+void GameObjects::drawBackgroundTiles()
+{
+    for (unsigned i = 0; i < background.size(); i++) {
+        drawBackgroundTile(i);
+    }
+}
+
+void GameObjects::drawBackgroundTile(unsigned i)
+{
+    groundSprite->setTextureRect(sf::IntRect(background[i][2], background[i][3], 25, 25));
+    groundSprite->setPosition(background[i][0], background[i][1]);
+    grounds->draw(*groundSprite);
+}
+
+void GameObjects::drawVisibleObjects(Window* window, float dt)
+{
+    sf::Vector2f backgroundCoords = window->mapPixelToCoords(sf::Vector2i(0, 0));
+    CObject currentWindow (backgroundCoords.x, backgroundCoords.y, 900, 600);
+
+    for (unsigned i = 0; i < all.size(); i++) {
+        drawObjectIfVisible(all[i], currentWindow, window, dt);
+    }
+}
+
+void GameObjects::drawObjectIfVisible(CObject* object, CObject& windowRect, Window* window, float dt)
+{
+    if (windowRect.collideRect(object)) {
+        object->draw(window, dt);
+    }
+}
+
+void GameObjects::drawButtons(Window* window, float dt)
+{
     for (unsigned i = 0; i < buttons.size(); i++) {
         buttons[i]->draw(window, dt);
     }
@@ -265,11 +314,6 @@ void GameObjects::drawDialogue(Window* window)
     window->setView(window->getDefaultView());
     dialogue->draw(*window, window->getSize().x, window->getSize().y);
     window->setView(*gs->view);
-}
-
-void GameObjects::correctBackgroundSprite()
-{
-    
 }
 
 void GameObjects::drawPlayerUi(Window* window)

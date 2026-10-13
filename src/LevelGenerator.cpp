@@ -2,6 +2,7 @@
 #include <ctime>
 #include <climits>
 #include <algorithm>
+#include <iterator>
 #include <cmath>
 #include <vector>
 #include "LevelGenerator.h"
@@ -47,6 +48,40 @@ constexpr int LevelGenerator::TREE_TRUNK_MARGIN;
 constexpr int LevelGenerator::TREE_COLUMN_STEP;
 constexpr int LevelGenerator::FLAG_SIZE;
 
+namespace {
+const int PLATFORM_TILE_WIDTH = 50;
+const int PLATFORM_BLOCK_HEIGHT = 25;
+const int MIN_BLOCK_GAP = 2 * LevelGenerator::PLAYER_WIDTH;
+const int HALF_GAP = MIN_BLOCK_GAP / 2;
+const int SPACING_CELL_SIZE = MIN_BLOCK_GAP;
+const int MIN_PLATFORM_Y = 50;
+const float WIDTH_SCALE_MIN = 1.2f;
+const float WIDTH_SCALE_MAX = 2.0f;
+const int UPWARD_ATTEMPTS = 40;
+const int FRONTIER_GUARD_LIMIT = 4000;
+const int TREE_PLATFORM_INTERVAL = 3;
+const int TREE_MIN_BRANCH_LENGTH = 2;
+const int TREE_MAX_BRANCH_LENGTH = 6;
+const float LEVEL_EDGE_MARGIN = 50.f;
+
+SpacingBox spacingBoxOf(const GeneratedObject& block) {
+    return {block.x, block.y, block.width, block.height};
+}
+
+bool isTreeOnBlock(const GeneratedObject& object, const GeneratedObject& block) {
+    return object.type == "Tree" && object.y == block.y &&
+           object.x >= block.x && object.x <= block.x + block.width;
+}
+
+struct TreeOnBlock {
+    const GeneratedObject& block;
+
+    bool operator()(const GeneratedObject& object) const {
+        return isTreeOnBlock(object, block);
+    }
+};
+}
+
 LevelGenerator::LevelGenerator(GameObjects* go) : go(go)
 {
     std::srand(std::time(0));
@@ -76,7 +111,13 @@ void LevelGenerator::generateLevel(Map* map)
 
     generateFlag(objects);
 
+    createPlayer();
 
+    instantiateObjects(objects);
+}
+
+void LevelGenerator::createPlayer()
+{
     // Create the player on top of the fixed start block in the bottom-left corner.
     const int startBlockCenterX = START_BLOCK_X + (START_BLOCK_WIDTH - PLAYER_WIDTH) / 2;
     Shooter* player = go->fabric->createShooter(
@@ -87,59 +128,111 @@ void LevelGenerator::generateLevel(Map* map)
 
     go->aim = go->fabric->createAim(startBlockCenterX, START_BLOCK_Y - PLAYER_HEIGHT, 10, 10);
     go->all.push_back(go->aim);
+}
 
-    // Create objects using Fabric and add to GameObjects
+void LevelGenerator::instantiateObjects(const std::vector<GeneratedObject>& objects)
+{
     for (const auto& obj : objects)
     {
-        if (obj.type == "Border")
-        {
-            go->borders.insert({
-                static_cast<int>(obj.x),
-                go->fabric->createBorder(obj.x, obj.y, obj.width, obj.height)
-            });
-        }
-        else if (obj.type == "Platform")
-        {
-            go->all.push_back(go->fabric->createPlatform(obj.x, obj.y, obj.width, obj.height));
-        }
-        else if (obj.type == "GroundBlock")
-        {
-            go->all.push_back(go->fabric->createGroundBlock(obj.x, obj.y, obj.width, obj.height));
-        }
-        else if (obj.type == "Tree")
-        {
-            Tree* tree = go->fabric->createTree(obj.x, obj.y, obj.trunkHeight, obj.numBranches, obj.minBranchLength,
-                                                obj.maxBranchLength, obj.branchStep, obj.topBranchSide,
-                                                obj.topBranchLength);
-            // Add only branches to all (for collision)
-            for (Platform* branch : tree->getBranches())
-            {
-                go->all.push_back(branch);
-            }
-            go->all.push_back(tree);
-        }
-        else if (obj.type == "Heart")
-        {
-            go->all.push_back(go->fabric->createHeart(obj.x, obj.y, obj.width, obj.height));
-        }
-        else if (obj.type == "Ammunition")
-        {
-            go->all.push_back(go->fabric->createAmmo(obj.x, obj.y, obj.width, obj.height));
-        }
-        else if (obj.type == "Crystal")
-        {
-            go->all.push_back(go->fabric->createCrystal(obj.x, obj.y, obj.width, obj.height));
-        }
-        else if (obj.type == "Shooter")
-        {
-            Shooter* shooter = go->fabric->createShooter(obj.x, obj.y, obj.width, obj.height);
-            go->all.push_back(shooter);
-        }
-        else if (obj.type == "Flag")
-        {
-            go->all.push_back(go->fabric->createFlag(obj.x, obj.y, obj.width, obj.height));
-        }
+        instantiateObject(obj);
     }
+}
+
+void LevelGenerator::instantiateObject(const GeneratedObject& obj)
+{
+    ObjectCreator creator = creatorFor(obj.type);
+
+    if (creator == nullptr)
+    {
+        return;
+    }
+
+    (this->*creator)(obj);
+}
+
+LevelGenerator::ObjectCreator LevelGenerator::creatorFor(const std::string& type)
+{
+    const CreatorTable& table = creatorTable();
+    CreatorTable::const_iterator it = table.find(type);
+
+    if (it == table.end())
+    {
+        return nullptr;
+    }
+
+    return it->second;
+}
+
+const LevelGenerator::CreatorTable& LevelGenerator::creatorTable()
+{
+    static const CreatorTable table = {
+        {"Border", &LevelGenerator::createBorderObject},
+        {"Platform", &LevelGenerator::createPlatformObject},
+        {"GroundBlock", &LevelGenerator::createGroundBlockObject},
+        {"Tree", &LevelGenerator::createTreeObject},
+        {"Heart", &LevelGenerator::createHeartObject},
+        {"Ammunition", &LevelGenerator::createAmmoObject},
+        {"Crystal", &LevelGenerator::createCrystalObject},
+        {"Shooter", &LevelGenerator::createShooterObject},
+        {"Flag", &LevelGenerator::createFlagObject}
+    };
+    return table;
+}
+
+void LevelGenerator::createBorderObject(const GeneratedObject& obj)
+{
+    go->borders.insert({
+        static_cast<int>(obj.x),
+        go->fabric->createBorder(obj.x, obj.y, obj.width, obj.height)
+    });
+}
+
+void LevelGenerator::createPlatformObject(const GeneratedObject& obj)
+{
+    go->all.push_back(go->fabric->createPlatform(obj.x, obj.y, obj.width, obj.height));
+}
+
+void LevelGenerator::createGroundBlockObject(const GeneratedObject& obj)
+{
+    go->all.push_back(go->fabric->createGroundBlock(obj.x, obj.y, obj.width, obj.height));
+}
+
+void LevelGenerator::createTreeObject(const GeneratedObject& obj)
+{
+    Tree* tree = go->fabric->createTree(obj.x, obj.y, obj.trunkHeight, obj.numBranches,
+                                        obj.minBranchLength, obj.maxBranchLength, obj.branchStep,
+                                        obj.topBranchSide, obj.topBranchLength);
+    // Add only branches to all (for collision)
+    for (Platform* branch : tree->getBranches())
+    {
+        go->all.push_back(branch);
+    }
+    go->all.push_back(tree);
+}
+
+void LevelGenerator::createHeartObject(const GeneratedObject& obj)
+{
+    go->all.push_back(go->fabric->createHeart(obj.x, obj.y, obj.width, obj.height));
+}
+
+void LevelGenerator::createAmmoObject(const GeneratedObject& obj)
+{
+    go->all.push_back(go->fabric->createAmmo(obj.x, obj.y, obj.width, obj.height));
+}
+
+void LevelGenerator::createCrystalObject(const GeneratedObject& obj)
+{
+    go->all.push_back(go->fabric->createCrystal(obj.x, obj.y, obj.width, obj.height));
+}
+
+void LevelGenerator::createShooterObject(const GeneratedObject& obj)
+{
+    go->all.push_back(go->fabric->createShooter(obj.x, obj.y, obj.width, obj.height));
+}
+
+void LevelGenerator::createFlagObject(const GeneratedObject& obj)
+{
+    go->all.push_back(go->fabric->createFlag(obj.x, obj.y, obj.width, obj.height));
 }
 
 void LevelGenerator::generateGround(std::vector<GeneratedObject>& objects)
@@ -174,44 +267,26 @@ void LevelGenerator::generateGround(std::vector<GeneratedObject>& objects)
 
 void LevelGenerator::generatePlatforms(std::vector<GeneratedObject>& objects)
 {
-    // Ground blocks with varying lengths, widened by a random factor.
-    // Tile width assumed to be 50 pixels (same as ground height).
-    const int TILE_WIDTH = 50;
-    const int BLOCK_HEIGHT = 25;
-
-    // Minimum clearance between any two ground blocks: 2 widths / 2 heights of
-    // the Shooter (50x50) => 100 pixels along at least one axis.
-    const int MIN_BLOCK_GAP = 2 * PLAYER_WIDTH;
-    const int HALF_GAP = MIN_BLOCK_GAP / 2;
-    const int CELL_SIZE = MIN_BLOCK_GAP;
-    const int MIN_Y = 50;
-
-    // Width multiplier applied to every generated block.
-    const float WIDTH_SCALE_MIN = 1.2f;
-    const float WIDTH_SCALE_MAX = 2.0f;
-
     // Spatial hash grid: only blocks in nearby cells are checked for clearance,
     // so the number of proximity checks stays linear in the number of blocks.
-    SpacingGrid grid(CELL_SIZE, static_cast<float>(HALF_GAP));
+    grid = new SpacingGrid(SPACING_CELL_SIZE, static_cast<float>(HALF_GAP));
 
-    auto boxOf = [](const GeneratedObject& block) -> SpacingBox
-    {
-        return {block.x, block.y, block.width, block.height};
-    };
+    GeneratedObject startBlock = makeStartBlock();
+    grid->insert(spacingBoxOf(startBlock));
+    objects.push_back(startBlock);
 
-    auto generateBlockWidth = [&]() -> int
-    {
-        // Base length 3-10 tiles, more long than short, then widened 1.2-2x.
-        int baseTiles = (randomFloat(0, 1) < 0.6) ? randomInt(6, 10) : randomInt(3, 5);
-        float scale = randomFloat(WIDTH_SCALE_MIN, WIDTH_SCALE_MAX);
-        int tiles = static_cast<int>(baseTiles * scale + 0.5f);
-        if (tiles < 3)
-        {
-            tiles = 3;
-        }
-        return tiles * TILE_WIDTH;
-    };
+    std::vector<Node> frontier;
+    frontier.push_back({startBlock, 0, objects.size() - 1});
+    int groundCount = 1;
 
+    growFrontier(frontier, objects, groundCount);
+
+    delete grid;
+    grid = nullptr;
+}
+
+GeneratedObject LevelGenerator::makeStartBlock()
+{
     // Fixed start block in the bottom-left corner, on the ground.
     GeneratedObject startBlock;
     startBlock.x = START_BLOCK_X;
@@ -219,127 +294,235 @@ void LevelGenerator::generatePlatforms(std::vector<GeneratedObject>& objects)
     startBlock.width = START_BLOCK_WIDTH;
     startBlock.height = START_BLOCK_HEIGHT;
     startBlock.type = "GroundBlock";
-    grid.insert(boxOf(startBlock));
-    objects.push_back(startBlock);
+    return startBlock;
+}
 
-    // Blocks that still need an upward neighbour, with their ground index (used
-    // to decide which of them carry a tree). Generation is bottom-up: every
-    // block spawns exactly one neighbour above it, so a block that will carry a
-    // tree reserves a full TREE_HEIGHT of room without moving anything.
-    struct Node
+int LevelGenerator::generateBlockWidth()
+{
+    const int baseTiles = pickBaseTiles();
+    const float scale = randomFloat(WIDTH_SCALE_MIN, WIDTH_SCALE_MAX);
+    const int tiles = static_cast<int>(baseTiles * scale + 0.5f);
+    return std::max(tiles, 3) * PLATFORM_TILE_WIDTH;
+}
+
+int LevelGenerator::pickBaseTiles()
+{
+    // Base length 3-10 tiles, more long than short.
+    if (randomFloat(0, 1) < 0.6)
     {
-        GeneratedObject block;
-        int index;
-        size_t objectIndex;
-    };
-    std::vector<Node> frontier;
-    frontier.push_back({startBlock, 0, objects.size() - 1});
-    int groundCount = 1;
+        return randomInt(6, 10);
+    }
+    return randomInt(3, 5);
+}
 
-    auto placeUpward = [&](const Node& lower, bool carriesTree, int forcedSide,
-                           GeneratedObject& out) -> bool
-    {
-        if (lower.block.y <= MIN_Y)
-        {
-            return false;
-        }
-
-        // A tree-carrying block leaves a full tree height of room; the tree's
-        // branches bridge the gap. Other blocks keep a jump-sized step.
-        const int step = carriesTree ? TREE_HEIGHT : randomInt(50, 100);
-        const int y = static_cast<int>(lower.block.y) - step;
-        if (y < MIN_Y)
-        {
-            return false;
-        }
-
-        const int ATTEMPTS = 40;
-        for (int attempt = 0; attempt < ATTEMPTS; ++attempt)
-        {
-            const int width = generateBlockWidth();
-            const int gap = randomInt(MIN_BLOCK_GAP, MAX_HORIZONTAL_REACH);
-            const bool left = (forcedSide >= 0)
-                ? (forcedSide == 0)
-                : (randomFloat(0, 1) < 0.5f);
-            const float x = left
-                ? lower.block.x - static_cast<float>(gap) - width
-                : lower.block.x + lower.block.width + static_cast<float>(gap);
-
-            if (x < 50.f || x + width > LEVEL_WIDTH - 50.f)
-            {
-                continue;
-            }
-
-            GeneratedObject candidate;
-            candidate.x = x;
-            candidate.y = static_cast<float>(y);
-            candidate.width = width;
-            candidate.height = BLOCK_HEIGHT;
-            candidate.type = "GroundBlock";
-
-            if (!grid.canPlace(boxOf(candidate)))
-            {
-                continue;
-            }
-
-            grid.insert(boxOf(candidate));
-            out = candidate;
-            return true;
-        }
-        return false;
-    };
-
-    // Places the upward neighbour of `lower`. A block that carries a tree puts
-    // its neighbour on the side that will hold the tree's topmost branch, so the
-    // player can climb the tree straight onto that platform.
-    auto placeForLower = [&](const Node& lower, GeneratedObject& out, int& side) -> bool
-    {
-        const bool carriesTree = isTreeCandidate(lower.block, lower.index);
-        if (!carriesTree)
-        {
-            side = -1;
-            return placeUpward(lower, false, -1, out);
-        }
-
-        const int preferred = (randomFloat(0, 1) < 0.5f) ? 0 : 1;
-        if (placeUpward(lower, true, preferred, out))
-        {
-            side = preferred;
-            return true;
-        }
-        if (placeUpward(lower, true, 1 - preferred, out))
-        {
-            side = 1 - preferred;
-            return true;
-        }
-        side = -1;
-        return false;
-    };
-
+void LevelGenerator::growFrontier(std::vector<Node>& frontier,
+                                  std::vector<GeneratedObject>& objects, int& groundCount)
+{
     int guard = 0;
-    const int GUARD_LIMIT = 4000;
-    while (!frontier.empty() && guard < GUARD_LIMIT)
+
+    while (!frontier.empty() && guard < FRONTIER_GUARD_LIMIT)
     {
         ++guard;
-
-        std::vector<Node> next;
-        for (const Node& lower : frontier)
-        {
-            GeneratedObject candidate;
-            int side = -1;
-            if (placeForLower(lower, candidate, side))
-            {
-                if (side >= 0)
-                {
-                    objects[lower.objectIndex].topBranchSide = side;
-                }
-                objects.push_back(candidate);
-                next.push_back({candidate, groundCount, objects.size() - 1});
-                ++groundCount;
-            }
-        }
+        std::vector<Node> next = nextFrontier(frontier, objects, groundCount);
         frontier.swap(next);
     }
+}
+
+std::vector<LevelGenerator::Node> LevelGenerator::nextFrontier(
+    const std::vector<Node>& frontier, std::vector<GeneratedObject>& objects, int& groundCount)
+{
+    std::vector<Node> next;
+
+    for (const Node& lower : frontier)
+    {
+        expandNode(lower, objects, next, groundCount);
+    }
+
+    return next;
+}
+
+void LevelGenerator::expandNode(const Node& lower, std::vector<GeneratedObject>& objects,
+                                std::vector<Node>& next, int& groundCount)
+{
+    GeneratedObject candidate;
+    int side = -1;
+
+    if (!placeForLower(lower, candidate, side))
+    {
+        return;
+    }
+
+    registerNeighbour(lower, candidate, side, objects, next, groundCount);
+}
+
+void LevelGenerator::registerNeighbour(const Node& lower, const GeneratedObject& candidate,
+                                       int side, std::vector<GeneratedObject>& objects,
+                                       std::vector<Node>& next, int& groundCount)
+{
+    if (side >= 0)
+    {
+        objects[lower.objectIndex].topBranchSide = side;
+    }
+
+    objects.push_back(candidate);
+    next.push_back({candidate, groundCount, objects.size() - 1});
+    ++groundCount;
+}
+
+bool LevelGenerator::placeForLower(const Node& lower, GeneratedObject& out, int& side)
+{
+    const bool carriesTree = isTreeCandidate(lower.block, lower.index);
+    if (!carriesTree)
+    {
+        side = -1;
+        return placeUpward(lower, false, -1, out);
+    }
+
+    return placeTreeNeighbour(lower, out, side);
+}
+
+bool LevelGenerator::placeTreeNeighbour(const Node& lower, GeneratedObject& out, int& side)
+{
+    const int preferred = choosePreferredSide();
+
+    if (placeUpward(lower, true, preferred, out))
+    {
+        side = preferred;
+        return true;
+    }
+
+    return placeOtherSide(lower, out, side, preferred);
+}
+
+bool LevelGenerator::placeOtherSide(const Node& lower, GeneratedObject& out, int& side, int preferred)
+{
+    if (placeUpward(lower, true, 1 - preferred, out))
+    {
+        side = 1 - preferred;
+        return true;
+    }
+
+    side = -1;
+    return false;
+}
+
+int LevelGenerator::choosePreferredSide()
+{
+    return (randomFloat(0, 1) < 0.5f) ? 0 : 1;
+}
+
+bool LevelGenerator::placeUpward(const Node& lower, bool carriesTree, int forcedSide,
+                                 GeneratedObject& out)
+{
+    if (!hasRoomAbove(lower))
+    {
+        return false;
+    }
+
+    const int y = upwardY(lower, carriesTree);
+    return placeWithinHeight(lower, y, carriesTree, forcedSide, out);
+}
+
+bool LevelGenerator::hasRoomAbove(const Node& lower)
+{
+    return lower.block.y > MIN_PLATFORM_Y;
+}
+
+int LevelGenerator::upwardY(const Node& lower, bool carriesTree)
+{
+    // A tree-carrying block leaves a full tree height of room; the tree's
+    // branches bridge the gap. Other blocks keep a jump-sized step.
+    const int step = carriesTree ? TREE_HEIGHT : randomInt(50, 100);
+    return static_cast<int>(lower.block.y) - step;
+}
+
+bool LevelGenerator::placeWithinHeight(const Node& lower, int y, bool carriesTree,
+                                       int forcedSide, GeneratedObject& out)
+{
+    if (y < MIN_PLATFORM_Y)
+    {
+        return false;
+    }
+
+    return placeUpwardAttempts(lower, y, forcedSide, out);
+}
+
+bool LevelGenerator::placeUpwardAttempts(const Node& lower, int y, int forcedSide,
+                                         GeneratedObject& out)
+{
+    bool placed = false;
+
+    for (int attempt = 0; attempt < UPWARD_ATTEMPTS && !placed; ++attempt)
+    {
+        placed = tryCommitAttempt(lower, y, forcedSide, out);
+    }
+
+    return placed;
+}
+
+bool LevelGenerator::tryCommitAttempt(const Node& lower, int y, int forcedSide,
+                                      GeneratedObject& out)
+{
+    GeneratedObject candidate = makeUpwardCandidate(lower, y, forcedSide);
+    if (!canCommitCandidate(candidate))
+    {
+        return false;
+    }
+
+    grid->insert(spacingBoxOf(candidate));
+    out = candidate;
+    return true;
+}
+
+GeneratedObject LevelGenerator::makeUpwardCandidate(const Node& lower, int y, int forcedSide)
+{
+    const int width = generateBlockWidth();
+    const int gap = randomInt(MIN_BLOCK_GAP, MAX_HORIZONTAL_REACH);
+    const bool left = chooseSide(forcedSide);
+
+    GeneratedObject candidate;
+    candidate.x = candidateX(lower.block, left, gap, width);
+    candidate.y = static_cast<float>(y);
+    candidate.width = width;
+    candidate.height = PLATFORM_BLOCK_HEIGHT;
+    candidate.type = "GroundBlock";
+    return candidate;
+}
+
+bool LevelGenerator::chooseSide(int forcedSide)
+{
+    if (forcedSide >= 0)
+    {
+        return forcedSide == 0;
+    }
+
+    return randomFloat(0, 1) < 0.5f;
+}
+
+float LevelGenerator::candidateX(const GeneratedObject& lower, bool left, int gap, int width)
+{
+    if (left)
+    {
+        return lower.x - static_cast<float>(gap) - width;
+    }
+
+    return lower.x + lower.width + static_cast<float>(gap);
+}
+
+bool LevelGenerator::canCommitCandidate(const GeneratedObject& candidate)
+{
+    return isWithinLevel(candidate) && grid->canPlace(spacingBoxOf(candidate));
+}
+
+bool LevelGenerator::isWithinLevel(const GeneratedObject& candidate)
+{
+    return candidate.x >= LEVEL_EDGE_MARGIN &&
+           candidate.x + candidate.width <= LEVEL_WIDTH - LEVEL_EDGE_MARGIN;
+}
+
+bool LevelGenerator::isGroundBlock(const GeneratedObject& object)
+{
+    return object.type == "GroundBlock";
 }
 
 bool LevelGenerator::isNthPlatform(size_t index, int step)
@@ -350,29 +533,37 @@ bool LevelGenerator::isNthPlatform(size_t index, int step)
 bool LevelGenerator::platformHasTree(const std::vector<GeneratedObject>& objects,
                                      const GeneratedObject& block)
 {
-    for (const auto& obj : objects)
-    {
-        if (obj.type == "Tree" && obj.y == block.y &&
-            obj.x >= block.x && obj.x <= block.x + block.width)
-        {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(objects.begin(), objects.end(), TreeOnBlock{block});
 }
 
 std::vector<GeneratedObject> LevelGenerator::groundBlocks(
     const std::vector<GeneratedObject>& objects)
 {
     std::vector<GeneratedObject> blocks;
-    for (const auto& obj : objects)
-    {
-        if (obj.type == "GroundBlock")
-        {
-            blocks.push_back(obj);
-        }
-    }
+    std::copy_if(objects.begin(), objects.end(), std::back_inserter(blocks), isGroundBlock);
     return blocks;
+}
+
+std::vector<size_t> LevelGenerator::groundBlockIndices(
+    const std::vector<GeneratedObject>& objects)
+{
+    std::vector<size_t> indices;
+
+    for (size_t i = 0; i < objects.size(); ++i)
+    {
+        addGroundBlockIndex(indices, objects[i], i);
+    }
+
+    return indices;
+}
+
+void LevelGenerator::addGroundBlockIndex(std::vector<size_t>& indices,
+                                         const GeneratedObject& object, size_t index)
+{
+    if (isGroundBlock(object))
+    {
+        indices.push_back(index);
+    }
 }
 
 int LevelGenerator::itemMaskForIndex(size_t index)
@@ -449,49 +640,45 @@ void LevelGenerator::placeCrystal(std::vector<GeneratedObject>& objects,
     objects.push_back(item);
 }
 
-void LevelGenerator::generateGuaranteedAmmo(std::vector<GeneratedObject>& objects) const
+void LevelGenerator::generateGuaranteedItem(std::vector<GeneratedObject>& objects, int itemFlag,
+                                            ItemPlacer placer) const
 {
     const std::vector<GeneratedObject> blocks = groundBlocks(objects);
+
     for (size_t i = 0; i < blocks.size(); ++i)
     {
-        const int mask = effectiveItemMask(objects, blocks[i], i);
-        if (mask & ITEM_AMMO)
-        {
-            const int count = popcount3(mask);
-            const int slot = slotForItem(mask, ITEM_AMMO);
-            placeAmmunition(objects, blocks[i], itemSlotX(blocks[i], slot, count));
-        }
+        placeGuaranteedItem(objects, blocks[i], i, itemFlag, placer);
     }
+}
+
+void LevelGenerator::placeGuaranteedItem(std::vector<GeneratedObject>& objects,
+                                         const GeneratedObject& block, size_t index,
+                                         int itemFlag, ItemPlacer placer) const
+{
+    const int mask = effectiveItemMask(objects, block, index);
+    if (!(mask & itemFlag))
+    {
+        return;
+    }
+
+    const int count = popcount3(mask);
+    const int slot = slotForItem(mask, itemFlag);
+    placer(objects, block, itemSlotX(block, slot, count));
+}
+
+void LevelGenerator::generateGuaranteedAmmo(std::vector<GeneratedObject>& objects) const
+{
+    generateGuaranteedItem(objects, ITEM_AMMO, &LevelGenerator::placeAmmunition);
 }
 
 void LevelGenerator::generateGuaranteedHeart(std::vector<GeneratedObject>& objects) const
 {
-    const std::vector<GeneratedObject> blocks = groundBlocks(objects);
-    for (size_t i = 0; i < blocks.size(); ++i)
-    {
-        const int mask = effectiveItemMask(objects, blocks[i], i);
-        if (mask & ITEM_HEART)
-        {
-            const int count = popcount3(mask);
-            const int slot = slotForItem(mask, ITEM_HEART);
-            placeHeart(objects, blocks[i], itemSlotX(blocks[i], slot, count));
-        }
-    }
+    generateGuaranteedItem(objects, ITEM_HEART, &LevelGenerator::placeHeart);
 }
 
 void LevelGenerator::generateGuaranteedCrystal(std::vector<GeneratedObject>& objects) const
 {
-    const std::vector<GeneratedObject> blocks = groundBlocks(objects);
-    for (size_t i = 0; i < blocks.size(); ++i)
-    {
-        const int mask = effectiveItemMask(objects, blocks[i], i);
-        if (mask & ITEM_CRYSTAL)
-        {
-            const int count = popcount3(mask);
-            const int slot = slotForItem(mask, ITEM_CRYSTAL);
-            placeCrystal(objects, blocks[i], itemSlotX(blocks[i], slot, count));
-        }
-    }
+    generateGuaranteedItem(objects, ITEM_CRYSTAL, &LevelGenerator::placeCrystal);
 }
 
 void LevelGenerator::generatePlatformItems(std::vector<GeneratedObject>& objects)
@@ -512,14 +699,39 @@ void LevelGenerator::generateEnemies(std::vector<GeneratedObject>& objects)
 
     for (size_t k = 0; k < indices.size(); ++k)
     {
-        const GeneratedObject& platform = objects[indices[k]];
-        const bool hasCrystal = platformHasCrystal(objects, platform, k);
-        crystalOrdinal += hasCrystal ? 1 : 0;
+        crystalOrdinal = placeEnemyForPlatform(objects, indices[k], k, crystalOrdinal);
+    }
+}
 
-        if (shouldPlaceEnemy(platform, hasCrystal, crystalOrdinal))
-        {
-            objects.push_back(makeEnemy(platform));
-        }
+int LevelGenerator::placeEnemyForPlatform(std::vector<GeneratedObject>& objects,
+                                          size_t platformIndex, size_t k,
+                                          int crystalOrdinal) const
+{
+    const GeneratedObject& platform = objects[platformIndex];
+    const bool hasCrystal = platformHasCrystal(objects, platform, k);
+    const int ordinal = incrementIfCrystal(crystalOrdinal, hasCrystal);
+
+    appendEnemyIfNeeded(objects, platform, hasCrystal, ordinal);
+    return ordinal;
+}
+
+int LevelGenerator::incrementIfCrystal(int crystalOrdinal, bool hasCrystal)
+{
+    if (hasCrystal)
+    {
+        return crystalOrdinal + 1;
+    }
+
+    return crystalOrdinal;
+}
+
+void LevelGenerator::appendEnemyIfNeeded(std::vector<GeneratedObject>& objects,
+                                         const GeneratedObject& platform, bool hasCrystal,
+                                         int crystalOrdinal) const
+{
+    if (shouldPlaceEnemy(platform, hasCrystal, crystalOrdinal))
+    {
+        objects.push_back(makeEnemy(platform));
     }
 }
 
@@ -563,21 +775,6 @@ GeneratedObject LevelGenerator::makeEnemy(const GeneratedObject& platform)
     return enemy;
 }
 
-int LevelGenerator::findPlatformAtX(const std::vector<GeneratedObject>& platforms, float x)
-{
-    // Find the platform that contains the given x coordinate (within platform bounds)
-    for (size_t i = 0; i < platforms.size(); ++i)
-    {
-        const auto& platform = platforms[i];
-        if (x >= platform.x && x <= platform.x + platform.width)
-        {
-            return i;
-        }
-    }
-    // If none found, return -1
-    return -1;
-}
-
 bool LevelGenerator::blocksOverhead(const GeneratedObject& candidate,
                                     const GeneratedObject& block, float trunkX,
                                     int trunkWidth)
@@ -588,18 +785,17 @@ bool LevelGenerator::blocksOverhead(const GeneratedObject& candidate,
     return above && overlapsX;
 }
 
-std::vector<size_t> LevelGenerator::groundBlockIndices(
-    const std::vector<GeneratedObject>& objects)
+int LevelGenerator::minClearance(int worst, const GeneratedObject& candidate,
+                                 const GeneratedObject& block, float trunkX, int trunkWidth)
 {
-    std::vector<size_t> indices;
-    for (size_t i = 0; i < objects.size(); ++i)
+    if (!blocksOverhead(candidate, block, trunkX, trunkWidth))
     {
-        if (objects[i].type == "GroundBlock")
-        {
-            indices.push_back(i);
-        }
+        return worst;
     }
-    return indices;
+
+    const int clearance = static_cast<int>(block.y) -
+                          (static_cast<int>(candidate.y) + candidate.height);
+    return std::min(worst, clearance);
 }
 
 int LevelGenerator::clearanceAtX(const std::vector<GeneratedObject>& objects,
@@ -607,19 +803,12 @@ int LevelGenerator::clearanceAtX(const std::vector<GeneratedObject>& objects,
                                  int trunkWidth)
 {
     int worst = INT_MAX;
+
     for (const auto& candidate : objects)
     {
-        if (!blocksOverhead(candidate, block, trunkX, trunkWidth))
-        {
-            continue;
-        }
-        const int clearance = static_cast<int>(block.y) -
-                              (static_cast<int>(candidate.y) + candidate.height);
-        if (clearance < worst)
-        {
-            worst = clearance;
-        }
+        worst = minClearance(worst, candidate, block, trunkX, trunkWidth);
     }
+
     return worst;
 }
 
@@ -629,28 +818,33 @@ std::vector<float> LevelGenerator::clearTrunkPositions(
     std::vector<float> positions;
     const float from = block.x + TREE_TRUNK_MARGIN;
     const float to = block.x + block.width - TREE_TRUNK_MARGIN;
+
     for (float x = from; x <= to; x += TREE_COLUMN_STEP)
     {
-        if (clearanceAtX(objects, block, x, Tree::TRUNK_WIDTH) >= TREE_HEIGHT)
-        {
-            positions.push_back(x);
-        }
+        appendClearPosition(positions, objects, block, x);
     }
+
     return positions;
+}
+
+void LevelGenerator::appendClearPosition(std::vector<float>& positions,
+                                         const std::vector<GeneratedObject>& objects,
+                                         const GeneratedObject& block, float x)
+{
+    if (clearanceAtX(objects, block, x, Tree::TRUNK_WIDTH) >= TREE_HEIGHT)
+    {
+        positions.push_back(x);
+    }
 }
 
 bool LevelGenerator::isTreeCandidate(const GeneratedObject& block, size_t index)
 {
-    const int PLATFORM_INTERVAL = 3;
-    return (index + 1) % static_cast<size_t>(PLATFORM_INTERVAL) == 0 &&
+    return (index + 1) % static_cast<size_t>(TREE_PLATFORM_INTERVAL) == 0 &&
            block.width >= TREE_MIN_BLOCK_WIDTH;
 }
 
 bool LevelGenerator::buildTree(std::vector<GeneratedObject>& objects, size_t blockIndex)
 {
-    const int MIN_BRANCH_LENGTH = 2; // tiles
-    const int MAX_BRANCH_LENGTH = 6; // tiles
-
     const GeneratedObject block = objects[blockIndex];
 
     // Choose a trunk position with a clear TREE_HEIGHT column overhead; if the
@@ -669,8 +863,8 @@ bool LevelGenerator::buildTree(std::vector<GeneratedObject>& objects, size_t blo
     treeObj.height = 0;
     treeObj.type = "Tree";
     treeObj.trunkHeight = TREE_TRUNK_HEIGHT;
-    treeObj.minBranchLength = MIN_BRANCH_LENGTH;
-    treeObj.maxBranchLength = MAX_BRANCH_LENGTH;
+    treeObj.minBranchLength = TREE_MIN_BRANCH_LENGTH;
+    treeObj.maxBranchLength = TREE_MAX_BRANCH_LENGTH;
     treeObj.branchStep = TREE_BRANCH_STEP;
     treeObj.topBranchSide = block.topBranchSide;
     treeObj.topBranchLength = topBranchLengthFor(block, x, block.topBranchSide);
@@ -678,16 +872,33 @@ bool LevelGenerator::buildTree(std::vector<GeneratedObject>& objects, size_t blo
     return true;
 }
 
+float LevelGenerator::branchOuterEnd(const GeneratedObject& block, float trunkX, int side)
+{
+    if (side == 0)
+    {
+        return trunkX + Tree::TRUNK_WIDTH;
+    }
+
+    return block.x + block.width;
+}
+
+float LevelGenerator::branchInnerEnd(const GeneratedObject& block, float trunkX, int side)
+{
+    if (side == 0)
+    {
+        return block.x;
+    }
+
+    return trunkX;
+}
+
 int LevelGenerator::topBranchLengthFor(const GeneratedObject& block, float trunkX, int side)
 {
     // The top branch base sits at the far trunk edge and reaches the host block
     // edge on the branch side, so the player can walk out to the edge and jump
     // across the reserved gap to the platform above.
-    const float outerEnd = (side == 0)
-        ? trunkX + Tree::TRUNK_WIDTH
-        : block.x + block.width;
-    const float innerEnd = (side == 0) ? block.x : trunkX;
-    return static_cast<int>(outerEnd - innerEnd);
+    return static_cast<int>(branchOuterEnd(block, trunkX, side) -
+                            branchInnerEnd(block, trunkX, side));
 }
 
 void LevelGenerator::generateTrees(std::vector<GeneratedObject>& objects)
@@ -700,10 +911,16 @@ void LevelGenerator::generateTrees(std::vector<GeneratedObject>& objects)
 
     for (size_t k = 0; k < indices.size(); ++k)
     {
-        if (isTreeCandidate(objects[indices[k]], k))
-        {
-            buildTree(objects, indices[k]);
-        }
+        buildTreeIfCandidate(objects, indices[k], k);
+    }
+}
+
+void LevelGenerator::buildTreeIfCandidate(std::vector<GeneratedObject>& objects,
+                                          size_t blockIndex, size_t k)
+{
+    if (isTreeCandidate(objects[blockIndex], k))
+    {
+        buildTree(objects, blockIndex);
     }
 }
 

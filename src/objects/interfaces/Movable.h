@@ -27,6 +27,17 @@ public:
     float getVelocity();
     float getMaxVelocity();
 
+private:
+    bool isDirection(const std::string& value) const;
+    void decelerateLeft();
+    void accelerateRight();
+    void applyDirectionVelocity();
+
+    bool canMoveTo(float x, float y);
+    bool isMapEnd(float x, float y);
+    void applyMove(float x, float y);
+    void resetVelocityAtGround(float y);
+
 protected:
     float acceleration = 0.3f;
     /* Velocity when object is moving left or right*/

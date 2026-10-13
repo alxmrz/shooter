@@ -108,6 +108,21 @@ private:
      * @return bool
      */
     bool collidePlayableAfterMove(float x, float y);
+    bool blockedAt(float x, float y);
+    bool collidesAt(float x, float y);
+    void advance(float x, float y);
+    bool hitsUnit(Unit* unit, CObject& collider);
+    bool isAffectedUnit(Unit* unit, CObject& collider);
+    bool isPlayerInvolved(Unit* unit);
+    void damageUnit(Unit* unit);
+    void killUnitIfExhausted(Unit* unit);
+
+    struct UnitImpactDetector {
+        Bullet* bullet;
+        CObject* collider;
+
+        bool operator()(CObject* object) const;
+    };
 
     /**
      * Check, is the next position beyond the maximum flight distance

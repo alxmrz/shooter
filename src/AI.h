@@ -2,6 +2,7 @@
 #define AI_H
 
 #include <string>
+#include <vector>
 #include <SFML/Graphics.hpp>
 
 class GameObjects;
@@ -36,8 +37,8 @@ private:
     void patrol();
     bool isPlayerInRange();
     bool hasLineOfSight();
+    std::vector<sf::Vector2f> pathPoints();
     bool isSightBlockedAt(sf::Vector2f point);
-    bool isSolidSightBlocker(Platform* platform, sf::Vector2f point);
     float distanceToPlayer();
     float horizontalDistanceToPlayer();
     sf::Vector2f unitCenter();
@@ -48,8 +49,13 @@ private:
     bool shouldApproach(const std::string& direction);
     float stepOffset(const std::string& direction);
     bool isSolidGroundBelow(float x, float y);
-    bool isSolidBelow(Platform* platform, CObject& probe);
     static std::string opposite(const std::string& direction);
+
+    struct SightBlocker {
+        AI* ai;
+
+        bool operator()(const sf::Vector2f& point) const;
+    };
 };
 
 #endif /* AI_H */

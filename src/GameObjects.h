@@ -81,7 +81,6 @@ struct GameObjects {
     void clear();
     
     void draw(Window* window, float dt);
-    void correctBackgroundSprite();
     void drawPlayerUi(Window* window);
     
     /**
@@ -183,6 +182,17 @@ struct GameObjects {
     void restartGame();
 
 private:
+    void drawWorld(Window* window, float dt);
+    void drawBackground(Window* window);
+    void drawGrounds(Window* window);
+    void ensureGroundsSprite();
+    void buildGroundsSprite();
+    void drawBackgroundTiles();
+    void drawBackgroundTile(unsigned i);
+    void drawVisibleObjects(Window* window, float dt);
+    void drawObjectIfVisible(CObject* object, CObject& windowRect, Window* window, float dt);
+    void drawButtons(Window* window, float dt);
+
     /**
      * Set the open dialogue and its flag-completion marker, opening it.
      */

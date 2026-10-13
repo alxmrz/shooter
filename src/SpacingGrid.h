@@ -31,26 +31,7 @@ public:
         int minCy = cellIndex(box.y - halfGap);
         int maxCy = cellIndex(box.y + box.height + halfGap);
 
-        for (int cx = minCx; cx <= maxCx; ++cx)
-        {
-            for (int cy = minCy; cy <= maxCy; ++cy)
-            {
-                auto it = cells.find(cellKey(cx, cy));
-                if (it == cells.end())
-                {
-                    continue;
-                }
-                for (const SpacingBox& other : it->second)
-                {
-                    ++checkCount;
-                    if (overlapsExpanded(box, other))
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
+        return overlapsNothing(box, minCx, maxCx, minCy, maxCy);
     }
 
     void insert(const SpacingBox& box)
@@ -62,10 +43,7 @@ public:
 
         for (int cx = minCx; cx <= maxCx; ++cx)
         {
-            for (int cy = minCy; cy <= maxCy; ++cy)
-            {
-                cells[cellKey(cx, cy)].push_back(box);
-            }
+            insertColumn(box, cx, minCy, maxCy);
         }
     }
 
@@ -73,6 +51,56 @@ public:
     void resetCheckCount() { checkCount = 0; }
 
 private:
+    bool overlapsNothing(const SpacingBox& box, int minCx, int maxCx, int minCy, int maxCy)
+    {
+        bool clear = true;
+        for (int cx = minCx; cx <= maxCx; ++cx)
+        {
+            clear = clear && !columnOverlaps(box, cx, minCy, maxCy);
+        }
+        return clear;
+    }
+
+    bool columnOverlaps(const SpacingBox& box, int cx, int minCy, int maxCy)
+    {
+        bool overlaps = false;
+        for (int cy = minCy; cy <= maxCy; ++cy)
+        {
+            overlaps = overlaps || cellOverlaps(box, cx, cy);
+        }
+        return overlaps;
+    }
+
+    bool cellOverlaps(const SpacingBox& box, int cx, int cy)
+    {
+        std::unordered_map<long long, std::vector<SpacingBox>>::const_iterator it =
+            cells.find(cellKey(cx, cy));
+        if (it == cells.end())
+        {
+            return false;
+        }
+        return anyBoxOverlaps(box, it->second);
+    }
+
+    bool anyBoxOverlaps(const SpacingBox& box, const std::vector<SpacingBox>& others)
+    {
+        bool overlaps = false;
+        for (const SpacingBox& other : others)
+        {
+            ++checkCount;
+            overlaps = overlaps || overlapsExpanded(box, other);
+        }
+        return overlaps;
+    }
+
+    void insertColumn(const SpacingBox& box, int cx, int minCy, int maxCy)
+    {
+        for (int cy = minCy; cy <= maxCy; ++cy)
+        {
+            cells[cellKey(cx, cy)].push_back(box);
+        }
+    }
+
     bool overlapsExpanded(const SpacingBox& a, const SpacingBox& b) const
     {
         float aL = a.x - halfGap;

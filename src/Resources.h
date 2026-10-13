@@ -100,13 +100,18 @@ private:
     std::map<std::string, sf::Sound*> sounds;
     
     void loadTextures();
+    void loadTexture(const std::string& key, const std::string& path);
     void loadFonts();
+    void loadFont(const std::string& key, const std::string& path);
     void loadSounds();
+    void loadSound(const std::string& key, const std::string& path);
 
     std::string dialoguePath(std::string type);
     static void addDialogueLine(std::vector<std::string>& lines, std::string line);
     static bool isBlankDialogueLine(const std::string& line);
     static std::string cleanDialogueLine(std::string line);
+    static void stripCarriageReturn(std::string& line);
+    static bool hasTrailingCarriageReturn(const std::string& line);
 };
 
 #endif /* RESOURCES_H */

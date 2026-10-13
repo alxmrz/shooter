@@ -30,31 +30,75 @@ bool Movable::isMoving()
 
 void Movable::calcVelocity()
 {
-    if (direction == "left") {
-        if (velocity > -maxVelocity) {
-            velocity -= acceleration;
-        }
-    } else if (direction == "right") {
-        if (velocity < maxVelocity) {
-            velocity += acceleration;
-        }
-    } else {
-        velocity = 0.f;
+    if (isDirection("left")) {
+        decelerateLeft();
+        return;
     }
+
+    applyDirectionVelocity();
+}
+
+bool Movable::isDirection(const std::string& value) const
+{
+    return direction == value;
+}
+
+void Movable::decelerateLeft()
+{
+    if (velocity > -maxVelocity) {
+        velocity -= acceleration;
+    }
+}
+
+void Movable::accelerateRight()
+{
+    if (velocity < maxVelocity) {
+        velocity += acceleration;
+    }
+}
+
+void Movable::applyDirectionVelocity()
+{
+    if (isDirection("right")) {
+        accelerateRight();
+        return;
+    }
+
+    velocity = 0.f;
 }
 
 bool Movable::move(float x, float y)
 {
-    bool isMapEnd = this->x+x <= 0 || this->y + y <= 0;
-    if (!isMapEnd && !collideObjectAfterMove(x, y)) {
-        this->x += x;
-        this->y += y;
+    if (canMoveTo(x, y)) {
+        applyMove(x, y);
         return true;
-    } else if (y == 0.f) {
+    }
+
+    resetVelocityAtGround(y);
+    return false;
+}
+
+bool Movable::canMoveTo(float x, float y)
+{
+    return !isMapEnd(x, y) && !collideObjectAfterMove(x, y);
+}
+
+bool Movable::isMapEnd(float x, float y)
+{
+    return this->x + x <= 0 || this->y + y <= 0;
+}
+
+void Movable::applyMove(float x, float y)
+{
+    this->x += x;
+    this->y += y;
+}
+
+void Movable::resetVelocityAtGround(float y)
+{
+    if (y == 0.f) {
         velocity = 0;
     }
-    
-    return false;
 }
 
 bool Movable::move(std::string direction) 

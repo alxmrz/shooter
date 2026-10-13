@@ -31,17 +31,6 @@ Shooter::~Shooter()
 void Shooter::destroy()
 {
     CObject::destroy();
-
-   /* Ammunition* amma= go->fabric->createAmmo(
-                            getX(),
-                            getY(),
-                            50,
-                            50
-                            );
-
-    CObject* ammo = dynamic_cast<CObject*>(amma); */
-
-    //go->all.push_back(ammo);
 }
 
 void Shooter::draw(Window* window, float dt)
@@ -51,25 +40,54 @@ void Shooter::draw(Window* window, float dt)
         return;
     }
 
-    if (!dead) {
-        refreshSpriteFrame(dt);
-    } else if (!mustBeDeleted) {
-        animateExplosion(dt);
-    }
-
-    if (!(dead && mustBeDeleted)) {
-        fireTime += dt;
-        gravitationalTime += dt;
-    }
-
-    bool aliveNPC = health > 0 && !isPlayer();
-    if (aliveNPC) {
-        drawHearts(window);
-    }
-
+    updateAnimation(dt);
+    advanceTimers(dt);
+    drawHeartsIfNpc(window);
     applyRotation(dt);
 
     this->CObject::draw(window, dt);
+}
+
+void Shooter::updateAnimation(float dt)
+{
+    if (!dead) {
+        refreshSpriteFrame(dt);
+        return;
+    }
+
+    animateExplosionIfPending(dt);
+}
+
+void Shooter::animateExplosionIfPending(float dt)
+{
+    if (!mustBeDeleted) {
+        animateExplosion(dt);
+    }
+}
+
+void Shooter::advanceTimers(float dt)
+{
+    if (isActiveAnimation()) {
+        fireTime += dt;
+        gravitationalTime += dt;
+    }
+}
+
+bool Shooter::isActiveAnimation()
+{
+    return !(dead && mustBeDeleted);
+}
+
+void Shooter::drawHeartsIfNpc(Window* window)
+{
+    if (isAliveNpc()) {
+        drawHearts(window);
+    }
+}
+
+bool Shooter::isAliveNpc()
+{
+    return health > 0 && !isPlayer();
 }
 
 void Shooter::refreshSpriteFrame(float dt)
@@ -175,12 +193,22 @@ void Shooter::attack()
         return;
     }
 
+    performFire();
+}
+
+void Shooter::performFire()
+{
     playShotgunSound();
     fireTime = 0.f;
+    consumeAmmoIfPlayer();
+    fireBullet();
+}
+
+void Shooter::consumeAmmoIfPlayer()
+{
     if (isPlayer()) {
         --ammo;
     }
-    fireBullet();
 }
 
 bool Shooter::canFire()
@@ -259,10 +287,26 @@ sf::Vector2f Shooter::bulletSpawn(sf::Vector2f direction)
 
 void Shooter::shiftSpritePositions()
 {
-    float originX = this->mainSprite ? this->mainSprite->getOrigin().x : 0.f;
-    float originY = this->mainSprite ? this->mainSprite->getOrigin().y : 0.f;
-    this->mainSprite->setPosition(this->x + originX, this->y + originY);
+    this->mainSprite->setPosition(this->x + spriteOriginX(), this->y + spriteOriginY());
     this->explosionSprite->setPosition(this->x, this->y);
+}
+
+float Shooter::spriteOriginX()
+{
+    if (this->mainSprite == nullptr) {
+        return 0.f;
+    }
+
+    return this->mainSprite->getOrigin().x;
+}
+
+float Shooter::spriteOriginY()
+{
+    if (this->mainSprite == nullptr) {
+        return 0.f;
+    }
+
+    return this->mainSprite->getOrigin().y;
 }
 
 
@@ -304,17 +348,35 @@ void Shooter::applyRotation(float dt)
     if (!rotating) {
         return;
     }
-    
+
+    rotateStep(dt);
+}
+
+void Shooter::rotateStep(float dt)
+{
     // Rotation speed: 360 degrees per 0.5 seconds
-    float rotationSpeed = 360.f / 0.5f; // degrees per second
-    rotationAngle += rotationSpeed * dt;
-    
+    rotationAngle += rotationSpeedPerSecond() * dt;
+    stopRotationIfComplete();
+}
+
+float Shooter::rotationSpeedPerSecond()
+{
+    return 360.f / 0.5f; // degrees per second
+}
+
+void Shooter::stopRotationIfComplete()
+{
     if (rotationAngle >= 360.f) {
         rotationAngle = 0.f;
         rotating = false;
     }
-    
+
     // Apply rotation to main sprite
+    applySpriteRotationIfPresent();
+}
+
+void Shooter::applySpriteRotationIfPresent()
+{
     if (mainSprite) {
         mainSprite->setRotation(rotationAngle);
     }

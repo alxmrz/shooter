@@ -36,11 +36,26 @@ private:
     Platform* trunk;
     Platform* leaves;
     
+    void drawPart(Window* window, Platform* part, float dt);
+
+    void updateBounds();
+    void includeBranches(float& minX, float& minY, float& maxX, float& maxY);
+    void includeLeaves(float& minX, float& minY, float& maxX, float& maxY);
+    void includePart(Platform* part, float& minX, float& minY, float& maxX, float& maxY);
+
     void generateBranches(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength);
+    Platform* makeBranch(int x, int y, int trunkHeight, int minBranchLength, int maxBranchLength, int side);
+    int branchXForSide(int baseX, int branchWidth, int side);
+
     void generateLadderBranches(int x, int trunkTop, int trunkHeight, int branchStep,
                                 int minBranchLength, int maxBranchLength, int topBranchSide,
                                 int topBranchLength);
-    void updateBounds();
+    Platform* makeLadderBranch(int x, int baseY, int trunkHeight, int height, int index,
+                               int minBranchLength, int maxBranchLength, int topBranchSide,
+                               int topBranchLength);
+    bool isStretchedTop(int height, int trunkHeight, int topBranchLength);
+    Platform* makeStretchedTopBranch(int x, int branchY, int side, int topBranchLength);
+    Platform* makeRandomBranch(int x, int branchY, int minBranchLength, int maxBranchLength, int side);
 };
 
 #endif /* TREE_H */

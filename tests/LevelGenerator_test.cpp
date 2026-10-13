@@ -333,12 +333,7 @@ TEST_F(LevelGeneratorTest, GroundPlatformIsGenerated) {
     EXPECT_EQ(objects[2].height, TEST_LEVEL_HEIGHT);
 }
 
-TEST_F(LevelGeneratorTest, PlatformsAreGeneratedWithVaryingLengths) {
-    std::vector<GeneratedObject> objects;
-    realGeneratePlatforms(objects);
-
-    EXPECT_GT(objects.size(), 0u);
-
+static void expectPlatformWidthsVary(const std::vector<GeneratedObject>& objects) {
     int shortBlocks = 0;
     int longBlocks = 0;
     for (const auto& obj : objects) {
@@ -348,8 +343,7 @@ TEST_F(LevelGeneratorTest, PlatformsAreGeneratedWithVaryingLengths) {
         EXPECT_GE(obj.width, 150);
         EXPECT_LE(obj.width, 1000);
         EXPECT_EQ(obj.width % 50, 0);
-        int tiles = obj.width / 50;
-        if (tiles <= 5) {
+        if (obj.width / 50 <= 5) {
             shortBlocks++;
         } else {
             longBlocks++;
@@ -359,10 +353,15 @@ TEST_F(LevelGeneratorTest, PlatformsAreGeneratedWithVaryingLengths) {
     EXPECT_GT(longBlocks, shortBlocks);
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtLeastOneBlockPerLevel) {
+TEST_F(LevelGeneratorTest, PlatformsAreGeneratedWithVaryingLengths) {
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
+    EXPECT_GT(objects.size(), 0u);
+    expectPlatformWidthsVary(objects);
+}
+
+static void expectEveryLevelHasBlocks(const std::vector<GeneratedObject>& objects) {
     // Group blocks by their y level (the fixed start block is its own level).
     // Several blocks per level are allowed now that every block gets an upward
     // neighbour, so only "at least one" is required.
@@ -377,21 +376,30 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtLeastOneBlockPerLevel) {
     }
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorPlacesFixedStartBlockInBottomLeft) {
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtLeastOneBlockPerLevel) {
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
-    bool found = false;
+    expectEveryLevelHasBlocks(objects);
+}
+
+static bool containsStartBlock(const std::vector<GeneratedObject>& objects) {
     for (const auto& obj : objects) {
         if (obj.x == LevelGenerator::START_BLOCK_X &&
             obj.y == LevelGenerator::START_BLOCK_Y &&
             obj.width == LevelGenerator::START_BLOCK_WIDTH &&
             obj.height == LevelGenerator::START_BLOCK_HEIGHT) {
-            found = true;
-            break;
+            return true;
         }
     }
-    EXPECT_TRUE(found) << "Fixed start block is missing";
+    return false;
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesFixedStartBlockInBottomLeft) {
+    std::vector<GeneratedObject> objects;
+    realGeneratePlatforms(objects);
+
+    EXPECT_TRUE(containsStartBlock(objects)) << "Fixed start block is missing";
 }
 
 static float horizontalGap(const GeneratedObject& a, const GeneratedObject& b) {
@@ -406,18 +414,31 @@ static float verticalGap(const GeneratedObject& a, const GeneratedObject& b) {
     return std::max(a.y, b.y) - std::min(aBottom, bBottom);
 }
 
+static void expectMinimumBlockSpacing(const std::vector<GeneratedObject>& objects, float halfGap) {
+    for (size_t i = 0; i < objects.size(); ++i) {
+        EXPECT_EQ(objects[i].type, "GroundBlock");
+        for (size_t j = i + 1; j < objects.size(); ++j) {
+            EXPECT_FALSE(expandedRectsOverlap(objects[i], objects[j], halfGap))
+                << "Blocks " << i << " and " << j << " are closer than the required gap";
+        }
+    }
+}
+
 TEST_F(LevelGeneratorTest, RealGeneratorRespectsMinimumBlockSpacing) {
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
     ASSERT_GT(objects.size(), 0u);
+    expectMinimumBlockSpacing(objects, 50.f);
+}
 
-    const float HALF_GAP = 50.f;
+static void expectSameLevelHorizontalGap(const std::vector<GeneratedObject>& objects, float minGap) {
     for (size_t i = 0; i < objects.size(); ++i) {
-        EXPECT_EQ(objects[i].type, "GroundBlock");
         for (size_t j = i + 1; j < objects.size(); ++j) {
-            EXPECT_FALSE(expandedRectsOverlap(objects[i], objects[j], HALF_GAP))
-                << "Blocks " << i << " and " << j << " are closer than the required gap";
+            if (objects[i].y == objects[j].y) {
+                EXPECT_GE(horizontalGap(objects[i], objects[j]), minGap)
+                    << "Blocks " << i << " and " << j << " on the same level are too close";
+            }
         }
     }
 }
@@ -426,11 +447,15 @@ TEST_F(LevelGeneratorTest, RealGeneratorSameLevelBlocksHaveHorizontalGap) {
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
+    expectSameLevelHorizontalGap(objects, 100.f);
+}
+
+static void expectVerticalGapWhenOverlappingX(const std::vector<GeneratedObject>& objects, float minGap) {
     for (size_t i = 0; i < objects.size(); ++i) {
         for (size_t j = i + 1; j < objects.size(); ++j) {
-            if (objects[i].y == objects[j].y) {
-                EXPECT_GE(horizontalGap(objects[i], objects[j]), 100.f)
-                    << "Blocks " << i << " and " << j << " on the same level are too close";
+            if (horizontalGap(objects[i], objects[j]) < 0.f) {
+                EXPECT_GE(verticalGap(objects[i], objects[j]), minGap)
+                    << "Blocks " << i << " and " << j << " overlap in X without vertical clearance";
             }
         }
     }
@@ -440,11 +465,18 @@ TEST_F(LevelGeneratorTest, RealGeneratorVerticallyOverlappingBlocksHaveVerticalG
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
+    expectVerticalGapWhenOverlappingX(objects, 100.f);
+}
+
+static void expectDiagonalClearance(const std::vector<GeneratedObject>& objects, float minGap) {
     for (size_t i = 0; i < objects.size(); ++i) {
         for (size_t j = i + 1; j < objects.size(); ++j) {
-            if (horizontalGap(objects[i], objects[j]) < 0.f) {
-                EXPECT_GE(verticalGap(objects[i], objects[j]), 100.f)
-                    << "Blocks " << i << " and " << j << " overlap in X without vertical clearance";
+            if (horizontalGap(objects[i], objects[j]) >= 0.f &&
+                verticalGap(objects[i], objects[j]) >= 0.f) {
+                float bestGap = std::max(horizontalGap(objects[i], objects[j]),
+                                         verticalGap(objects[i], objects[j]));
+                EXPECT_GE(bestGap, minGap)
+                    << "Diagonal blocks " << i << " and " << j << " lack clearance";
             }
         }
     }
@@ -454,17 +486,7 @@ TEST_F(LevelGeneratorTest, RealGeneratorDiagonalBlocksHaveClearanceOnSomeAxis) {
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
-    for (size_t i = 0; i < objects.size(); ++i) {
-        for (size_t j = i + 1; j < objects.size(); ++j) {
-            if (horizontalGap(objects[i], objects[j]) >= 0.f &&
-                verticalGap(objects[i], objects[j]) >= 0.f) {
-                float bestGap = std::max(horizontalGap(objects[i], objects[j]),
-                                         verticalGap(objects[i], objects[j]));
-                EXPECT_GE(bestGap, 100.f)
-                    << "Diagonal blocks " << i << " and " << j << " lack clearance";
-            }
-        }
-    }
+    expectDiagonalClearance(objects, 100.f);
 }
 
 TEST_F(LevelGeneratorTest, MaxVerticalDistanceFollowsDoubleJumpMinusPlayerHeight) {
@@ -473,12 +495,7 @@ TEST_F(LevelGeneratorTest, MaxVerticalDistanceFollowsDoubleJumpMinusPlayerHeight
     EXPECT_EQ(LevelGenerator::MAX_JUMP_HEIGHT, 110);
 }
 
-TEST_F(LevelGeneratorTest, PlatformVerticalSpacingDoesNotExceedMaxJumpHeight) {
-    std::vector<GeneratedObject> objects;
-    realGeneratePlatforms(objects);
-
-    ASSERT_GT(objects.size(), 0u);
-
+static void expectLevelGapsWithinTreeHeight(const std::vector<GeneratedObject>& objects) {
     std::vector<float> levels;
     for (const auto& obj : objects) {
         levels.push_back(obj.y);
@@ -493,6 +510,14 @@ TEST_F(LevelGeneratorTest, PlatformVerticalSpacingDoesNotExceedMaxJumpHeight) {
             << "Vertical gap between levels " << levels[i - 1] << " and " << levels[i]
             << " exceeds the maximum tree-bridged height";
     }
+}
+
+TEST_F(LevelGeneratorTest, PlatformVerticalSpacingDoesNotExceedMaxJumpHeight) {
+    std::vector<GeneratedObject> objects;
+    realGeneratePlatforms(objects);
+
+    ASSERT_GT(objects.size(), 0u);
+    expectLevelGapsWithinTreeHeight(objects);
 }
 
 // True when `upper` sits above `lower` within one jump and the player can cross
@@ -543,12 +568,7 @@ static bool hasLevelAbove(const std::vector<GeneratedObject>& blocks, const Gene
     return false;
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorGivesEveryBlockAReachableUpwardNeighbor) {
-    std::vector<GeneratedObject> objects;
-    realGeneratePlatforms(objects);
-
-    ASSERT_GT(objects.size(), 0u);
-
+static void expectEveryBlockReachable(const std::vector<GeneratedObject>& objects) {
     for (const auto& block : objects) {
         if (!hasLevelAbove(objects, block)) {
             continue;
@@ -565,12 +585,15 @@ TEST_F(LevelGeneratorTest, RealGeneratorGivesEveryBlockAReachableUpwardNeighbor)
     }
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorUpwardNeighborGapIsWithinReach) {
+TEST_F(LevelGeneratorTest, RealGeneratorGivesEveryBlockAReachableUpwardNeighbor) {
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
     ASSERT_GT(objects.size(), 0u);
+    expectEveryBlockReachable(objects);
+}
 
+static void expectUpwardGapWithinReach(const std::vector<GeneratedObject>& objects) {
     for (const auto& block : objects) {
         if (!hasLevelAbove(objects, block)) {
             continue;
@@ -596,12 +619,15 @@ TEST_F(LevelGeneratorTest, RealGeneratorUpwardNeighborGapIsWithinReach) {
     }
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorHasClimbablePathFromStartBlock) {
+TEST_F(LevelGeneratorTest, RealGeneratorUpwardNeighborGapIsWithinReach) {
     std::vector<GeneratedObject> objects;
     realGeneratePlatforms(objects);
 
     ASSERT_GT(objects.size(), 0u);
+    expectUpwardGapWithinReach(objects);
+}
 
+static bool hasClimbablePathToTop(const std::vector<GeneratedObject>& objects) {
     // Locate the fixed start block.
     size_t startIndex = objects.size();
     for (size_t i = 0; i < objects.size(); ++i) {
@@ -611,7 +637,9 @@ TEST_F(LevelGeneratorTest, RealGeneratorHasClimbablePathFromStartBlock) {
             break;
         }
     }
-    ASSERT_LT(startIndex, objects.size()) << "Start block not found";
+    if (startIndex >= objects.size()) {
+        return false;
+    }
 
     // Highest (smallest y) block level.
     float topY = objects[0].y;
@@ -625,14 +653,12 @@ TEST_F(LevelGeneratorTest, RealGeneratorHasClimbablePathFromStartBlock) {
     queue.push_back(startIndex);
     visited[startIndex] = true;
 
-    bool reachedTop = false;
     while (!queue.empty()) {
         size_t current = queue.back();
         queue.pop_back();
 
         if (objects[current].y == topY) {
-            reachedTop = true;
-            break;
+            return true;
         }
 
         for (size_t i = 0; i < objects.size(); ++i) {
@@ -647,16 +673,56 @@ TEST_F(LevelGeneratorTest, RealGeneratorHasClimbablePathFromStartBlock) {
         }
     }
 
-    EXPECT_TRUE(reachedTop) << "Cannot climb from the start block to the top level";
+    return false;
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorVariesHorizontalGapBetweenLevels) {
+TEST_F(LevelGeneratorTest, RealGeneratorHasClimbablePathFromStartBlock) {
+    std::vector<GeneratedObject> objects;
+    realGeneratePlatforms(objects);
+
+    ASSERT_GT(objects.size(), 0u);
+    EXPECT_TRUE(hasClimbablePathToTop(objects)) << "Cannot climb from the start block to the top level";
+}
+
+static void recordBlockGap(const std::vector<GeneratedObject>& objects,
+                           const GeneratedObject& block, std::set<float>& observedGaps,
+                           int& totalGaps, int& widerThanMinimum) {
+    // Find the nearest level above this block.
+    float nearestY = -1.f;
+    for (const auto& other : objects) {
+        if (other.y < block.y && (nearestY < 0.f || other.y > nearestY)) {
+            nearestY = other.y;
+        }
+    }
+    if (nearestY < 0.f) {
+        return;
+    }
+
+    float bestGap = -1.f;
+    for (const auto& other : objects) {
+        if (other.y != nearestY) {
+            continue;
+        }
+        float gap = horizontalGap(block, other);
+        if (gap < 0.f || gap > static_cast<float>(LevelGenerator::MAX_HORIZONTAL_REACH)) {
+            continue;
+        }
+        if (bestGap < 0.f || gap < bestGap) {
+            bestGap = gap;
+        }
+    }
+    if (bestGap >= 0.f) {
+        observedGaps.insert(bestGap);
+        totalGaps++;
+        if (bestGap > 100.f) {
+            widerThanMinimum++;
+        }
+    }
+}
+
+static void collectLevelGaps(std::set<float>& observedGaps, int& totalGaps, int& widerThanMinimum) {
     // The gap to the upward neighbour must be dynamic: sometimes as small as the
     // minimum block gap, sometimes up to 50% wider, never beyond jump reach.
-    std::set<float> observedGaps;
-    int totalGaps = 0;
-    int widerThanMinimum = 0;
-
     for (unsigned seed = 1; seed <= 20; ++seed) {
         std::vector<GeneratedObject> objects;
         LevelGenerator generator(nullptr);
@@ -664,40 +730,13 @@ TEST_F(LevelGeneratorTest, RealGeneratorVariesHorizontalGapBetweenLevels) {
         generator.generatePlatforms(objects);
 
         for (const auto& block : objects) {
-            // Find the nearest level above this block.
-            float nearestY = -1.f;
-            for (const auto& other : objects) {
-                if (other.y < block.y && (nearestY < 0.f || other.y > nearestY)) {
-                    nearestY = other.y;
-                }
-            }
-            if (nearestY < 0.f) {
-                continue;
-            }
-
-            float bestGap = -1.f;
-            for (const auto& other : objects) {
-                if (other.y != nearestY) {
-                    continue;
-                }
-                float gap = horizontalGap(block, other);
-                if (gap < 0.f || gap > static_cast<float>(LevelGenerator::MAX_HORIZONTAL_REACH)) {
-                    continue;
-                }
-                if (bestGap < 0.f || gap < bestGap) {
-                    bestGap = gap;
-                }
-            }
-            if (bestGap >= 0.f) {
-                observedGaps.insert(bestGap);
-                totalGaps++;
-                if (bestGap > 100.f) {
-                    widerThanMinimum++;
-                }
-            }
+            recordBlockGap(objects, block, observedGaps, totalGaps, widerThanMinimum);
         }
     }
+}
 
+static void expectObservedGapsAreValid(const std::set<float>& observedGaps, int totalGaps,
+                                       int widerThanMinimum) {
     ASSERT_FALSE(observedGaps.empty());
     for (float gap : observedGaps) {
         EXPECT_GE(gap, 100.f);
@@ -713,7 +752,16 @@ TEST_F(LevelGeneratorTest, RealGeneratorVariesHorizontalGapBetweenLevels) {
         << " gaps are wider than the minimum";
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorKeepsBlockCountBounded) {
+TEST_F(LevelGeneratorTest, RealGeneratorVariesHorizontalGapBetweenLevels) {
+    std::set<float> observedGaps;
+    int totalGaps = 0;
+    int widerThanMinimum = 0;
+
+    collectLevelGaps(observedGaps, totalGaps, widerThanMinimum);
+    expectObservedGapsAreValid(observedGaps, totalGaps, widerThanMinimum);
+}
+
+static void expectBlockCountBoundedForSeeds() {
     // Covering lower blocks with upward neighbours must not blow up the number
     // of blocks: a single upper block can cover several lower ones, so the
     // count stays proportional to the number of levels across many seeds.
@@ -735,14 +783,32 @@ TEST_F(LevelGeneratorTest, RealGeneratorKeepsBlockCountBounded) {
     }
 }
 
+TEST_F(LevelGeneratorTest, RealGeneratorKeepsBlockCountBounded) {
+    expectBlockCountBoundedForSeeds();
+}
+
+static void expectAllType(const std::vector<GeneratedObject>& objects, const std::string& type) {
+    for (const auto& obj : objects) {
+        EXPECT_EQ(obj.type, type);
+    }
+}
+
 TEST_F(LevelGeneratorTest, EnemyCountDoesNotExceedMaximum) {
     std::vector<GeneratedObject> enemies;
     testGenerateEnemies(enemies);
     
     EXPECT_EQ(enemies.size(), static_cast<size_t>(TEST_MAX_ENEMIES));
-    
-    for (const auto& enemy : enemies) {
-        EXPECT_EQ(enemy.type, "Shooter");
+    expectAllType(enemies, "Shooter");
+}
+
+static void expectEnemiesSeparated(const std::vector<GeneratedObject>& enemies, float minDistance) {
+    for (size_t i = 0; i < enemies.size(); ++i) {
+        for (size_t j = i + 1; j < enemies.size(); ++j) {
+            float dx = enemies[i].x - enemies[j].x;
+            float dy = enemies[i].y - enemies[j].y;
+            float distance = std::sqrt(dx * dx + dy * dy);
+            EXPECT_GE(distance, minDistance);
+        }
     }
 }
 
@@ -750,13 +816,12 @@ TEST_F(LevelGeneratorTest, EnemiesAreNotTooClose) {
     std::vector<GeneratedObject> enemies;
     testGenerateEnemies(enemies);
     
-    for (size_t i = 0; i < enemies.size(); ++i) {
-        for (size_t j = i + 1; j < enemies.size(); ++j) {
-            float dx = enemies[i].x - enemies[j].x;
-            float dy = enemies[i].y - enemies[j].y;
-            float distance = std::sqrt(dx * dx + dy * dy);
-            EXPECT_GE(distance, 200.0f);
-        }
+    expectEnemiesSeparated(enemies, 200.0f);
+}
+
+static void expectEnemiesOutsideCamera(const std::vector<GeneratedObject>& enemies, float minX) {
+    for (const auto& enemy : enemies) {
+        EXPECT_GE(enemy.x, minX);
     }
 }
 
@@ -764,8 +829,28 @@ TEST_F(LevelGeneratorTest, EnemiesAreOutsideCameraView) {
     std::vector<GeneratedObject> enemies;
     testGenerateEnemies(enemies);
     
-    for (const auto& enemy : enemies) {
-        EXPECT_GE(enemy.x, static_cast<float>(TEST_CAMERA_WIDTH + 100));
+    expectEnemiesOutsideCamera(enemies, static_cast<float>(TEST_CAMERA_WIDTH + 100));
+}
+
+static bool containsType(const std::vector<GeneratedObject>& objects, const std::string& type) {
+    for (const auto& obj : objects) {
+        if (obj.type == type) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void expectTreeParametersValid(const std::vector<GeneratedObject>& objects) {
+    for (const auto& obj : objects) {
+        if (obj.type != "Tree") {
+            continue;
+        }
+        // Every tree has the fixed trunk height and a ladder branch step.
+        EXPECT_EQ(obj.trunkHeight, LevelGenerator::TREE_TRUNK_HEIGHT);
+        EXPECT_EQ(obj.branchStep, LevelGenerator::TREE_BRANCH_STEP);
+        EXPECT_GE(obj.minBranchLength, 2);
+        EXPECT_LE(obj.maxBranchLength, 6);
     }
 }
 
@@ -781,18 +866,8 @@ TEST_F(LevelGeneratorTest, TreesAreGeneratedWithBranches) {
 
     generator.generateTrees(objects);
 
-    bool hasTree = false;
-    for (const auto& obj : objects) {
-        if (obj.type == "Tree") {
-            hasTree = true;
-            // Every tree has the fixed trunk height and a ladder branch step.
-            EXPECT_EQ(obj.trunkHeight, LevelGenerator::TREE_TRUNK_HEIGHT);
-            EXPECT_EQ(obj.branchStep, LevelGenerator::TREE_BRANCH_STEP);
-            EXPECT_GE(obj.minBranchLength, 2);
-            EXPECT_LE(obj.maxBranchLength, 6);
-        }
-    }
-    EXPECT_TRUE(hasTree) << "No tree found";
+    expectTreeParametersValid(objects);
+    EXPECT_TRUE(containsType(objects, "Tree")) << "No tree found";
 }
 
 TEST_F(LevelGeneratorTest, RealGeneratorTreeHeightIsFixed) {
@@ -846,6 +921,33 @@ TEST_F(LevelGeneratorTest, RealGeneratorTreeHeightWithoutUpperBlock) {
     EXPECT_LE(totalHeight, LevelGenerator::TREE_HEIGHT);
 }
 
+static bool isTreeOnWideGroundBlock(const std::vector<GeneratedObject>& objects,
+                                    const GeneratedObject& tree) {
+    for (const auto& block : objects) {
+        if (block.type != "GroundBlock" || block.width < LevelGenerator::TREE_MIN_BLOCK_WIDTH) {
+            continue;
+        }
+        if (tree.y == block.y &&
+            tree.x >= block.x && tree.x <= block.x + block.width) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static int countTreesOnWideBlocks(const std::vector<GeneratedObject>& objects) {
+    int treeCount = 0;
+    for (const auto& obj : objects) {
+        if (obj.type != "Tree") {
+            continue;
+        }
+        treeCount++;
+        EXPECT_TRUE(isTreeOnWideGroundBlock(objects, obj))
+            << "Tree at (" << obj.x << ", " << obj.y << ") is not on a wide ground block";
+    }
+    return treeCount;
+}
+
 TEST_F(LevelGeneratorTest, RealGeneratorPlacesTreesOnWideGroundBlocks) {
     LevelGenerator generator(nullptr);
     std::vector<GeneratedObject> objects;
@@ -853,36 +955,10 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesTreesOnWideGroundBlocks) {
     generator.generatePlatforms(objects);
     generator.generateTrees(objects);
 
-    int treeCount = 0;
-    for (const auto& obj : objects) {
-        if (obj.type != "Tree") {
-            continue;
-        }
-        treeCount++;
-
-        bool onBlock = false;
-        for (const auto& block : objects) {
-            if (block.type != "GroundBlock" || block.width < LevelGenerator::TREE_MIN_BLOCK_WIDTH) {
-                continue;
-            }
-            if (obj.y == block.y &&
-                obj.x >= block.x && obj.x <= block.x + block.width) {
-                onBlock = true;
-                break;
-            }
-        }
-        EXPECT_TRUE(onBlock) << "Tree at (" << obj.x << ", " << obj.y << ") is not on a wide ground block";
-    }
-    EXPECT_GT(treeCount, 0);
+    EXPECT_GT(countTreesOnWideBlocks(objects), 0);
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneTreePerBlock) {
-    LevelGenerator generator(nullptr);
-    std::vector<GeneratedObject> objects;
-    std::srand(42);
-    generator.generatePlatforms(objects);
-    generator.generateTrees(objects);
-
+static void expectAtMostOneTreePerBlock(const std::vector<GeneratedObject>& objects) {
     for (const auto& block : objects) {
         if (block.type != "GroundBlock") {
             continue;
@@ -899,13 +975,17 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneTreePerBlock) {
     }
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneTreePerThreeBlocks) {
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneTreePerBlock) {
     LevelGenerator generator(nullptr);
     std::vector<GeneratedObject> objects;
     std::srand(42);
     generator.generatePlatforms(objects);
     generator.generateTrees(objects);
 
+    expectAtMostOneTreePerBlock(objects);
+}
+
+static void expectTreesAtMostEveryThirdBlock(const std::vector<GeneratedObject>& objects) {
     int blockCount = 0;
     int treeCount = 0;
     for (const auto& obj : objects) {
@@ -919,13 +999,27 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneTreePerThreeBlocks) {
     EXPECT_LE(treeCount, blockCount / 3);
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorReservesRoomForEveryTreeCandidate) {
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesAtMostOneTreePerThreeBlocks) {
     LevelGenerator generator(nullptr);
     std::vector<GeneratedObject> objects;
     std::srand(42);
     generator.generatePlatforms(objects);
     generator.generateTrees(objects);
 
+    expectTreesAtMostEveryThirdBlock(objects);
+}
+
+static bool hasTreeOnBlock(const std::vector<GeneratedObject>& objects, const GeneratedObject& block) {
+    for (const auto& obj : objects) {
+        if (obj.type == "Tree" && obj.y == block.y &&
+            obj.x >= block.x && obj.x <= block.x + block.width) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void expectEveryCandidateGotTree(const std::vector<GeneratedObject>& objects) {
     int candidates = 0;
     int withTree = 0;
     int index = 0;
@@ -940,21 +1034,68 @@ TEST_F(LevelGeneratorTest, RealGeneratorReservesRoomForEveryTreeCandidate) {
             continue;
         }
         candidates++;
-
-        bool hasTree = false;
-        for (const auto& obj : objects) {
-            if (obj.type == "Tree" && obj.y == block.y &&
-                obj.x >= block.x && obj.x <= block.x + block.width) {
-                hasTree = true;
-                break;
-            }
-        }
-        withTree += hasTree ? 1 : 0;
+        withTree += hasTreeOnBlock(objects, block) ? 1 : 0;
     }
 
     EXPECT_GT(candidates, 0);
     EXPECT_EQ(withTree, candidates)
         << withTree << " of " << candidates << " tree candidates got a tree";
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorReservesRoomForEveryTreeCandidate) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    generator.generatePlatforms(objects);
+    generator.generateTrees(objects);
+
+    expectEveryCandidateGotTree(objects);
+}
+
+static int countReservedPlatformsForBlock(const std::vector<GeneratedObject>& objects,
+                                          const GeneratedObject& block,
+                                          const GeneratedObject& tree) {
+    int checked = 0;
+    // The reserved platform is the only ground block above within a tree height.
+    for (const auto& up : objects) {
+        if (up.type != "GroundBlock") {
+            continue;
+        }
+        const int gapY = static_cast<int>(block.y) - static_cast<int>(up.y);
+        if (gapY <= 0 || gapY > LevelGenerator::TREE_HEIGHT) {
+            continue;
+        }
+        const bool platformOnLeft = (up.x + up.width <= block.x);
+        const bool platformOnRight = (up.x >= block.x + block.width);
+        if (!platformOnLeft && !platformOnRight) {
+            continue;
+        }
+        const bool expectedLeft = (tree.topBranchSide == 0);
+        EXPECT_EQ(platformOnLeft, expectedLeft)
+            << "platform is not on the tree's top-branch side";
+        checked++;
+    }
+    return checked;
+}
+
+static int countPlatformsOnTopBranchSide(const std::vector<GeneratedObject>& objects) {
+    int checked = 0;
+    for (const auto& tree : objects) {
+        if (tree.type != "Tree") {
+            continue;
+        }
+        // Locate the ground block the tree stands on.
+        for (const auto& block : objects) {
+            if (block.type != "GroundBlock" || block.y != tree.y) {
+                continue;
+            }
+            if (tree.x < block.x || tree.x >= block.x + block.width) {
+                continue;
+            }
+            checked += countReservedPlatformsForBlock(objects, block, tree);
+        }
+    }
+    return checked;
 }
 
 TEST_F(LevelGeneratorTest, RealGeneratorPlacesTreePlatformOnTopBranchSide) {
@@ -964,43 +1105,7 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesTreePlatformOnTopBranchSide) {
     generator.generatePlatforms(objects);
     generator.generateTrees(objects);
 
-    int checked = 0;
-    for (const auto& tree : objects) {
-        if (tree.type != "Tree") {
-            continue;
-        }
-
-        // Locate the ground block the tree stands on.
-        for (const auto& block : objects) {
-            if (block.type != "GroundBlock" || block.y != tree.y) {
-                continue;
-            }
-            if (tree.x < block.x || tree.x >= block.x + block.width) {
-                continue;
-            }
-
-            // The reserved platform is the only ground block above within a tree height.
-            for (const auto& up : objects) {
-                if (up.type != "GroundBlock") {
-                    continue;
-                }
-                const int gapY = static_cast<int>(block.y) - static_cast<int>(up.y);
-                if (gapY <= 0 || gapY > LevelGenerator::TREE_HEIGHT) {
-                    continue;
-                }
-                const bool platformOnLeft = (up.x + up.width <= block.x);
-                const bool platformOnRight = (up.x >= block.x + block.width);
-                if (!platformOnLeft && !platformOnRight) {
-                    continue;
-                }
-                const bool expectedLeft = (tree.topBranchSide == 0);
-                EXPECT_EQ(platformOnLeft, expectedLeft)
-                    << "platform is not on the tree's top-branch side";
-                checked++;
-            }
-        }
-    }
-    EXPECT_GT(checked, 0) << "no reserved platform was checked";
+    EXPECT_GT(countPlatformsOnTopBranchSide(objects), 0) << "no reserved platform was checked";
 }
 
 TEST_F(LevelGeneratorTest, RealGeneratorSetsTopBranchLengthToPlatformEdgeLeft) {
@@ -1040,9 +1145,9 @@ TEST_F(LevelGeneratorTest, RealGeneratorSetsTopBranchLengthToPlatformEdgeRight) 
     EXPECT_EQ(tree->topBranchLength, expected);
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorTopBranchReachesPlatformEdge) {
+static int countTopBranchEdges(int maxSeed) {
     int checked = 0;
-    for (unsigned seed = 1; seed <= 10; ++seed) {
+    for (unsigned seed = 1; seed <= static_cast<unsigned>(maxSeed); ++seed) {
         LevelGenerator generator(nullptr);
         std::vector<GeneratedObject> objects;
         std::srand(seed);
@@ -1054,7 +1159,10 @@ TEST_F(LevelGeneratorTest, RealGeneratorTopBranchReachesPlatformEdge) {
                 continue;
             }
             const GeneratedObject* block = hostBlockOf(objects, tree);
-            ASSERT_NE(block, nullptr) << "seed " << seed;
+            EXPECT_NE(block, nullptr) << "seed " << seed;
+            if (block == nullptr) {
+                continue;
+            }
             const TopBranchGeometry geometry = topBranchGeometry(tree);
             const float edge = (tree.topBranchSide == 0)
                 ? block->x
@@ -1063,12 +1171,16 @@ TEST_F(LevelGeneratorTest, RealGeneratorTopBranchReachesPlatformEdge) {
             checked++;
         }
     }
-    EXPECT_GT(checked, 0) << "no trees were generated";
+    return checked;
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorReservedPlatformWithinReachFromTopBranch) {
+TEST_F(LevelGeneratorTest, RealGeneratorTopBranchReachesPlatformEdge) {
+    EXPECT_GT(countTopBranchEdges(10), 0) << "no trees were generated";
+}
+
+static int countReservedPlatformsWithinReach(int maxSeed) {
     int checked = 0;
-    for (unsigned seed = 1; seed <= 20; ++seed) {
+    for (unsigned seed = 1; seed <= static_cast<unsigned>(maxSeed); ++seed) {
         LevelGenerator generator(nullptr);
         std::vector<GeneratedObject> objects;
         std::srand(seed);
@@ -1080,7 +1192,10 @@ TEST_F(LevelGeneratorTest, RealGeneratorReservedPlatformWithinReachFromTopBranch
                 continue;
             }
             const GeneratedObject* block = hostBlockOf(objects, tree);
-            ASSERT_NE(block, nullptr) << "seed " << seed;
+            EXPECT_NE(block, nullptr) << "seed " << seed;
+            if (block == nullptr) {
+                continue;
+            }
             const TopBranchGeometry geometry = topBranchGeometry(tree);
 
             for (const auto& up : objects) {
@@ -1107,7 +1222,11 @@ TEST_F(LevelGeneratorTest, RealGeneratorReservedPlatformWithinReachFromTopBranch
             }
         }
     }
-    EXPECT_GT(checked, 0) << "no reserved platforms were checked";
+    return checked;
+}
+
+TEST_F(LevelGeneratorTest, RealGeneratorReservedPlatformWithinReachFromTopBranch) {
+    EXPECT_GT(countReservedPlatformsWithinReach(20), 0) << "no reserved platforms were checked";
 }
 
 static bool hasTreeOn(const std::vector<GeneratedObject>& objects, const GeneratedObject& block) {
@@ -1120,21 +1239,18 @@ static bool hasTreeOn(const std::vector<GeneratedObject>& objects, const Generat
     return false;
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemyOnEverySecondCrystalPlatform) {
-    LevelGenerator generator(nullptr);
-    std::vector<GeneratedObject> objects;
-    std::srand(42);
-    generator.generatePlatforms(objects);
-    generator.generateTrees(objects);
-    generator.generateEnemies(objects);
-
+static std::vector<GeneratedObject> groundBlocksOnly(const std::vector<GeneratedObject>& objects) {
     std::vector<GeneratedObject> blocks;
     for (const auto& obj : objects) {
         if (obj.type == "GroundBlock") {
             blocks.push_back(obj);
         }
     }
+    return blocks;
+}
 
+static std::vector<int> collectEnemyPlatformIndices(const std::vector<GeneratedObject>& objects,
+                                                    const std::vector<GeneratedObject>& blocks) {
     std::vector<int> enemyIndices;
     for (const auto& obj : objects) {
         if (obj.type != "Shooter") {
@@ -1149,12 +1265,19 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemyOnEverySecondCrystalPlatform)
                 break;
             }
         }
-        ASSERT_GE(index, 0) << "enemy is not on any ground block";
+        EXPECT_GE(index, 0) << "enemy is not on any ground block";
+        if (index < 0) {
+            continue;
+        }
         EXPECT_GE(obj.x, static_cast<float>(LevelGenerator::CAMERA_SAFE_X));
         enemyIndices.push_back(index);
     }
-    EXPECT_GT(enemyIndices.size(), 0u) << "real generator produced no enemies";
+    return enemyIndices;
+}
 
+static void expectEnemiesOnEverySecondCrystalPlatform(const std::vector<GeneratedObject>& objects,
+                                                      const std::vector<GeneratedObject>& blocks,
+                                                      const std::vector<int>& enemyIndices) {
     // Independent oracle: a platform carries a crystal when it is an even 1-based
     // platform without a tree; enemies must sit on every second such platform.
     int crystalOrdinal = 0;
@@ -1170,13 +1293,22 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemyOnEverySecondCrystalPlatform)
     }
 }
 
-TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemiesOnPlatformsOutsideCamera) {
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemyOnEverySecondCrystalPlatform) {
     LevelGenerator generator(nullptr);
     std::vector<GeneratedObject> objects;
     std::srand(42);
     generator.generatePlatforms(objects);
+    generator.generateTrees(objects);
     generator.generateEnemies(objects);
 
+    std::vector<GeneratedObject> blocks = groundBlocksOnly(objects);
+    std::vector<int> enemyIndices = collectEnemyPlatformIndices(objects, blocks);
+    EXPECT_GT(enemyIndices.size(), 0u) << "real generator produced no enemies";
+
+    expectEnemiesOnEverySecondCrystalPlatform(objects, blocks, enemyIndices);
+}
+
+static void expectEnemiesOnGroundAndOutsideCamera(const std::vector<GeneratedObject>& objects) {
     for (const auto& obj : objects) {
         if (obj.type != "Shooter") {
             continue;
@@ -1198,32 +1330,30 @@ TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemiesOnPlatformsOutsideCamera) {
     }
 }
 
+TEST_F(LevelGeneratorTest, RealGeneratorPlacesEnemiesOnPlatformsOutsideCamera) {
+    LevelGenerator generator(nullptr);
+    std::vector<GeneratedObject> objects;
+    std::srand(42);
+    generator.generatePlatforms(objects);
+    generator.generateEnemies(objects);
+
+    expectEnemiesOnGroundAndOutsideCamera(objects);
+}
+
+static void expectAllBeyondX(const std::vector<GeneratedObject>& objects, float minExclusive) {
+    for (const auto& obj : objects) {
+        EXPECT_GT(obj.x, minExclusive)
+            << "Object at (" << obj.x << ", " << obj.y << ") is within camera view";
+    }
+}
+
 TEST_F(LevelGeneratorTest, EnemiesArePlacedOnPlatforms) {
     std::vector<GeneratedObject> enemies;
     std::vector<GeneratedObject> platforms;
     testGenerateEnemiesWithPlatforms(enemies, platforms);
     
     EXPECT_EQ(enemies.size(), static_cast<size_t>(TEST_MAX_ENEMIES));
-    
-    for (const auto& enemy : enemies) {
-        // Find a platform that supports this enemy
-        bool found = false;
-        for (const auto& platform : platforms) {
-            // Check if enemy is directly above platform (within horizontal bounds)
-            if (enemy.x >= platform.x && enemy.x + enemy.width <= platform.x + platform.width) {
-                // Check vertical alignment: enemy bottom should be at platform top
-                if (enemy.y + enemy.height != platform.y) {
-                    // Enemy might have been shifted to camera-safe position, just check it's on some platform
-                    continue;
-                }
-                found = true;
-                break;
-            }
-        }
-        // At minimum, enemy should be outside camera view
-        EXPECT_GT(enemy.x, static_cast<float>(TEST_CAMERA_WIDTH + 100))
-            << "Enemy at (" << enemy.x << ", " << enemy.y << ") is within camera view";
-    }
+    expectAllBeyondX(enemies, static_cast<float>(TEST_CAMERA_WIDTH + 100));
 }
 
 // ---------------------------------------------------------------------------
@@ -1297,21 +1427,29 @@ static bool isItemType(const GeneratedObject& obj) {
     return obj.type == "Ammunition" || obj.type == "Heart" || obj.type == "Crystal";
 }
 
+static void expectItemsOnNthPlatform(const std::vector<GeneratedObject>& objects,
+                                     const std::string& type, int step) {
+    std::vector<GeneratedObject> blocks = platformsOf(objects);
+    for (const auto& obj : objects) {
+        if (obj.type != type) {
+            continue;
+        }
+        int index = platformIndexForItem(blocks, obj);
+        EXPECT_GE(index, 0) << type << " is not on a platform";
+        if (index < 0) {
+            continue;
+        }
+        EXPECT_EQ((index + 1) % step, 0) << type << " on platform " << index + 1;
+    }
+}
+
 TEST_F(LevelGeneratorTest, EveryThirdPlatformGetsAmmunition) {
     std::vector<GeneratedObject> objects = makePlatforms(6);
     LevelGenerator generator(nullptr);
     generator.generatePlatformItems(objects);
 
-    std::vector<GeneratedObject> blocks = platformsOf(objects);
     EXPECT_EQ(countByType(objects, "Ammunition"), 2);
-    for (const auto& obj : objects) {
-        if (obj.type != "Ammunition") {
-            continue;
-        }
-        int index = platformIndexForItem(blocks, obj);
-        ASSERT_GE(index, 0) << "Ammunition is not on a platform";
-        EXPECT_EQ((index + 1) % 3, 0) << "Ammunition on platform " << index + 1;
-    }
+    expectItemsOnNthPlatform(objects, "Ammunition", 3);
 }
 
 TEST_F(LevelGeneratorTest, EveryFourthPlatformGetsHeart) {
@@ -1319,16 +1457,8 @@ TEST_F(LevelGeneratorTest, EveryFourthPlatformGetsHeart) {
     LevelGenerator generator(nullptr);
     generator.generatePlatformItems(objects);
 
-    std::vector<GeneratedObject> blocks = platformsOf(objects);
     EXPECT_EQ(countByType(objects, "Heart"), 2);
-    for (const auto& obj : objects) {
-        if (obj.type != "Heart") {
-            continue;
-        }
-        int index = platformIndexForItem(blocks, obj);
-        ASSERT_GE(index, 0) << "Heart is not on a platform";
-        EXPECT_EQ((index + 1) % 4, 0) << "Heart on platform " << index + 1;
-    }
+    expectItemsOnNthPlatform(objects, "Heart", 4);
 }
 
 TEST_F(LevelGeneratorTest, EverySecondPlatformGetsCrystal) {
@@ -1336,15 +1466,25 @@ TEST_F(LevelGeneratorTest, EverySecondPlatformGetsCrystal) {
     LevelGenerator generator(nullptr);
     generator.generatePlatformItems(objects);
 
-    std::vector<GeneratedObject> blocks = platformsOf(objects);
     EXPECT_EQ(countByType(objects, "Crystal"), 5);
+    expectItemsOnNthPlatform(objects, "Crystal", 2);
+}
+
+static void expectNoItemsOnPlatforms(const std::vector<GeneratedObject>& objects,
+                                     const std::vector<GeneratedObject>& blocks,
+                                     const std::vector<int>& excludedIndices) {
     for (const auto& obj : objects) {
-        if (obj.type != "Crystal") {
+        if (!isItemType(obj)) {
             continue;
         }
         int index = platformIndexForItem(blocks, obj);
-        ASSERT_GE(index, 0) << "Crystal is not on a platform";
-        EXPECT_EQ((index + 1) % 2, 0) << "Crystal on platform " << index + 1;
+        EXPECT_GE(index, 0) << obj.type << " is not on a platform";
+        if (index < 0) {
+            continue;
+        }
+        EXPECT_EQ(std::find(excludedIndices.begin(), excludedIndices.end(), index),
+                  excludedIndices.end())
+            << obj.type << " placed on a tree platform";
     }
 }
 
@@ -1366,15 +1506,23 @@ TEST_F(LevelGeneratorTest, PlatformsWithTreesGetNoItems) {
     // Crystal on 2nd, 4th, 6th, 8th, 10th; 4th is skipped.
     EXPECT_EQ(countByType(objects, "Crystal"), 4);
 
+    expectNoItemsOnPlatforms(objects, blocks, {2, 3, 4});
+}
+
+static void expectItemsOnTheirStep(const std::vector<GeneratedObject>& objects,
+                                   const std::vector<GeneratedObject>& blocks) {
     for (const auto& obj : objects) {
         if (!isItemType(obj)) {
             continue;
         }
         int index = platformIndexForItem(blocks, obj);
-        ASSERT_GE(index, 0) << obj.type << " is not on a platform";
-        EXPECT_NE(index, 2) << obj.type << " placed on the tree platform";
-        EXPECT_NE(index, 3) << obj.type << " placed on the tree platform";
-        EXPECT_NE(index, 4) << obj.type << " placed on the tree platform";
+        EXPECT_GE(index, 0) << obj.type << " is not on a platform";
+        if (index < 0) {
+            continue;
+        }
+        int step = (obj.type == "Ammunition") ? 3 : (obj.type == "Heart") ? 4 : 2;
+        EXPECT_EQ((index + 1) % step, 0)
+            << obj.type << " on platform " << index + 1 << " (step " << step << ")";
     }
 }
 
@@ -1389,15 +1537,38 @@ TEST_F(LevelGeneratorTest, ItemPlacementIsDeterministic) {
     EXPECT_EQ(countByType(objects, "Heart"), 5);
     EXPECT_EQ(countByType(objects, "Crystal"), 10);
 
+    expectItemsOnTheirStep(objects, blocks);
+}
+
+static std::vector<GeneratedObject> collectItemsOnPlatform(
+    const std::vector<GeneratedObject>& objects, const std::vector<GeneratedObject>& blocks,
+    int platformIndex) {
+    std::vector<GeneratedObject> items;
     for (const auto& obj : objects) {
         if (!isItemType(obj)) {
             continue;
         }
         int index = platformIndexForItem(blocks, obj);
-        ASSERT_GE(index, 0) << obj.type << " is not on a platform";
-        int step = (obj.type == "Ammunition") ? 3 : (obj.type == "Heart") ? 4 : 2;
-        EXPECT_EQ((index + 1) % step, 0)
-            << obj.type << " on platform " << index + 1 << " (step " << step << ")";
+        EXPECT_GE(index, 0) << obj.type << " is not on a platform";
+        if (index < 0) {
+            continue;
+        }
+        EXPECT_EQ(obj.y, blocks[index].y - TEST_ITEM_SIZE)
+            << obj.type << " does not rest on the platform top";
+        if (index == platformIndex) {
+            items.push_back(obj);
+        }
+    }
+    return items;
+}
+
+static void expectNoItemOverlap(const std::vector<GeneratedObject>& items) {
+    for (size_t i = 0; i < items.size(); ++i) {
+        for (size_t j = i + 1; j < items.size(); ++j) {
+            bool overlap = items[i].x < items[j].x + items[j].width &&
+                           items[j].x < items[i].x + items[i].width;
+            EXPECT_FALSE(overlap) << "Items overlap on the 12th platform";
+        }
     }
 }
 
@@ -1407,29 +1578,11 @@ TEST_F(LevelGeneratorTest, ItemsRestOnPlatformTopWithoutOverlap) {
     generator.generatePlatformItems(objects);
 
     std::vector<GeneratedObject> blocks = platformsOf(objects);
-    std::vector<GeneratedObject> onTwelfth;
-    for (const auto& obj : objects) {
-        if (!isItemType(obj)) {
-            continue;
-        }
-        int index = platformIndexForItem(blocks, obj);
-        ASSERT_GE(index, 0) << obj.type << " is not on a platform";
-        EXPECT_EQ(obj.y, blocks[index].y - TEST_ITEM_SIZE)
-            << obj.type << " does not rest on the platform top";
-        if (index == 11) {
-            onTwelfth.push_back(obj);
-        }
-    }
-
     // The 12th platform is divisible by 2, 3 and 4, so it gets all three items.
+    std::vector<GeneratedObject> onTwelfth = collectItemsOnPlatform(objects, blocks, 11);
     ASSERT_EQ(onTwelfth.size(), 3u);
-    for (size_t i = 0; i < onTwelfth.size(); ++i) {
-        for (size_t j = i + 1; j < onTwelfth.size(); ++j) {
-            bool overlap = onTwelfth[i].x < onTwelfth[j].x + onTwelfth[j].width &&
-                           onTwelfth[j].x < onTwelfth[i].x + onTwelfth[i].width;
-            EXPECT_FALSE(overlap) << "Items overlap on the 12th platform";
-        }
-    }
+
+    expectNoItemOverlap(onTwelfth);
 }
 
 // ---------------------------------------------------------------------------
@@ -1457,6 +1610,22 @@ static int enemyPlatformIndex(const std::vector<GeneratedObject>& blocks,
     return -1;
 }
 
+static void expectEnemiesOnPlatformsModulo(const std::vector<GeneratedObject>& objects,
+                                           const std::vector<GeneratedObject>& blocks, int mod) {
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        int index = enemyPlatformIndex(blocks, obj);
+        EXPECT_GE(index, 0) << "enemy is not on a platform";
+        if (index < 0) {
+            continue;
+        }
+        EXPECT_EQ((index + 1) % mod, 0)
+            << "enemy not on every second crystal platform: index " << index;
+    }
+}
+
 TEST_F(LevelGeneratorTest, EnemyOnEverySecondCrystalPlatform) {
     std::vector<GeneratedObject> objects = makeFarPlatforms(9);
     LevelGenerator generator(nullptr);
@@ -1466,15 +1635,7 @@ TEST_F(LevelGeneratorTest, EnemyOnEverySecondCrystalPlatform) {
     // them is index 3 and 7.
     std::vector<GeneratedObject> blocks = platformsOf(objects);
     ASSERT_EQ(countByType(objects, "Shooter"), 2);
-    for (const auto& obj : objects) {
-        if (obj.type != "Shooter") {
-            continue;
-        }
-        int index = enemyPlatformIndex(blocks, obj);
-        ASSERT_GE(index, 0) << "enemy is not on a platform";
-        EXPECT_EQ((index + 1) % 4, 0)
-            << "enemy not on every second crystal platform: index " << index;
-    }
+    expectEnemiesOnPlatformsModulo(objects, blocks, 4);
 }
 
 TEST_F(LevelGeneratorTest, EnemySkippedWithoutCrystal) {
@@ -1483,14 +1644,21 @@ TEST_F(LevelGeneratorTest, EnemySkippedWithoutCrystal) {
     generator.generateEnemies(objects);
 
     std::vector<GeneratedObject> blocks = platformsOf(objects);
+    expectEnemiesOnPlatformsModulo(objects, blocks, 2);
+}
+
+static void expectNoEnemyOnPlatform(const std::vector<GeneratedObject>& objects,
+                                    const std::vector<GeneratedObject>& blocks, int excludedIndex) {
     for (const auto& obj : objects) {
         if (obj.type != "Shooter") {
             continue;
         }
         int index = enemyPlatformIndex(blocks, obj);
-        ASSERT_GE(index, 0) << "enemy is not on a platform";
-        EXPECT_EQ((index + 1) % 2, 0)
-            << "enemy on platform without a crystal: index " << index;
+        EXPECT_GE(index, 0);
+        if (index < 0) {
+            continue;
+        }
+        EXPECT_NE(index, excludedIndex) << "enemy placed on the tree platform";
     }
 }
 
@@ -1503,13 +1671,25 @@ TEST_F(LevelGeneratorTest, EnemySkippedOnTreePlatform) {
     generator.generateEnemies(objects);
 
     std::vector<GeneratedObject> afterBlocks = platformsOf(objects);
+    expectNoEnemyOnPlatform(objects, afterBlocks, 3);
+}
+
+static void expectOneEnemyPerPlatform(const std::vector<GeneratedObject>& objects,
+                                      const std::vector<GeneratedObject>& blocks) {
+    std::map<int, int> enemiesPerPlatform;
     for (const auto& obj : objects) {
         if (obj.type != "Shooter") {
             continue;
         }
-        int index = enemyPlatformIndex(afterBlocks, obj);
-        ASSERT_GE(index, 0);
-        EXPECT_NE(index, 3) << "enemy placed on the tree platform";
+        int index = enemyPlatformIndex(blocks, obj);
+        EXPECT_GE(index, 0);
+        if (index < 0) {
+            continue;
+        }
+        enemiesPerPlatform[index]++;
+    }
+    for (const auto& entry : enemiesPerPlatform) {
+        EXPECT_EQ(entry.second, 1) << "platform " << entry.first;
     }
 }
 
@@ -1519,18 +1699,7 @@ TEST_F(LevelGeneratorTest, OneEnemyPerPlatform) {
     generator.generateEnemies(objects);
 
     std::vector<GeneratedObject> blocks = platformsOf(objects);
-    std::map<int, int> enemiesPerPlatform;
-    for (const auto& obj : objects) {
-        if (obj.type != "Shooter") {
-            continue;
-        }
-        int index = enemyPlatformIndex(blocks, obj);
-        ASSERT_GE(index, 0);
-        enemiesPerPlatform[index]++;
-    }
-    for (const auto& entry : enemiesPerPlatform) {
-        EXPECT_EQ(entry.second, 1) << "platform " << entry.first;
-    }
+    expectOneEnemyPerPlatform(objects, blocks);
 }
 
 TEST_F(LevelGeneratorTest, NoMaxEnemiesCap) {
@@ -1543,19 +1712,37 @@ TEST_F(LevelGeneratorTest, NoMaxEnemiesCap) {
     EXPECT_GT(countByType(objects, "Shooter"), LevelGenerator::MAX_ENEMIES);
 }
 
+static void expectEnemiesOnPlatformTop(const std::vector<GeneratedObject>& objects,
+                                       const std::vector<GeneratedObject>& blocks) {
+    for (const auto& obj : objects) {
+        if (obj.type != "Shooter") {
+            continue;
+        }
+        int index = enemyPlatformIndex(blocks, obj);
+        EXPECT_GE(index, 0);
+        if (index < 0) {
+            continue;
+        }
+        EXPECT_EQ(obj.y, blocks[index].y - LevelGenerator::ENEMY_HEIGHT);
+    }
+}
+
 TEST_F(LevelGeneratorTest, EnemyStandsOnPlatformTop) {
     std::vector<GeneratedObject> objects = makeFarPlatforms(6);
     LevelGenerator generator(nullptr);
     generator.generateEnemies(objects);
 
     std::vector<GeneratedObject> blocks = platformsOf(objects);
+    expectEnemiesOnPlatformTop(objects, blocks);
+}
+
+static void expectEnemiesBeyondCamera(const std::vector<GeneratedObject>& objects) {
     for (const auto& obj : objects) {
         if (obj.type != "Shooter") {
             continue;
         }
-        int index = enemyPlatformIndex(blocks, obj);
-        ASSERT_GE(index, 0);
-        EXPECT_EQ(obj.y, blocks[index].y - LevelGenerator::ENEMY_HEIGHT);
+        EXPECT_GE(obj.x, static_cast<float>(LevelGenerator::CAMERA_SAFE_X))
+            << "enemy at " << obj.x << " is inside the camera view";
     }
 }
 
@@ -1564,11 +1751,5 @@ TEST_F(LevelGeneratorTest, EnemyOutsideCameraView) {
     LevelGenerator generator(nullptr);
     generator.generateEnemies(objects);
 
-    for (const auto& obj : objects) {
-        if (obj.type != "Shooter") {
-            continue;
-        }
-        EXPECT_GE(obj.x, static_cast<float>(LevelGenerator::CAMERA_SAFE_X))
-            << "enemy at " << obj.x << " is inside the camera view";
-    }
+    expectEnemiesBeyondCamera(objects);
 }

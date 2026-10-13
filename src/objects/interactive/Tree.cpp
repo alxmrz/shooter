@@ -82,14 +82,16 @@ void Tree::update(Event event) {
 }
 
 void Tree::draw(Window* window, float dt) {
-    if (trunk) {
-        trunk->draw(window, dt);
-    }
-    if (leaves) {
-        leaves->draw(window, dt);
-    }
+    drawPart(window, trunk, dt);
+    drawPart(window, leaves, dt);
     // Branches are rendered by the shared loop in GameObjects::draw,
     // because they are stored in all for collision. Drawing them here would duplicate them.
+}
+
+void Tree::drawPart(Window* window, Platform* part, float dt) {
+    if (part) {
+        part->draw(window, dt);
+    }
 }
 
 std::vector<Platform*> Tree::getBranches() const {
@@ -110,19 +112,8 @@ void Tree::updateBounds() {
     float maxX = trunk->getX() + trunk->getWidth();
     float maxY = trunk->getY() + trunk->getHeight();
 
-    auto include = [&](Platform* part) {
-        minX = std::min(minX, part->getX());
-        minY = std::min(minY, part->getY());
-        maxX = std::max(maxX, part->getX() + part->getWidth());
-        maxY = std::max(maxY, part->getY() + part->getHeight());
-    };
-
-    for (Platform* branch : branches) {
-        include(branch);
-    }
-    if (leaves) {
-        include(leaves);
-    }
+    includeBranches(minX, minY, maxX, maxY);
+    includeLeaves(minX, minY, maxX, maxY);
 
     x = minX;
     y = minY;
@@ -130,27 +121,52 @@ void Tree::updateBounds() {
     height = static_cast<int>(maxY - minY);
 }
 
+void Tree::includeBranches(float& minX, float& minY, float& maxX, float& maxY) {
+    for (Platform* branch : branches) {
+        includePart(branch, minX, minY, maxX, maxY);
+    }
+}
+
+void Tree::includeLeaves(float& minX, float& minY, float& maxX, float& maxY) {
+    if (leaves) {
+        includePart(leaves, minX, minY, maxX, maxY);
+    }
+}
+
+void Tree::includePart(Platform* part, float& minX, float& minY, float& maxX, float& maxY) {
+    minX = std::min(minX, part->getX());
+    minY = std::min(minY, part->getY());
+    maxX = std::max(maxX, part->getX() + part->getWidth());
+    maxY = std::max(maxY, part->getY() + part->getHeight());
+}
+
 void Tree::generateBranches(int x, int y, int trunkHeight, int numBranches, int minBranchLength, int maxBranchLength) {
     // At most one branch per side: one on the left and one on the right.
     const int branchCount = std::min(numBranches, 2);
 
     for (int i = 0; i < branchCount; i++) {
-        // Random height along trunk
-        int branchY = y + trunkHeight * (rand() % 80 + 10) / 100;
-
-        // Random length in tiles
-        int tiles = minBranchLength + rand() % (maxBranchLength - minBranchLength + 1);
-        int branchWidth = tiles * TILE_WIDTH;
-
-        // First branch extends left, second extends right; base lies inside the trunk x-range
-        int baseX = x + rand() % (TRUNK_WIDTH + 1);
-        bool leftSide = (i == 0);
-        int branchX = leftSide ? baseX - branchWidth : baseX;
-
-        Platform* branch = new Platform(branchX, branchY, branchWidth, BRANCH_HEIGHT,
-                                        sf::Color(160, 82, 45), sf::Color::Black);
-        branches.push_back(branch);
+        branches.push_back(makeBranch(x, y, trunkHeight, minBranchLength, maxBranchLength, i));
     }
+}
+
+Platform* Tree::makeBranch(int x, int y, int trunkHeight, int minBranchLength, int maxBranchLength, int side) {
+    // Random height along trunk
+    const int branchY = y + trunkHeight * (rand() % 80 + 10) / 100;
+
+    // Random length in tiles
+    const int tiles = minBranchLength + rand() % (maxBranchLength - minBranchLength + 1);
+    const int branchWidth = tiles * TILE_WIDTH;
+
+    // First branch extends left, second extends right; base lies inside the trunk x-range
+    const int baseX = x + rand() % (TRUNK_WIDTH + 1);
+    const int branchX = branchXForSide(baseX, branchWidth, side);
+
+    return new Platform(branchX, branchY, branchWidth, BRANCH_HEIGHT,
+                        sf::Color(160, 82, 45), sf::Color::Black);
+}
+
+int Tree::branchXForSide(int baseX, int branchWidth, int side) {
+    return (side == 0) ? baseX - branchWidth : baseX;
 }
 
 void Tree::generateLadderBranches(int x, int trunkTop, int trunkHeight, int branchStep,
@@ -164,29 +180,44 @@ void Tree::generateLadderBranches(int x, int trunkTop, int trunkHeight, int bran
     // length is given, the topmost branch spans from the trunk to the edge of the
     // host ground block instead of using a random length.
     const int baseY = trunkTop + trunkHeight;
-    int side = topBranchSide;
 
-    for (int height = trunkHeight; height > 0; height -= branchStep) {
-        const int branchY = baseY - height;
-        const bool leftSide = (side == 0);
-        const bool stretchedTop = (height == trunkHeight) && (topBranchLength > 0);
-
-        int branchWidth;
-        int branchX;
-        if (stretchedTop) {
-            branchWidth = topBranchLength;
-            branchX = leftSide ? (x + TRUNK_WIDTH) - branchWidth : x;
-        } else {
-            int tiles = minBranchLength + rand() % (maxBranchLength - minBranchLength + 1);
-            branchWidth = tiles * TILE_WIDTH;
-            int baseX = x + rand() % (TRUNK_WIDTH + 1);
-            branchX = leftSide ? baseX - branchWidth : baseX;
-        }
-
-        Platform* branch = new Platform(branchX, branchY, branchWidth, BRANCH_HEIGHT,
-                                        sf::Color(160, 82, 45), sf::Color::Black);
-        branches.push_back(branch);
-
-        side = (side + 1) % 2;
+    for (int height = trunkHeight, index = 0; height > 0; height -= branchStep, index++) {
+        branches.push_back(makeLadderBranch(x, baseY, trunkHeight, height, index,
+                                            minBranchLength, maxBranchLength, topBranchSide,
+                                            topBranchLength));
     }
+}
+
+Platform* Tree::makeLadderBranch(int x, int baseY, int trunkHeight, int height, int index,
+                                 int minBranchLength, int maxBranchLength, int topBranchSide,
+                                 int topBranchLength) {
+    const int side = (topBranchSide + index) % 2;
+    const int branchY = baseY - height;
+
+    if (isStretchedTop(height, trunkHeight, topBranchLength)) {
+        return makeStretchedTopBranch(x, branchY, side, topBranchLength);
+    }
+
+    return makeRandomBranch(x, branchY, minBranchLength, maxBranchLength, side);
+}
+
+bool Tree::isStretchedTop(int height, int trunkHeight, int topBranchLength) {
+    return (height == trunkHeight) && (topBranchLength > 0);
+}
+
+Platform* Tree::makeStretchedTopBranch(int x, int branchY, int side, int topBranchLength) {
+    const int branchX = (side == 0) ? (x + TRUNK_WIDTH) - topBranchLength : x;
+
+    return new Platform(branchX, branchY, topBranchLength, BRANCH_HEIGHT,
+                        sf::Color(160, 82, 45), sf::Color::Black);
+}
+
+Platform* Tree::makeRandomBranch(int x, int branchY, int minBranchLength, int maxBranchLength, int side) {
+    const int tiles = minBranchLength + rand() % (maxBranchLength - minBranchLength + 1);
+    const int branchWidth = tiles * TILE_WIDTH;
+    const int baseX = x + rand() % (TRUNK_WIDTH + 1);
+    const int branchX = branchXForSide(baseX, branchWidth, side);
+
+    return new Platform(branchX, branchY, branchWidth, BRANCH_HEIGHT,
+                        sf::Color(160, 82, 45), sf::Color::Black);
 }

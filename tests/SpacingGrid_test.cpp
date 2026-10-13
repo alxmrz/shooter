@@ -4,6 +4,14 @@
 namespace {
 const int CELL_SIZE = 100;
 const float HALF_GAP = 50.f;
+
+void fillGrid(SpacingGrid& grid, int count) {
+    for (int i = 0; i < count; ++i) {
+        SpacingBox box = {i * 200.f, 0.f, 100, 25};
+        EXPECT_TRUE(grid.canPlace(box));
+        grid.insert(box);
+    }
+}
 }
 
 TEST(SpacingGridTest, AllowsDistantBoxes) {
@@ -59,18 +67,10 @@ TEST(SpacingGridTest, CheckCountGrowsLinearly) {
     const int largeCount = 200;
 
     SpacingGrid small(CELL_SIZE, HALF_GAP);
-    for (int i = 0; i < smallCount; ++i) {
-        SpacingBox box = {i * 200.f, 0.f, 100, 25};
-        ASSERT_TRUE(small.canPlace(box));
-        small.insert(box);
-    }
+    fillGrid(small, smallCount);
 
     SpacingGrid large(CELL_SIZE, HALF_GAP);
-    for (int i = 0; i < largeCount; ++i) {
-        SpacingBox box = {i * 200.f, 0.f, 100, 25};
-        ASSERT_TRUE(large.canPlace(box));
-        large.insert(box);
-    }
+    fillGrid(large, largeCount);
 
     int checksSmall = small.getCheckCount();
     int checksLarge = large.getCheckCount();

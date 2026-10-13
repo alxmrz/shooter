@@ -1,11 +1,43 @@
 #include <vector>
 #include <cmath>
+#include <algorithm>
 #include <iostream>
 #include "CObject.h"
 
 #include "Event.h"
 #include "GameObjects.h"
 #include "Window.h"
+
+namespace {
+struct PointInside {
+    CObject* target;
+
+    bool operator()(const std::vector<float>& point) const {
+        return target->collidePoint(static_cast<int>(point[0]), static_cast<int>(point[1]));
+    }
+};
+
+bool anyPointInside(const std::vector<std::vector<float>>& points, CObject* target) {
+    return std::any_of(points.begin(), points.end(), PointInside{target});
+}
+
+bool borderBlocks(int borderX, CObject* border, CObject& collider, int checkPoint) {
+    const int borderRight = borderX + border->getWidth();
+    bool collideX = (checkPoint >= borderX && checkPoint < borderRight - 1) ||
+                    (checkPoint + collider.getWidth() > borderX &&
+                     checkPoint + collider.getWidth() < borderRight);
+    return collideX && collider.collideRect(border);
+}
+
+struct BorderCollision {
+    CObject* collider;
+    int checkPoint;
+
+    bool operator()(const std::pair<const int, CObject*>& entry) const {
+        return borderBlocks(entry.first, entry.second, *collider, checkPoint);
+    }
+};
+}
 
 CObject::CObject()
 {
@@ -35,23 +67,8 @@ CObject::~CObject()
 
 bool CObject::collideRect(CObject* obj)
 {
-    //TODO: is there more elegant and more easy way?
-
-    std::vector<std::vector<float>> objPoints = obj->getBorderPoints();
-    for (unsigned i = 0; i < objPoints.size(); i++) {
-        if (this->collidePoint(objPoints[i][0], objPoints[i][1])) {
-            return true;
-        }
-    }
-
-    std::vector<std::vector<float>> thisPoints = this->getBorderPoints();
-    for (unsigned i = 0; i < thisPoints.size(); i++) {
-        if (obj->collidePoint(thisPoints[i][0], thisPoints[i][1])) {
-            return true;
-        }
-    }
-
-    return false;
+    return anyPointInside(obj->getBorderPoints(), this) ||
+           anyPointInside(this->getBorderPoints(), obj);
 }
 
 bool CObject::collidePoint(int x, int y)
@@ -68,13 +85,13 @@ void CObject::update(Event event)
 
 void CObject::destroy()
 {
-    for (auto iter = go->all.begin(); iter != go->all.end(); ++iter) {
-        if (*iter == this) {
-            go->all.erase(iter);
-            break;
-        }
+    std::vector<CObject*>::iterator iter = std::find(go->all.begin(), go->all.end(), this);
+
+    if (iter == go->all.end()) {
+        return;
     }
-   
+
+    go->all.erase(iter);
 }
 
 sf::Drawable* CObject::getDrawForm()
@@ -136,31 +153,32 @@ void CObject::draw(Window* window, float dt)
 
 bool CObject::collideObjectAfterMove(float x, float y)
 {
-    x = x < 0? std::floor(x) : std::ceil(x);
-    std::ceil(y);
-    
-    CObject collider = CObject(
-            getX() + x,
-            getY() + y,
-            getWidth(),
-            getHeight()
-            );
-    int checkPoint = 0;
-    if (x <= 0 || y < 0 || y > 0) {
-        checkPoint = collider.getX();
-    } else if ( x > 0) {
-        checkPoint = collider.getX() + collider.getWidth();
+    CObject collider = movedCollider(x, y);
+    int checkPoint = collisionCheckPoint(collider, x, y);
+
+    return collidesAnyBorder(collider, checkPoint);
+}
+
+CObject CObject::movedCollider(float x, float y)
+{
+    float stepX = (x < 0) ? std::floor(x) : std::ceil(x);
+
+    return CObject(getX() + stepX, getY() + y, getWidth(), getHeight());
+}
+
+int CObject::collisionCheckPoint(CObject& collider, float x, float y)
+{
+    if (x <= 0 || y != 0) {
+        return static_cast<int>(collider.getX());
     }
 
-    for (auto it = go->borders.begin(); it != go->borders.end(); it++) {
-        bool collideX = (checkPoint >= it->first && checkPoint < it->first + it->second->getWidth()-1) ||
-        (checkPoint + collider.getWidth() > it->first && checkPoint + collider.getWidth() < it->first + it->second->getWidth());
-        if (collideX && collider.collideRect(it->second)) {
-            return true;
-        }
-    }
+    return static_cast<int>(collider.getX() + collider.getWidth());
+}
 
-    return false;
+bool CObject::collidesAnyBorder(CObject& collider, int checkPoint)
+{
+    return std::any_of(go->borders.begin(), go->borders.end(),
+                       BorderCollision{&collider, checkPoint});
 }
 
 void CObject::setCoords(float x, float y)

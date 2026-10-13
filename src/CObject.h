@@ -85,6 +85,11 @@ protected:
     int height;
 
     sf::Sprite* mainSprite = nullptr;
+
+private:
+    CObject movedCollider(float x, float y);
+    int collisionCheckPoint(CObject& collider, float x, float y);
+    bool collidesAnyBorder(CObject& collider, int checkPoint);
 };
 
 #endif /* COBJECT_H */

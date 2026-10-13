@@ -1,12 +1,14 @@
 #ifndef LEVELGENERATOR_H
 #define LEVELGENERATOR_H
 
+#include <map>
 #include <vector>
-#include <cstdlib>
 #include <string>
+#include <cstdlib>
 
 class GameObjects;
 class Map;
+class SpacingGrid;
 
 struct GeneratedObject {
     float x;
@@ -115,45 +117,91 @@ public:
     int randomInt(int min, int max);
     
 private:
-    GameObjects* go;
-    int findPlatformAtX(const std::vector<GeneratedObject>& platforms, float x);
+    struct Node
+    {
+        GeneratedObject block;
+        int index;
+        size_t objectIndex;
+    };
 
-    // Deterministic item placement helpers. Each function keeps to at most a
-    // single loop and a single branch to stay within the project's complexity
-    // budget.
-    static bool isNthPlatform(size_t index, int step);
+    typedef void (LevelGenerator::*ObjectCreator)(const GeneratedObject&);
+    typedef std::map<std::string, ObjectCreator> CreatorTable;
+    typedef void (*ItemPlacer)(std::vector<GeneratedObject>&, const GeneratedObject&, float);
+
+    GameObjects* go;
+    SpacingGrid* grid = nullptr;
+
+    // Level assembly
+    void createPlayer();
+    void instantiateObjects(const std::vector<GeneratedObject>& objects);
+    void instantiateObject(const GeneratedObject& obj);
+    ObjectCreator creatorFor(const std::string& type);
+    const CreatorTable& creatorTable();
+    void createBorderObject(const GeneratedObject& obj);
+    void createPlatformObject(const GeneratedObject& obj);
+    void createGroundBlockObject(const GeneratedObject& obj);
+    void createTreeObject(const GeneratedObject& obj);
+    void createHeartObject(const GeneratedObject& obj);
+    void createAmmoObject(const GeneratedObject& obj);
+    void createCrystalObject(const GeneratedObject& obj);
+    void createShooterObject(const GeneratedObject& obj);
+    void createFlagObject(const GeneratedObject& obj);
+
+    // Platform generation
+    GeneratedObject makeStartBlock();
+    int generateBlockWidth();
+    int pickBaseTiles();
+    void growFrontier(std::vector<Node>& frontier, std::vector<GeneratedObject>& objects,
+                      int& groundCount);
+    std::vector<Node> nextFrontier(const std::vector<Node>& frontier,
+                                   std::vector<GeneratedObject>& objects, int& groundCount);
+    void expandNode(const Node& lower, std::vector<GeneratedObject>& objects,
+                    std::vector<Node>& next, int& groundCount);
+    void registerNeighbour(const Node& lower, const GeneratedObject& candidate, int side,
+                           std::vector<GeneratedObject>& objects, std::vector<Node>& next,
+                           int& groundCount);
+    bool placeForLower(const Node& lower, GeneratedObject& out, int& side);
+    bool placeTreeNeighbour(const Node& lower, GeneratedObject& out, int& side);
+    bool placeOtherSide(const Node& lower, GeneratedObject& out, int& side, int preferred);
+    int choosePreferredSide();
+    bool placeUpward(const Node& lower, bool carriesTree, int forcedSide, GeneratedObject& out);
+    bool hasRoomAbove(const Node& lower);
+    int upwardY(const Node& lower, bool carriesTree);
+    bool placeWithinHeight(const Node& lower, int y, bool carriesTree, int forcedSide,
+                           GeneratedObject& out);
+    bool placeUpwardAttempts(const Node& lower, int y, int forcedSide, GeneratedObject& out);
+    bool tryCommitAttempt(const Node& lower, int y, int forcedSide, GeneratedObject& out);
+    GeneratedObject makeUpwardCandidate(const Node& lower, int y, int forcedSide);
+    bool chooseSide(int forcedSide);
+    float candidateX(const GeneratedObject& lower, bool left, int gap, int width);
+    bool canCommitCandidate(const GeneratedObject& candidate);
+    bool isWithinLevel(const GeneratedObject& candidate);
+
+    // Shared generated-object queries
+    static bool isGroundBlock(const GeneratedObject& object);
     static bool platformHasTree(const std::vector<GeneratedObject>& objects,
                                 const GeneratedObject& block);
     static std::vector<size_t> groundBlockIndices(
         const std::vector<GeneratedObject>& objects);
-    static bool isTreeCandidate(const GeneratedObject& block, size_t index);
-    static bool isEverySecondCrystalPlatform(int crystalOrdinal);
-    static bool shouldPlaceEnemy(const GeneratedObject& platform, bool hasCrystal,
-                                 int crystalOrdinal);
-    static bool isEnemyOutsideCamera(const GeneratedObject& platform);
-    static float enemySpawnX(const GeneratedObject& platform);
-    static GeneratedObject makeEnemy(const GeneratedObject& platform);
-    static bool blocksOverhead(const GeneratedObject& candidate,
-                               const GeneratedObject& block, float trunkX,
-                               int trunkWidth);
-    static int clearanceAtX(const std::vector<GeneratedObject>& objects,
-                            const GeneratedObject& block, float trunkX,
-                            int trunkWidth);
-    static std::vector<float> clearTrunkPositions(
-        const std::vector<GeneratedObject>& objects,
-        const GeneratedObject& block);
-    bool buildTree(std::vector<GeneratedObject>& objects, size_t blockIndex);
-    static int topBranchLengthFor(const GeneratedObject& block, float trunkX, int side);
+    static void addGroundBlockIndex(std::vector<size_t>& indices,
+                                    const GeneratedObject& object, size_t index);
     static std::vector<GeneratedObject> groundBlocks(
         const std::vector<GeneratedObject>& objects);
+    static bool isNthPlatform(size_t index, int step);
+    static bool isTreeCandidate(const GeneratedObject& block, size_t index);
+
+    // Items
     static int itemMaskForIndex(size_t index);
     static int popcount3(int mask);
     static int slotForItem(int mask, int item);
     int effectiveItemMask(const std::vector<GeneratedObject>& objects,
                           const GeneratedObject& block, size_t index) const;
-    bool platformHasCrystal(const std::vector<GeneratedObject>& objects,
-                            const GeneratedObject& block, size_t index) const;
     static float itemSlotX(const GeneratedObject& block, int slot, int count);
+    void generateGuaranteedItem(std::vector<GeneratedObject>& objects, int itemFlag,
+                                ItemPlacer placer) const;
+    void placeGuaranteedItem(std::vector<GeneratedObject>& objects,
+                             const GeneratedObject& block, size_t index, int itemFlag,
+                             ItemPlacer placer) const;
     static void placeAmmunition(std::vector<GeneratedObject>& objects,
                                 const GeneratedObject& block, float x);
     static void placeHeart(std::vector<GeneratedObject>& objects,
@@ -164,8 +212,44 @@ private:
     void generateGuaranteedHeart(std::vector<GeneratedObject>& objects) const;
     void generateGuaranteedCrystal(std::vector<GeneratedObject>& objects) const;
 
-    // Highest-platform lookup and flag assembly, split so each function keeps
-    // to at most a single loop and a single branch (complexity budget).
+    // Enemies
+    bool platformHasCrystal(const std::vector<GeneratedObject>& objects,
+                            const GeneratedObject& block, size_t index) const;
+    static bool isEverySecondCrystalPlatform(int crystalOrdinal);
+    static bool shouldPlaceEnemy(const GeneratedObject& platform, bool hasCrystal,
+                                 int crystalOrdinal);
+    static bool isEnemyOutsideCamera(const GeneratedObject& platform);
+    static float enemySpawnX(const GeneratedObject& platform);
+    static GeneratedObject makeEnemy(const GeneratedObject& platform);
+    int placeEnemyForPlatform(std::vector<GeneratedObject>& objects, size_t platformIndex,
+                              size_t k, int crystalOrdinal) const;
+    static int incrementIfCrystal(int crystalOrdinal, bool hasCrystal);
+    void appendEnemyIfNeeded(std::vector<GeneratedObject>& objects,
+                             const GeneratedObject& platform, bool hasCrystal,
+                             int crystalOrdinal) const;
+
+    // Trees
+    static bool blocksOverhead(const GeneratedObject& candidate,
+                               const GeneratedObject& block, float trunkX,
+                               int trunkWidth);
+    static int clearanceAtX(const std::vector<GeneratedObject>& objects,
+                            const GeneratedObject& block, float trunkX,
+                            int trunkWidth);
+    static int minClearance(int worst, const GeneratedObject& candidate,
+                            const GeneratedObject& block, float trunkX, int trunkWidth);
+    std::vector<float> clearTrunkPositions(
+        const std::vector<GeneratedObject>& objects,
+        const GeneratedObject& block);
+    void appendClearPosition(std::vector<float>& positions,
+                             const std::vector<GeneratedObject>& objects,
+                             const GeneratedObject& block, float x);
+    bool buildTree(std::vector<GeneratedObject>& objects, size_t blockIndex);
+    void buildTreeIfCandidate(std::vector<GeneratedObject>& objects, size_t blockIndex, size_t k);
+    static int topBranchLengthFor(const GeneratedObject& block, float trunkX, int side);
+    static float branchOuterEnd(const GeneratedObject& block, float trunkX, int side);
+    static float branchInnerEnd(const GeneratedObject& block, float trunkX, int side);
+
+    // Flag
     static const GeneratedObject* highestGroundBlock(
         const std::vector<GeneratedObject>& objects);
     static void addGroundBlocks(std::vector<const GeneratedObject*>& out,

@@ -1,6 +1,12 @@
 #include <gtest/gtest.h>
 #include "objects/interfaces/Movable.h"
 
+static void driveCalcVelocity(Movable& movable, int times) {
+    for (int i = 0; i < times; i++) {
+        movable.calcVelocity();
+    }
+}
+
 TEST(MovableTest, DefaultConstructorInitialValues) {
     Movable m;
     EXPECT_FALSE(m.isMoving());
@@ -29,9 +35,7 @@ TEST(MovableTest, CalcVelocityRightIncreasesVelocity) {
 
 TEST(MovableTest, CalcVelocityApproachesMaxVelocity) {
     Movable m;
-    for (int i = 0; i < 100; i++) {
-        m.calcVelocity();
-    }
+    driveCalcVelocity(m, 100);
     EXPECT_GE(m.getVelocity(), m.getMaxVelocity());
 }
 

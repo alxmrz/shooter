@@ -21,7 +21,6 @@ set(PROJECT_HEADERS
         src/StageProgress.h
         src/objects/backgrounds/Ground.h
         src/objects/backgrounds/GroundBlock.h
-        src/objects/backgrounds/GroundBlock.h
     src/objects/interactive/Crystal.h
         src/objects/interactive/Heart.h
         src/objects/interactive/Ammunition.h
@@ -55,7 +54,6 @@ set(PROJECT_SOURCES
         src/LevelGenerator.cpp
         src/StageProgress.cpp
         src/objects/backgrounds/Ground.cpp
-        src/objects/backgrounds/GroundBlock.cpp
         src/objects/backgrounds/GroundBlock.cpp
     src/objects/interactive/Crystal.cpp
         src/objects/interactive/Heart.cpp

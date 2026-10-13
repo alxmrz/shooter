@@ -2,6 +2,7 @@ find_package(SFML 2.5 COMPONENTS graphics window system audio REQUIRED)
 
 add_executable(tests
     AI_test.cpp
+    CObject_test.cpp
     DeathDialog_test.cpp
     DialoguePause_test.cpp
     EventHandler_test.cpp
@@ -11,6 +12,7 @@ add_executable(tests
     GameObjects_test.cpp
     GameState_test.cpp
     LevelGenerator_test.cpp
+    Resources_test.cpp
     SpacingGrid_test.cpp
     StageProgress_test.cpp
 

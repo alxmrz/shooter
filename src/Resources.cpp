@@ -30,44 +30,59 @@ void Resources::load()
 
 void Resources::loadTextures()
 {
-    sf::Texture* texture;
     for (auto it = texturesLoadQueue.begin(); it != texturesLoadQueue.end(); it++) {
-        texture = new sf::Texture();
-        if (!texture->loadFromFile(it->second)) {
-            throw ResourceNotLoaded("Texture " + it->second + " is not found");
-        }
-        
-        textures[it->first] = texture;
+        loadTexture(it->first, it->second);
     }
+}
+
+void Resources::loadTexture(const std::string& key, const std::string& path)
+{
+    sf::Texture* texture = new sf::Texture();
+
+    if (!texture->loadFromFile(path)) {
+        throw ResourceNotLoaded("Texture " + path + " is not found");
+    }
+
+    textures[key] = texture;
 }
 
 void Resources::loadFonts()
 {
-    sf::Font* font;
     for (auto it = fontsLoadQueue.begin(); it != fontsLoadQueue.end(); it++) {
-        font = new sf::Font();
-        if (!font->loadFromFile(it->second)) {
-            throw ResourceNotLoaded("Font " + it->second + " is not found");
-        }
-        
-        fonts[it->first] = font;
+        loadFont(it->first, it->second);
     }
+}
+
+void Resources::loadFont(const std::string& key, const std::string& path)
+{
+    sf::Font* font = new sf::Font();
+
+    if (!font->loadFromFile(path)) {
+        throw ResourceNotLoaded("Font " + path + " is not found");
+    }
+
+    fonts[key] = font;
 }
 
 void Resources::loadSounds()
 {
-    sf::SoundBuffer* soundBuffer;
-    sf::Sound* sound;
     for (auto it = soundsLoadQueue.begin(); it != soundsLoadQueue.end(); it++) {
-        soundBuffer = new sf::SoundBuffer();
-        if (!soundBuffer->loadFromFile(it->second)) {
-             throw ResourceNotLoaded("Sound  " + it->second + " is not found");
-        }
-        sound = new sf::Sound;
-        sound->setBuffer(*soundBuffer);
-        
-        sounds[it->first] = sound;
+        loadSound(it->first, it->second);
     }
+}
+
+void Resources::loadSound(const std::string& key, const std::string& path)
+{
+    sf::SoundBuffer* soundBuffer = new sf::SoundBuffer();
+
+    if (!soundBuffer->loadFromFile(path)) {
+        throw ResourceNotLoaded("Sound  " + path + " is not found");
+    }
+
+    sf::Sound* sound = new sf::Sound;
+    sound->setBuffer(*soundBuffer);
+
+    sounds[key] = sound;
 }
 
 sf::Texture* Resources::getTexture(std::string type)
@@ -147,10 +162,20 @@ bool Resources::isBlankDialogueLine(const std::string& line)
 
 std::string Resources::cleanDialogueLine(std::string line)
 {
-    if (!line.empty() && line.back() == '\r') {
-        line.pop_back();
-    }
+    stripCarriageReturn(line);
 
     return line;
+}
+
+void Resources::stripCarriageReturn(std::string& line)
+{
+    if (hasTrailingCarriageReturn(line)) {
+        line.pop_back();
+    }
+}
+
+bool Resources::hasTrailingCarriageReturn(const std::string& line)
+{
+    return !line.empty() && line.back() == '\r';
 }
 

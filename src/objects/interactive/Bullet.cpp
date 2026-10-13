@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 #include <SFML/Audio.hpp>
 #include "Bullet.h"
 #include "../units/Unit.h"
@@ -160,19 +161,29 @@ sf::Sprite* Bullet::getExplosionSprite()
 
 bool Bullet::move(float x, float y)
 {
-    if (isMaxDistanceReached(this->x + x, this->y + y)) {
+    if (blockedAt(x, y)) {
         return false;
     }
 
-    if (collidePlayableAfterMove(x, y) || collideObjectAfterMove(x, y)) {
-        return false;
-    }
+    advance(x, y);
+    return true;
+}
 
+bool Bullet::blockedAt(float x, float y)
+{
+    return isMaxDistanceReached(this->x + x, this->y + y) || collidesAt(x, y);
+}
+
+bool Bullet::collidesAt(float x, float y)
+{
+    return collidePlayableAfterMove(x, y) || collideObjectAfterMove(x, y);
+}
+
+void Bullet::advance(float x, float y)
+{
     this->x += x;
     this->y += y;
     positionSprite();
-
-    return true;
 }
 
 bool Bullet::isMaxDistanceReached(float nextX, float nextY)
@@ -257,23 +268,47 @@ bool Bullet::collidePlayableAfterMove(float x, float y)
         getWidth(),
         getHeight()
         );
-    for (unsigned i = 0; i < go->all.size(); i++) {
-        if (Unit* shooter = dynamic_cast<Unit*>(go->all[i])) {
-            /** if the player is shot down or the player did the shot */
-           bool playerEnvolved = shooter->isPlayer() || this->shooter->isPlayer();
 
-           if (playerEnvolved && collider.collideRect(shooter)) { 
-               shooter->decreaseHealth();
-               if (shooter->getHealth() == 0) {
-                   shooter->setDead(true);
-               } 
+    return std::any_of(go->all.begin(), go->all.end(), UnitImpactDetector{this, &collider});
+}
 
-               return true;        
-           }            
-        } 
+bool Bullet::UnitImpactDetector::operator()(CObject* object) const
+{
+    return bullet->hitsUnit(dynamic_cast<Unit*>(object), *collider);
+}
+
+bool Bullet::hitsUnit(Unit* unit, CObject& collider)
+{
+    if (!isAffectedUnit(unit, collider)) {
+        return false;
     }
 
-    return false;
+    damageUnit(unit);
+    return true;
+}
+
+bool Bullet::isAffectedUnit(Unit* unit, CObject& collider)
+{
+    return unit != nullptr && isPlayerInvolved(unit) && collider.collideRect(unit);
+}
+
+bool Bullet::isPlayerInvolved(Unit* unit)
+{
+    /** if the player is shot down or the player did the shot */
+    return unit->isPlayer() || this->shooter->isPlayer();
+}
+
+void Bullet::damageUnit(Unit* unit)
+{
+    unit->decreaseHealth();
+    killUnitIfExhausted(unit);
+}
+
+void Bullet::killUnitIfExhausted(Unit* unit)
+{
+    if (unit->getHealth() == 0) {
+        unit->setDead(true);
+    }
 }
 
 void Bullet::setExplosionSprite(sf::Sprite* explosionSprite)

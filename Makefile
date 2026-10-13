@@ -92,4 +92,7 @@ test: test-build
 test-clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all exec dirs clean rebuild test test test-clean
+check:
+	python3 tools/complexity_check.py
+
+.PHONY: all exec dirs clean rebuild test test-clean check

@@ -17,6 +17,9 @@ class Text;
 class AI;
 class Platform;
 class Flag;
+class Crystal;
+class Heart;
+class Ammunition;
 
 class Unit : public Movable {
 public:
@@ -161,7 +164,40 @@ protected:
 
 private:
     void collectItems();
+    void collectFromWorld(unsigned i);
+    void collectAtOrContinue(unsigned i);
+    bool collectAt(unsigned i);
+    bool tryCollectCrystal(CObject* object, unsigned index);
+    bool tryCollectAmmo(CObject* object, unsigned index);
+    bool canCollectAmmo(Ammunition* ammoObject);
+    void collectAmmo(unsigned index);
+    void clampAmmo();
+    bool tryCollectHeart(CObject* object, unsigned index);
+    bool canCollectHeart(Heart* heart);
+    bool tryCollectFlagObject(CObject* object, unsigned index);
     bool tryCollectFlag(Flag* flag, unsigned index);
+
+    bool canStartJump();
+    void initiateJump();
+    void beginJumpIfNotStarted();
+    void applyJumpImpulse();
+    float jumpHeightFor(int count);
+    void onSecondJumpIfNeeded();
+
+    void handleRemoval();
+    void destroyIfAllowed();
+    void updateVerticalMotion();
+    void updateJump();
+    void adjustJumpVelocity();
+    void continueOrStopJump();
+    void stopJump();
+    void updatePlayerInput(Event event);
+    void handleReleasedKeys(Event event);
+    void stopMovingIfHorizontalReleased(Event event);
+    bool isHorizontalReleased(Event event);
+    void handlePlatformJump();
+    void clearPlatformAffected();
+
     bool resolvePlatformCollision(float x, float y);
     Platform* findCollidingPlatform();
     bool isSolidCollision(Platform* platform);
@@ -171,6 +207,12 @@ private:
     bool blockMoveUp(float x, float y);
     bool blockMoveHorizontal(float x, float y);
     void revertMove(float x, float y);
+
+    struct SolidPlatformFinder {
+        Unit* unit;
+
+        bool operator()(CObject* object) const;
+    };
 };
 
 #endif /* UNIT_H */
