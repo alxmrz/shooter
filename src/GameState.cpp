@@ -34,30 +34,73 @@ GameState::~GameState()
 
 void GameState::update(Event event)
 {
-    if (isGameStarted && !isGamePaused) {
-        // Проверяем, умер ли игрок
-        if (objects->player && objects->player->isDead() && !objects->gameOver) {
-            // Ждем завершения анимации смерти (mustBeDeleted становится true)
-            if (objects->player->isMustBeDeleted()) {
-                objects->showGameOverScreen();
-                // Останавливаем обновление игрового мира
-                // isGamePaused = true; // не ставим паузу, чтобы кнопка могла обрабатываться
-            }
-        }
-        
-        // Если игра не в состоянии gameOver, обновляем объекты
-        if (!objects->gameOver) {
-            updateObjects(event);
-            resetElapsedTime();
-        }
+    if (!isGameplayRunning()) {
+        return;
     }
+
+    updateRunningGame(event);
 }
 
-void GameState::updateObjects(Event event)
+bool GameState::isGameplayRunning()
 {
-    for (const auto &object: objects->all) {
-        object->update(event);
+    return isGameStarted && !isGamePaused;
+}
+
+void GameState::updateRunningGame(Event event)
+{
+    // Пока диалог открыт, игровой мир заморожен, но диалог продолжает печатать
+    if (objects->isDialogueOpen()) {
+        updateDialogue(event);
+        return;
     }
+
+    updatePlayerDeath();
+    updateGameplay(event);
+}
+
+void GameState::updateDialogue(Event event)
+{
+    objects->update(event, getElapsedTime());
+    resetElapsedTime();
+}
+
+void GameState::updateGameplay(Event event)
+{
+    if (objects->gameOver) {
+        return;
+    }
+
+    updateWorld(event);
+}
+
+void GameState::updateWorld(Event event)
+{
+    objects->update(event, getElapsedTime());
+    resetElapsedTime();
+}
+
+void GameState::updatePlayerDeath()
+{
+    if (!isDeathAnimationFinished()) {
+        return;
+    }
+
+    objects->showGameOverScreen();
+}
+
+bool GameState::isDeathAnimationFinished()
+{
+    return isPlayerDeathPending() && objects->player->isMustBeDeleted();
+}
+
+bool GameState::isPlayerDeathPending()
+{
+    return hasDeadPlayer() && !objects->gameOver;
+}
+
+bool GameState::hasDeadPlayer()
+{
+    return objects->player != nullptr && objects->player->isDead();
 }
 
 void GameState::resetElapsedTime()

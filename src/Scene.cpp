@@ -44,4 +44,5 @@ void Scene::initNewGame()
     //map->generateLevel("resources/levels/training.tmx");
     LevelGenerator generator(gameState->objects);
     map->generateLevel(generator);
+    gameState->objects->startIntroDialogue();
 }

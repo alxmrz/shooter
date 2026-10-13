@@ -34,6 +34,7 @@ set(PROJECT_HEADERS
         src/objects/interfaces/Movable.h
         src/ui/Button.h
         src/ui/Text.h
+        src/ui/Dialogue.h
         include/tinyxml/tinyxml2.h
 )
 set(PROJECT_SOURCES
@@ -65,6 +66,7 @@ set(PROJECT_SOURCES
         src/objects/interfaces/Movable.cpp
         src/ui/Button.cpp
         src/ui/Text.cpp
+        src/ui/Dialogue.cpp
         include/tinyxml/tinyxml2.cpp
 )
 

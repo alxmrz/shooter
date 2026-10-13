@@ -54,10 +54,15 @@ private:
     /* Elapsed time from list frame*/
     float elapsedTime = 0.0;
 
-    /**
-     * Call gravity for objects
-     */
-    void updateObjects(Event event);
+    bool isGameplayRunning();
+    void updateRunningGame(Event event);
+    void updateDialogue(Event event);
+    void updateGameplay(Event event);
+    void updateWorld(Event event);
+    void updatePlayerDeath();
+    bool isDeathAnimationFinished();
+    bool isPlayerDeathPending();
+    bool hasDeadPlayer();
 };
 
 #endif

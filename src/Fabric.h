@@ -21,6 +21,7 @@ class CObject;
 class Button;
 class Text;
 class Aim;
+class Dialogue;
 
 class Fabric {
 public:
@@ -44,6 +45,7 @@ public:
     CObject* createBorder(float x, float y, int width, int height);
     Text* createText(std::string text, int x, int y);
     Button* createButton(std::string id, std::string text, float x, float y, int width, int height);
+    Dialogue* createDialogue(std::string type);
     sf::Sprite* createSprite(std::string type, float x, float y);
     sf::Sound* getBackgroundSound();
     

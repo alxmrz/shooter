@@ -70,11 +70,23 @@ private:
     sf::Vector2f currentMouseWorld();
 
     /**
-     * Is there an active game with a living player?
+     * Handle a Space press as dialogue advance when the dialogue is open.
+     */
+    void handleDialogueKey(sf::Event& event);
+    bool isDialogueSpace(sf::Event& event);
+    bool isSpaceKey(sf::Event& event);
+    bool isDialogueOpen();
+
+    /**
+     * Is there an active game with a living player and no open dialogue?
      */
     bool isGameplayActive();
+    bool isGameRunning();
+    bool isMatchLive();
+    bool hasLivingPlayer();
+    bool shouldHandleRealTimeKeyboard();
 
-    void handleSpaceKey();
+    bool dialogueKeyConsumed = false;
 };
 
 #endif /* EVENT_HANDLER_H */

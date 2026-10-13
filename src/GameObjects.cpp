@@ -9,6 +9,7 @@
 #include "objects/interactive/Ammunition.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
+#include "ui/Dialogue.h"
 #include "Fabric.h"
 #include "Window.h"
 #include "GameState.h"
@@ -45,6 +46,7 @@ GameObjects::GameObjects(GameState* gs)
     gameOverContainer->setOutlineColor(sf::Color::Black);
     gameOver = false;
     aim = NULL;
+    dialogue = NULL;
     
     grounds = new sf::RenderTexture;
 }
@@ -59,6 +61,48 @@ void GameObjects::clear()
     all.clear();
     player = NULL;
     aim = NULL;
+    delete dialogue;
+    dialogue = NULL;
+}
+
+void GameObjects::update(Event event, float dt)
+{
+    if (isDialogueOpen()) {
+        dialogue->update(dt);
+        return;
+    }
+
+    updateWorld(event);
+}
+
+bool GameObjects::isDialogueOpen()
+{
+    return dialogue != nullptr && dialogue->isOpen();
+}
+
+void GameObjects::updateWorld(Event event)
+{
+    for (unsigned i = 0; i < all.size(); i++) {
+        all[i]->update(event);
+    }
+}
+
+void GameObjects::advanceDialogue()
+{
+    dialogue->advance();
+}
+
+void GameObjects::startIntroDialogue()
+{
+    dialogue = fabric->createDialogue("intro");
+
+    if (dialogue->hasFragments()) {
+        dialogue->open();
+        return;
+    }
+
+    delete dialogue;
+    dialogue = NULL;
 }
 
 void GameObjects::draw(Window* window, float dt)
@@ -104,10 +148,23 @@ void GameObjects::draw(Window* window, float dt)
         }
     }
     
+    drawDialogue(window);
+    
     // Кнопки отрисовываются поверх всего (включая экран смерти)
     for (unsigned i = 0; i < buttons.size(); i++) {
         buttons[i]->draw(window, dt);
     }
+}
+
+void GameObjects::drawDialogue(Window* window)
+{
+    if (!isDialogueOpen()) {
+        return;
+    }
+
+    window->setView(window->getDefaultView());
+    dialogue->draw(*window, window->getSize().x, window->getSize().y);
+    window->setView(*gs->view);
 }
 
 void GameObjects::correctBackgroundSprite()

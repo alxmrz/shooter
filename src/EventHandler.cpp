@@ -31,6 +31,8 @@ Event EventHandler::handle()
     Event result;
     sf::Event event;
 
+    dialogueKeyConsumed = false;
+
     updateAimTarget();
 
     while (app->window->pollEvent(event)) {
@@ -39,6 +41,7 @@ Event EventHandler::handle()
             result.SetType(Event::Type::Closed, event);
         } else if (event.type == sf::Event::KeyPressed) {
             handleMainKeys(event);
+            handleDialogueKey(event);
             result.SetType(Event::Type::KeyPressed, event);
         } else if (event.type == sf::Event::KeyReleased) {
             result.SetType(Event::Type::KeyReleased, event);
@@ -55,7 +58,7 @@ Event EventHandler::handle()
             result.SetType(Event::Type::MouseMoved, event);
         }
     }
-    if (gameState->isGameStarted) {
+    if (shouldHandleRealTimeKeyboard()) {
         handleRealTimeKeyboardState();
     }
 
@@ -154,10 +157,52 @@ sf::Vector2f EventHandler::currentMouseWorld()
 
 bool EventHandler::isGameplayActive()
 {
-    return gameState->isGameStarted
-        && !gameState->objects->gameOver
-        && player != nullptr
-        && !player->isDead();
+    return isGameRunning() && !isDialogueOpen();
+}
+
+bool EventHandler::isGameRunning()
+{
+    return isMatchLive() && hasLivingPlayer();
+}
+
+bool EventHandler::isMatchLive()
+{
+    return gameState->isGameStarted && !gameState->objects->gameOver;
+}
+
+bool EventHandler::hasLivingPlayer()
+{
+    return player != nullptr && !player->isDead();
+}
+
+bool EventHandler::shouldHandleRealTimeKeyboard()
+{
+    return gameState->isGameStarted && !dialogueKeyConsumed;
+}
+
+void EventHandler::handleDialogueKey(sf::Event& event)
+{
+    if (!isDialogueSpace(event)) {
+        return;
+    }
+
+    gameState->objects->advanceDialogue();
+    dialogueKeyConsumed = true;
+}
+
+bool EventHandler::isDialogueSpace(sf::Event& event)
+{
+    return isSpaceKey(event) && isDialogueOpen();
+}
+
+bool EventHandler::isSpaceKey(sf::Event& event)
+{
+    return event.key.code == sf::Keyboard::Space;
+}
+
+bool EventHandler::isDialogueOpen()
+{
+    return gameState->objects->isDialogueOpen();
 }
 
 void EventHandler::handleUiButtonsHover(sf::Event& event)
@@ -185,14 +230,6 @@ void EventHandler::handleRealTimeKeyboardState()
     }
     
     handleArrowKeys();
-    handleSpaceKey();
-}
-
-void EventHandler::handleSpaceKey()
-{
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-        player->attack();
-    }
 }
 
 void EventHandler::handleArrowKeys()

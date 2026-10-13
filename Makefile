@@ -33,6 +33,7 @@ src/objects/interactive/Aim.cpp \
 src/objects/interfaces/Movable.cpp \
 src/ui/Button.cpp \
 src/ui/Text.cpp \
+src/ui/Dialogue.cpp \
 include/tinyxml/tinyxml2.cpp
 
 DIRS = build \

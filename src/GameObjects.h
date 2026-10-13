@@ -5,6 +5,8 @@
 #include <map>
 #include <SFML/Graphics.hpp>
 
+#include "Event.h"
+
 class Unit;
 class CObject;
 class Fabric;
@@ -13,6 +15,7 @@ class Text;
 class Button;
 class GameState;
 class Aim;
+class Dialogue;
 
 struct GameObjects {
     GameObjects(GameState* gs);
@@ -28,6 +31,7 @@ struct GameObjects {
     Unit* player;
     Fabric* fabric;
     Aim* aim;
+    Dialogue* dialogue;
     
     sf::Sprite* backgroundSprite;
     sf::Sprite* groundSprite;
@@ -64,6 +68,37 @@ struct GameObjects {
     void draw(Window* window, float dt);
     void correctBackgroundSprite();
     void drawPlayerUi(Window* window);
+    
+    /**
+     * Draw the dialogue overlay in screen space above the game world.
+     */
+    void drawDialogue(Window* window);
+    
+    /**
+     * Update the current frame: while the dialogue is open only the dialogue
+     * advances, otherwise the game world updates.
+     */
+    void update(Event event, float dt);
+    
+    /**
+     * Update every game world object.
+     */
+    void updateWorld(Event event);
+    
+    /**
+     * @return true while the intro dialogue is open
+     */
+    bool isDialogueOpen();
+    
+    /**
+     * Advance the dialogue on a Space press.
+     */
+    void advanceDialogue();
+    
+    /**
+     * Create and open the intro dialogue at the start of a new game.
+     */
+    void startIntroDialogue();
     
     /**
      * Показать экран смерти

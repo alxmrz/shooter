@@ -17,6 +17,7 @@
 #include "objects/interactive/Aim.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
+#include "ui/Dialogue.h"
 
 
 Fabric::Fabric(GameObjects* go):
@@ -197,6 +198,15 @@ Button* Fabric::createButton(std::string id, std::string text, float x, float y,
     button->setText(createText(text, x, y));
     
     return button;
+}
+
+Dialogue* Fabric::createDialogue(std::string type)
+{
+    Dialogue* dialogue = new Dialogue(resources->getDialogue(type), Dialogue::CHARS_PER_SECOND);
+    dialogue->setFont(resources->getFont("arial"));
+    dialogue->setPortraitTexture(resources->getTexture("analytic"));
+
+    return dialogue;
 }
 
 sf::Sound* Fabric::getBackgroundSound()

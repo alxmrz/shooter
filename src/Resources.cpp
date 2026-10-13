@@ -1,6 +1,8 @@
 #include <string>
 #include <iostream>
 #include <exception>
+#include <fstream>
+#include <vector>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "Resources.h"
@@ -93,5 +95,62 @@ sf::Sound* Resources::getSound(std::string type)
     } else {
         throw ResourceTypeNotFound("Not found sound type: " + type);
     }
+}
+
+std::vector<std::string> Resources::getDialogue(std::string type)
+{
+    std::ifstream file(dialoguePath(type));
+
+    if (!file.is_open()) {
+        return {};
+    }
+
+    return parseDialogueLines(file);
+}
+
+std::string Resources::dialoguePath(std::string type)
+{
+    auto it = dialogueLoadQueue.find(type);
+
+    if (it == dialogueLoadQueue.end()) {
+        return "";
+    }
+
+    return it->second;
+}
+
+std::vector<std::string> Resources::parseDialogueLines(std::istream& input)
+{
+    std::vector<std::string> lines;
+    std::string line;
+
+    while (std::getline(input, line)) {
+        addDialogueLine(lines, line);
+    }
+
+    return lines;
+}
+
+void Resources::addDialogueLine(std::vector<std::string>& lines, std::string line)
+{
+    if (isBlankDialogueLine(line)) {
+        return;
+    }
+
+    lines.push_back(cleanDialogueLine(line));
+}
+
+bool Resources::isBlankDialogueLine(const std::string& line)
+{
+    return line.find_first_not_of(" \t\r\n") == std::string::npos;
+}
+
+std::string Resources::cleanDialogueLine(std::string line)
+{
+    if (!line.empty() && line.back() == '\r') {
+        line.pop_back();
+    }
+
+    return line;
 }
 

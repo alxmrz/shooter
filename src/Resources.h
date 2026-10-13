@@ -2,8 +2,10 @@
 #define RESOURCES_H
 
 #include <exception>
+#include <istream>
 #include <map>
 #include <string>
+#include <vector>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
@@ -50,7 +52,14 @@ public:
     sf::Texture* getTexture(std::string type);
     sf::Font* getFont(std::string type);
     sf::Sound* getSound(std::string type);
-    
+    std::vector<std::string> getDialogue(std::string type);
+
+    /**
+     * Split dialogue text into fragments: every non-blank line is a fragment,
+     * blank lines are ignored and the original order is preserved.
+     */
+    static std::vector<std::string> parseDialogueLines(std::istream& input);
+
     void load();
 private: 
     std::map<std::string, std::string> texturesLoadQueue {
@@ -63,6 +72,11 @@ private:
         {"background", "resources/images/background.png"},
         {"ammo", "resources/images/ammo.png"},
         {"aim", "resources/images/aim.png"},
+        {"analytic", "resources/images/analytic.png"},
+    };
+
+    std::map<std::string, std::string> dialogueLoadQueue = {
+        {"intro", "resources/dialogue/intro.txt"},
     };
     
     std::map<std::string, std::string> fontsLoadQueue = {
@@ -84,6 +98,11 @@ private:
     void loadTextures();
     void loadFonts();
     void loadSounds();
+
+    std::string dialoguePath(std::string type);
+    static void addDialogueLine(std::vector<std::string>& lines, std::string line);
+    static bool isBlankDialogueLine(const std::string& line);
+    static std::string cleanDialogueLine(std::string line);
 };
 
 #endif /* RESOURCES_H */
