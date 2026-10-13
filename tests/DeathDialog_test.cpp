@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "GameObjectsTestFixture.h"
+#include "fixtures/GameObjectsTestFixture.h"
 
 // Retry after death resets the run: captured flags go back to zero and the run
 // restarts from stage 1.

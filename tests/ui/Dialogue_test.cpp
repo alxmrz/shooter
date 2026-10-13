@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "GameObjectsTestFixture.h"
+#include "fixtures/GameObjectsTestFixture.h"
 #include "Resources.h"
 
 TEST_F(GameObjectsFixture, TypewriterRevealsPrefix) {

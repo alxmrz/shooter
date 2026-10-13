@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "GameObjectsTestFixture.h"
+#include "fixtures/GameObjectsTestFixture.h"
 
 TEST_F(GameObjectsFixture, PlayerAttackWithAimSpawnsAngledBullet) {
     RecordingShooter* player = spawnRecordingPlayer(100, 100);

@@ -18,6 +18,15 @@ schema: spec-driven
 #       - Always include a "Non-goals" section
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  design:
+    - design.md MUST contain UML sequence diagrams for the described interaction scenarios.
+    - design.md MUST contain a class relationship diagram with their methods and properties.
+    - New objects added to design.md (classes, methods, properties) MUST be highlighted in bold.
+  tasks:
+    - tasks.md MUST list new file additions first, then the list of tests grouped by module.
+    - Tests MUST be listed only in the format `{TestName} - {TestDescription}` with no additional data.
+    - Additional technical information MUST go in a separate block.
 
 # Per-operation guidance (optional)
 # Add advisory guidance for how apply and archive work should be conducted.

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "GameObjectsTestFixture.h"
+#include "fixtures/GameObjectsTestFixture.h"
 
 TEST_F(GameObjectsFixture, WorldPausedWhileDialogueOpen) {
     UpdateSpy* spy = spawnUpdateSpy();

@@ -49,7 +49,13 @@ CObject → Button, Text (UI)
 - UI components in `src/ui/`
 - Core systems in `src/core/` (Application, GameState, etc.)
 - The Cyclomatic complexity of the code MUST NOT exceed 2
+- Functions MUST NOT exceed ~50 lines. Large functions MUST be extracted into private methods or classes, grouped by meaning. Exception: keep the block intact when it is a single coherent unit and splitting it would harm comprehension.
+- Anonymous functions (lambdas) MUST NOT be used.
+- A class MUST contain only related properties and the methods that handle them: encapsulation MUST be respected.
 - Private methods MUST be defined immediately after their point of use: if a class method calls a private method, that private method is defined directly after the calling method.
+- Test files MUST live under `tests/`, in a subdirectory mirroring the module they test (e.g. `src/foo/` → `tests/foo/`); tests for modules directly in `src/` live at the root of `tests/`.
+- Fixture files MUST be placed under `tests/` (shared fixtures in `tests/fixtures/`).
+
 ## TDD Workflow (Test-Driven Development)
 All new code must be written following TDD:
 1. **Red** — Write a failing test first. Run it and confirm it fails.
@@ -59,7 +65,7 @@ All new code must be written following TDD:
 Never skip the test step. If a change has no tests, it is not done.
 
 ### Task Lists
-- Every test item in a task list MUST use the format `{test name} - {short description of the case}`.
+- Every test item in a task list MUST use the format `{TestName} - {TestDescription}`.
 
 ### Test Style
 - Tests MUST be written through a DSL: generalize assertions and fixture setup instead of duplicating raw construction/setup code.

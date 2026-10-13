@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "GameObjectsTestFixture.h"
+#include "fixtures/GameObjectsTestFixture.h"
 #include "AI.h"
 #include "objects/units/Shooter.h"
 

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "GameObjectsTestFixture.h"
+#include "fixtures/GameObjectsTestFixture.h"
 
 // Enemies must collide with ground blocks exactly like the player does.
 // DSL: placeGroundBlock / spawnEnemy build the world; each test asserts one case.

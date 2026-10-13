@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <cmath>
-#include "GameObjectsTestFixture.h"
+#include "fixtures/GameObjectsTestFixture.h"
 #include "objects/interactive/Bullet.h"
 
 namespace {
