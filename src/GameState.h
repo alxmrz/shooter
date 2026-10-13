@@ -7,6 +7,7 @@
 #include <SFML/Audio.hpp>
 
 #include "Event.h"
+#include "StageProgress.h"
 
 class Application;
 class CObject;
@@ -45,6 +46,26 @@ public:
     void startNewGame();
     float getElapsedTime();
     void resetElapsedTime();
+    
+    /**
+     * Number of the stage currently being played (starts at 1).
+     */
+    int getStage() const;
+    
+    /**
+     * Total number of flags captured during this run.
+     */
+    int getFlags() const;
+    
+    /**
+     * Register a captured flag: counts it and advances the stage.
+     */
+    void collectFlag();
+    
+    /**
+     * Forget all run progress (stage and captured flags).
+     */
+    void resetProgress();
 private:
     /* @var current application instance */
     Application* app;
@@ -54,8 +75,13 @@ private:
     /* Elapsed time from list frame*/
     float elapsedTime = 0.0;
 
+    /* Stage and flag progress for the current run (memory only) */
+    StageProgress progress;
+
     bool isGameplayRunning();
     void updateRunningGame(Event event);
+    void updateNonDialogue(Event event);
+    bool consumeStageRestart();
     void updateDialogue(Event event);
     void updateGameplay(Event event);
     void updateWorld(Event event);

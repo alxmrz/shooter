@@ -37,16 +37,17 @@ GameObjects::GameObjects(GameState* gs)
     ammoSprite->setScale(0.5f, 0.5f);
     ammoSprite->setTextureRect(sf::IntRect(0, 0, 50, 50));
     
-    // Инициализация UI элементов смерти (скрыты по умолчанию)
-    gameOverText = fabric->createText("You are dead", 0.f, 0.f);
-    restartButton = fabric->createButton("restart", "Restart", 0.f, 0.f, 200, 50);
-    gameOverContainer = new sf::RectangleShape(sf::Vector2f(400, 200));
-    gameOverContainer->setFillColor(sf::Color::White);
-    gameOverContainer->setOutlineThickness(2);
-    gameOverContainer->setOutlineColor(sf::Color::Black);
+    flagSprite = fabric->createSprite("flag", 0.f, 0.f);
+    flagSprite->setScale(0.07f, 0.07f);
+    flagCountText = fabric->createText("", 0.f, 0.f);
+    
+    // Инициализация состояния смерти (UI смерти — это диалог, создаётся по смерти)
     gameOver = false;
     aim = NULL;
     dialogue = NULL;
+    flagDialogue = false;
+    deathDialogue = false;
+    stageRestartPending = false;
     
     grounds = new sf::RenderTexture;
 }
@@ -63,6 +64,9 @@ void GameObjects::clear()
     aim = NULL;
     delete dialogue;
     dialogue = NULL;
+    flagDialogue = false;
+    deathDialogue = false;
+    stageRestartPending = false;
 }
 
 void GameObjects::update(Event event, float dt)
@@ -89,20 +93,122 @@ void GameObjects::updateWorld(Event event)
 
 void GameObjects::advanceDialogue()
 {
+    if (!isDialogueOpen()) {
+        return;
+    }
+
+    advanceOpenDialogue();
+}
+
+void GameObjects::advanceOpenDialogue()
+{
     dialogue->advance();
+    markStageRestartIfFlagClosed();
+}
+
+void GameObjects::markStageRestartIfFlagClosed()
+{
+    if (dialogue->isOpen() || !flagDialogue) {
+        return;
+    }
+
+    flagDialogue = false;
+    stageRestartPending = true;
+}
+
+bool GameObjects::consumeStageRestart()
+{
+    if (!stageRestartPending) {
+        return false;
+    }
+
+    stageRestartPending = false;
+    return true;
+}
+
+bool GameObjects::isFlagDialogue() const
+{
+    return flagDialogue;
+}
+
+void GameObjects::collectFlag()
+{
+    gs->collectFlag();
+    startFlagDialogue();
+}
+
+void GameObjects::startFlagDialogue()
+{
+    startDialogue(fabric->createDialogue(fabric->getDialogueFragments("flag")), true);
 }
 
 void GameObjects::startIntroDialogue()
 {
-    dialogue = fabric->createDialogue("intro");
+    std::vector<std::string> firstStart = fabric->getDialogueFragments("intro");
+    std::vector<std::string> continuation = fabric->getDialogueFragments("intro_continue");
+    std::vector<std::string> fragments =
+        buildIntroFragments(firstStart, continuation, gs->getFlags(), gs->getStage());
 
-    if (dialogue->hasFragments()) {
-        dialogue->open();
+    startDialogue(fabric->createDialogue(fragments), false);
+}
+
+void GameObjects::startDialogue(Dialogue* newDialogue, bool isFlag)
+{
+    if (!newDialogue->hasFragments()) {
+        delete newDialogue;
         return;
     }
 
-    delete dialogue;
-    dialogue = NULL;
+    beginDialogue(newDialogue, isFlag);
+}
+
+void GameObjects::beginDialogue(Dialogue* newDialogue, bool isFlag)
+{
+    dialogue = newDialogue;
+    flagDialogue = isFlag;
+    dialogue->open();
+}
+
+std::vector<std::string> GameObjects::buildIntroFragments(
+    const std::vector<std::string>& firstStart,
+    const std::vector<std::string>& continuation,
+    int flags,
+    int stage)
+{
+    if (flags > 0) {
+        return continuedIntro(continuation, flags, stage);
+    }
+
+    return firstStart;
+}
+
+std::vector<std::string> GameObjects::continuedIntro(
+    const std::vector<std::string>& continuation, int flags, int stage)
+{
+    std::vector<std::string> fragments;
+    for (const std::string& line : continuation) {
+        fragments.push_back(replaceProgressTokens(line, flags, stage));
+    }
+    return fragments;
+}
+
+std::string GameObjects::replaceProgressTokens(const std::string& line, int flags, int stage)
+{
+    std::string result = replaceToken(line, "{flags}", std::to_string(flags));
+    return replaceToken(result, "{stage}", std::to_string(stage));
+}
+
+std::string GameObjects::replaceToken(const std::string& line, const std::string& token,
+                                      const std::string& value)
+{
+    std::string result = line;
+    size_t position = result.find(token);
+    if (position == std::string::npos) {
+        return result;
+    }
+
+    result.replace(position, token.size(), value);
+    return result;
 }
 
 void GameObjects::draw(Window* window, float dt)
@@ -140,12 +246,6 @@ void GameObjects::draw(Window* window, float dt)
         }
         
         drawPlayerUi(window);
-        
-        // Если игра окончена, отображаем контейнер, текст и кнопки поверх всего
-        if (gameOver) {
-            window->draw(*gameOverContainer);
-            window->draw(*gameOverText->message);
-        }
     }
     
     drawDialogue(window);
@@ -181,6 +281,9 @@ void GameObjects::drawPlayerUi(Window* window)
     sf::Vector2f ammoWindowCoords = window->mapPixelToCoords(sf::Vector2i(220, 50));
     sf::Vector2f ammoCountCoords = window->mapPixelToCoords(sf::Vector2i(260, 50));
 
+    sf::Vector2f flagWindowCoords = window->mapPixelToCoords(sf::Vector2i(320, 50));
+    sf::Vector2f flagCountCoords = window->mapPixelToCoords(sf::Vector2i(350, 50));
+
     cristalCountText->message->setString(std::to_string(player->getCrystals()));
     cristalCountText->message->setPosition(crystalCountCoords.x, crystalCountCoords.y);
     crystalSprite->setPosition(cristalWindowCoords.x, cristalWindowCoords.y);
@@ -188,6 +291,10 @@ void GameObjects::drawPlayerUi(Window* window)
     ammoCountText->message->setString(std::to_string(player->getAmmo()));
     ammoCountText->message->setPosition(ammoCountCoords.x, ammoCountCoords.y);
     ammoSprite->setPosition(ammoWindowCoords.x, ammoWindowCoords.y);
+    
+    flagCountText->message->setString(std::to_string(gs->getFlags()));
+    flagCountText->message->setPosition(flagCountCoords.x, flagCountCoords.y);
+    flagSprite->setPosition(flagWindowCoords.x, flagWindowCoords.y);
 
 
     sf::Vector2f windowCoords = window->mapPixelToCoords(sf::Vector2i(50, 50));
@@ -203,6 +310,9 @@ void GameObjects::drawPlayerUi(Window* window)
     
     window->draw(*ammoSprite);
     window->draw(*ammoCountText->message);
+    
+    window->draw(*flagSprite);
+    window->draw(*flagCountText->message);
         
     
 }
@@ -213,59 +323,40 @@ void GameObjects::showGameOverScreen() {
     // Останавливаем фоновую музыку
     gs->stopBackgroundMusic();
     
-    // Получаем центр камеры (view)
-    sf::Vector2f center = gs->view->getCenter();
-    
-    // Позиционируем контейнер
-    gameOverContainer->setSize(sf::Vector2f(400, 200));
-    gameOverContainer->setOrigin(200, 100); // центр контейнера
-    gameOverContainer->setPosition(center.x, center.y);
-    gameOverContainer->setFillColor(sf::Color::White);
-    gameOverContainer->setOutlineThickness(2);
-    gameOverContainer->setOutlineColor(sf::Color::Black);
-    
-    // Позиционируем текст "Вы проиграли" по центру экрана (внутри контейнера)
-    gameOverText->message->setCharacterSize(48);
-    gameOverText->message->setFillColor(sf::Color::Red);
-    // Центрируем текст по горизонтали
-    sf::FloatRect textBounds = gameOverText->message->getLocalBounds();
-    gameOverText->message->setOrigin(textBounds.width / 2, textBounds.height / 2);
-    gameOverText->message->setPosition(center.x, center.y - 40);
-    
-    // Позиционируем кнопку "Начать заново" ниже текста
-    restartButton->setCoords(center.x - 100, center.y + 40);
-    
-    // Добавляем кнопку в вектор buttons для отрисовки
-    // Проверим, не добавлена ли уже
-    bool alreadyAdded = false;
-    for (auto btn : buttons) {
-        if (btn == restartButton) {
-            alreadyAdded = true;
-            break;
-        }
+    openDeathDialogue();
+}
+
+void GameObjects::openDeathDialogue() {
+    Dialogue* death = fabric->createDialogue(fabric->getDialogueFragments("death"));
+    death->setChoices({"Yes", "No"});
+    startDialogue(death, false);
+    deathDialogue = isDialogueOpen();
+}
+
+bool GameObjects::isDeathDialogueOpen() {
+    return deathDialogue && isDialogueOpen();
+}
+
+int GameObjects::deathChoiceAt(int x, int y) {
+    if (!isDeathDialogueOpen()) {
+        return -1;
     }
-    if (!alreadyAdded) {
-        buttons.push_back(restartButton);
-    }
+
+    return dialogue->choiceAt(static_cast<float>(x), static_cast<float>(y));
 }
 
 void GameObjects::hideGameOverScreen() {
     gameOver = false;
-    
-    // Удаляем кнопку из вектора buttons
-    for (auto it = buttons.begin(); it != buttons.end(); ++it) {
-        if (*it == restartButton) {
-            buttons.erase(it);
-            break;
-        }
-    }
+    deathDialogue = false;
 }
 
 void GameObjects::restartGame() {
-    hideGameOverScreen();
+    // Смерть сбрасывает прогресс: флаги обнуляются, этап начинается заново
+    gs->resetProgress();
     
-    // Очищаем текущее состояние игры
+    // Очищаем текущее состояние игры (в том числе диалог смерти)
     clear();
+    gameOver = false;
     
     // Запускаем новую игру через GameState
     gs->startNewGame();

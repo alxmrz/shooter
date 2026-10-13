@@ -73,10 +73,14 @@ private:
         {"ammo", "resources/images/ammo.png"},
         {"aim", "resources/images/aim.png"},
         {"analytic", "resources/images/analytic.png"},
+        {"flag", "resources/images/flag.png"},
     };
 
     std::map<std::string, std::string> dialogueLoadQueue = {
         {"intro", "resources/dialogue/intro.txt"},
+        {"intro_continue", "resources/dialogue/intro_continue.txt"},
+        {"flag", "resources/dialogue/flag.txt"},
+        {"death", "resources/dialogue/death.txt"},
     };
     
     std::map<std::string, std::string> fontsLoadQueue = {

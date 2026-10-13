@@ -26,6 +26,10 @@ add_executable(tests
     PlayerFiring_test.cpp
     Dialogue_test.cpp
     DialoguePause_test.cpp
+    StageProgress_test.cpp
+    Flag_test.cpp
+    FlagDialogue_test.cpp
+    DeathDialog_test.cpp
     LevelGenerator_test.cpp
     PlatformCollision_test.cpp
     ShooterPlatformCollision_test.cpp

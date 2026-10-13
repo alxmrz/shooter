@@ -7,6 +7,7 @@
 #include "../interactive/Heart.h"
 #include "../interactive/Ammunition.h"
 #include "../interactive/Platform.h"
+#include "../interactive/Flag.h"
 #include "../interactive/Bullet.h"
 #include "../interfaces/Movable.h"
 #include "../../CObject.h"
@@ -81,8 +82,22 @@ void Unit::collectItems() {
 
                 break;
             }
+        } else if (Flag *obj = dynamic_cast<Flag *>(go->all[i])) {
+            if (tryCollectFlag(obj, i)) {
+                break;
+            }
         }
     }
+}
+
+bool Unit::tryCollectFlag(Flag* flag, unsigned index) {
+    if (!collideRect(flag)) {
+        return false;
+    }
+
+    go->collectFlag();
+    go->all.erase(go->all.begin() + index);
+    return true;
 }
 
 bool Unit::resolvePlatformCollision(float x, float y) {

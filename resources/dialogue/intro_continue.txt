@@ -1,0 +1,1 @@
+Welcome back, shooter. You have already captured {flags} flag(s) and reached stage {stage}. Good luck out there!

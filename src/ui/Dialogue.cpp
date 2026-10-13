@@ -12,6 +12,14 @@ const float CHAR_WIDTH_RATIO = 0.5f;
 const unsigned TEXT_SIZE = 14;
 const unsigned PROMPT_SIZE = 12;
 const char* PROMPT_TEXT = "Press space to continue";
+
+const float CHOICE_WIDTH = 96.f;
+const float CHOICE_HEIGHT = 28.f;
+const float CHOICE_GAP = 12.f;
+const unsigned CHOICE_SIZE = 14;
+const sf::Color CHOICE_FILL(238, 240, 244);
+const sf::Color CHOICE_OUTLINE(90, 95, 105);
+const sf::Color CHOICE_TEXT(35, 38, 44);
 }
 
 constexpr float Dialogue::CHARS_PER_SECOND;
@@ -53,6 +61,15 @@ void Dialogue::update(float dt)
 }
 
 void Dialogue::advance()
+{
+    if (hasChoices()) {
+        return;
+    }
+
+    advanceFragmentOrType();
+}
+
+void Dialogue::advanceFragmentOrType()
 {
     if (isTyping()) {
         completeTyping();
@@ -140,6 +157,29 @@ std::string Dialogue::getVisibleText() const
     return currentFragment().substr(0, visibleCharCount());
 }
 
+void Dialogue::setChoices(std::vector<std::string> labels)
+{
+    choices = labels;
+}
+
+bool Dialogue::hasChoices() const
+{
+    return !choices.empty();
+}
+
+int Dialogue::choiceAt(float x, float y) const
+{
+    std::vector<sf::FloatRect>::const_iterator it =
+        std::find_if(choiceRects.begin(), choiceRects.end(),
+                     [x, y](const sf::FloatRect& rect) { return rect.contains(x, y); });
+
+    if (it == choiceRects.end()) {
+        return -1;
+    }
+
+    return static_cast<int>(std::distance(choiceRects.begin(), it));
+}
+
 void Dialogue::setFont(sf::Font* font)
 {
     this->font = font;
@@ -160,9 +200,24 @@ void Dialogue::draw(sf::RenderTarget& target, float screenWidth, float screenHei
     }
 
     layoutBox(screenWidth, screenHeight);
+    drawContent(target);
+}
+
+void Dialogue::drawContent(sf::RenderTarget& target)
+{
     target.draw(box);
     target.draw(portrait);
     target.draw(textMessage);
+    drawFooter(target);
+}
+
+void Dialogue::drawFooter(sf::RenderTarget& target)
+{
+    if (hasChoices()) {
+        drawChoices(target);
+        return;
+    }
+
     target.draw(promptMessage);
 }
 
@@ -182,7 +237,66 @@ void Dialogue::layoutBox(float screenWidth, float screenHeight)
     float side = boxH - 2.f * PADDING;
     positionPortrait(boxX + PADDING, boxY + PADDING, side);
     positionText(boxX + boxH, boxY + PADDING, boxW - boxH - PADDING);
+    layoutFooter(boxX, boxY, boxW, boxH);
+}
+
+void Dialogue::layoutFooter(float boxX, float boxY, float boxW, float boxH)
+{
+    if (hasChoices()) {
+        layoutChoices(boxX, boxY, boxW, boxH);
+        return;
+    }
+
     positionPrompt(boxX, boxY, boxW, boxH);
+}
+
+void Dialogue::layoutChoices(float boxX, float boxY, float boxW, float boxH)
+{
+    choiceRects.clear();
+
+    const float count = static_cast<float>(choices.size());
+    const float total = count * CHOICE_WIDTH + (count - 1.f) * CHOICE_GAP;
+    const float y = boxY + boxH - PADDING - CHOICE_HEIGHT;
+    const float startX = boxX + boxW - PADDING - total;
+
+    for (size_t i = 0; i < choices.size(); i++) {
+        float x = startX + static_cast<float>(i) * (CHOICE_WIDTH + CHOICE_GAP);
+        choiceRects.push_back(sf::FloatRect(x, y, CHOICE_WIDTH, CHOICE_HEIGHT));
+    }
+}
+
+void Dialogue::drawChoices(sf::RenderTarget& target)
+{
+    for (size_t i = 0; i < choiceRects.size(); i++) {
+        sf::RectangleShape shape = choiceBoxShape(choiceRects[i]);
+        sf::Text label = choiceLabel(i, choiceRects[i]);
+        target.draw(shape);
+        target.draw(label);
+    }
+}
+
+sf::RectangleShape Dialogue::choiceBoxShape(const sf::FloatRect& rect) const
+{
+    sf::RectangleShape shape(sf::Vector2f(rect.width, rect.height));
+    shape.setPosition(rect.left, rect.top);
+    shape.setFillColor(CHOICE_FILL);
+    shape.setOutlineThickness(2.f);
+    shape.setOutlineColor(CHOICE_OUTLINE);
+    return shape;
+}
+
+sf::Text Dialogue::choiceLabel(size_t index, const sf::FloatRect& rect) const
+{
+    sf::Text label;
+    label.setFont(*font);
+    label.setCharacterSize(CHOICE_SIZE);
+    label.setFillColor(CHOICE_TEXT);
+    label.setString(sf::String::fromUtf8(choices[index].begin(), choices[index].end()));
+
+    sf::FloatRect bounds = label.getLocalBounds();
+    label.setOrigin(bounds.left + bounds.width / 2.f, bounds.top + bounds.height / 2.f);
+    label.setPosition(rect.left + rect.width / 2.f, rect.top + rect.height / 2.f);
+    return label;
 }
 
 void Dialogue::positionPortrait(float x, float y, float side)

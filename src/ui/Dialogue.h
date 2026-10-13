@@ -6,8 +6,13 @@
 #include <SFML/Graphics.hpp>
 
 /**
- * Intro dialogue overlay: reveals text letter by letter and advances one
- * fragment per Space press, closing after the last fragment.
+ * Dialogue overlay: a box at the top of the screen with a character portrait
+ * on the left and letter-by-letter text on the right. By default it advances
+ * one fragment per Space press and closes after the last fragment.
+ *
+ * It can also act as a choice prompt: action buttons with the given labels are
+ * drawn inside the box instead of the continue hint, and Space no longer
+ * advances the dialogue.
  *
  * It is a screen-space overlay independent from the game camera, so it only
  * needs the current screen size when drawing.
@@ -33,7 +38,8 @@ public:
 
     /**
      * Handle a Space press: reveal the whole fragment while typing, otherwise
-     * move to the next fragment or close on the last one.
+     * move to the next fragment or close on the last one. Does nothing while
+     * choice buttons are shown.
      */
     void advance();
 
@@ -42,6 +48,17 @@ public:
     bool promptShown() const;
     int getCurrentIndex() const;
     std::string getVisibleText() const;
+
+    /**
+     * Show action buttons with the given labels instead of advancing on Space.
+     */
+    void setChoices(std::vector<std::string> labels);
+    bool hasChoices() const;
+
+    /**
+     * Index of the choice button at the given screen-space point, or -1.
+     */
+    int choiceAt(float x, float y) const;
 
     void setFont(sf::Font* font);
     void setPortraitTexture(sf::Texture* texture);
@@ -58,6 +75,9 @@ private:
     float typingElapsed;
     bool openState;
 
+    std::vector<std::string> choices;
+    std::vector<sf::FloatRect> choiceRects;
+
     sf::Font* font;
     sf::Texture* portraitTexture;
     sf::Text textMessage;
@@ -67,6 +87,7 @@ private:
 
     void completeTyping();
     void advanceFragment();
+    void advanceFragmentOrType();
     bool isTyping() const;
     int visibleCharCount() const;
     int currentFragmentSize() const;
@@ -76,9 +97,16 @@ private:
     void close();
 
     void layoutBox(float screenWidth, float screenHeight);
+    void layoutFooter(float boxX, float boxY, float boxW, float boxH);
+    void layoutChoices(float boxX, float boxY, float boxW, float boxH);
     void positionPortrait(float x, float y, float side);
     void positionText(float x, float y, float width);
     void positionPrompt(float boxX, float boxY, float boxW, float boxH);
+    void drawContent(sf::RenderTarget& target);
+    void drawFooter(sf::RenderTarget& target);
+    void drawChoices(sf::RenderTarget& target);
+    sf::RectangleShape choiceBoxShape(const sf::FloatRect& rect) const;
+    sf::Text choiceLabel(size_t index, const sf::FloatRect& rect) const;
     unsigned maxCharsForWidth(float width) const;
     std::string wrapText(const std::string& text, unsigned maxChars) const;
     void addWord(std::string& result, std::string& line, const std::string& word, unsigned maxChars) const;

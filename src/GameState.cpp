@@ -54,8 +54,27 @@ void GameState::updateRunningGame(Event event)
         return;
     }
 
+    updateNonDialogue(event);
+}
+
+void GameState::updateNonDialogue(Event event)
+{
+    if (consumeStageRestart()) {
+        return;
+    }
+
     updatePlayerDeath();
     updateGameplay(event);
+}
+
+bool GameState::consumeStageRestart()
+{
+    if (!objects->consumeStageRestart()) {
+        return false;
+    }
+
+    startNewGame();
+    return true;
 }
 
 void GameState::updateDialogue(Event event)
@@ -131,5 +150,25 @@ void GameState::startNewGame()
 float GameState::getElapsedTime()
 {
     return elapsedTime;
+}
+
+int GameState::getStage() const
+{
+    return progress.getStage();
+}
+
+int GameState::getFlags() const
+{
+    return progress.getFlags();
+}
+
+void GameState::collectFlag()
+{
+    progress.collectFlag();
+}
+
+void GameState::resetProgress()
+{
+    progress.reset();
 }
 

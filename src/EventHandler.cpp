@@ -33,6 +33,10 @@ Event EventHandler::handle()
 
     dialogueKeyConsumed = false;
 
+    // The player may have been recreated by a stage restart, so track the
+    // current instance instead of a stale pointer.
+    player = gameState->objects->player;
+
     updateAimTarget();
 
     while (app->window->pollEvent(event)) {
@@ -109,9 +113,6 @@ bool EventHandler::handleUiButtonsClick(sf::Event& event)
                 this->player = gameState->objects->player;
             } else if (id == "exit") {
                 app->close();
-            } else if (id == "restart") {
-                gameState->objects->restartGame();
-                this->player = gameState->objects->player;
             }
             return true;
         }
@@ -122,11 +123,51 @@ bool EventHandler::handleUiButtonsClick(sf::Event& event)
 
 void EventHandler::handleLeftClick(sf::Event& event)
 {
+    if (handleDeathChoice(event)) {
+        return;
+    }
+
     if (handleUiButtonsClick(event)) {
         return;
     }
 
     handlePlayerFire();
+}
+
+bool EventHandler::handleDeathChoice(sf::Event& event)
+{
+    if (!isDeathDialogueOpen()) {
+        return false;
+    }
+
+    return clickDeathChoice(event);
+}
+
+bool EventHandler::clickDeathChoice(sf::Event& event)
+{
+    int choice = gameState->objects->deathChoiceAt(event.mouseButton.x, event.mouseButton.y);
+    if (choice < 0) {
+        return false;
+    }
+
+    applyDeathChoice(choice);
+    return true;
+}
+
+void EventHandler::applyDeathChoice(int choice)
+{
+    if (choice != 0) {
+        app->close();
+        return;
+    }
+
+    gameState->objects->restartGame();
+    this->player = gameState->objects->player;
+}
+
+bool EventHandler::isDeathDialogueOpen()
+{
+    return gameState->objects->isDeathDialogueOpen();
 }
 
 void EventHandler::handlePlayerFire()
@@ -192,7 +233,7 @@ void EventHandler::handleDialogueKey(sf::Event& event)
 
 bool EventHandler::isDialogueSpace(sf::Event& event)
 {
-    return isSpaceKey(event) && isDialogueOpen();
+    return isSpaceKey(event) && isDialogueOpen() && !isDeathDialogueOpen();
 }
 
 bool EventHandler::isSpaceKey(sf::Event& event)

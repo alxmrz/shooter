@@ -18,6 +18,7 @@ set(PROJECT_HEADERS
         src/Resources.h
         src/LevelGenerator.h
         src/SpacingGrid.h
+        src/StageProgress.h
         src/objects/backgrounds/Ground.h
         src/objects/backgrounds/GroundBlock.h
         src/objects/backgrounds/GroundBlock.h
@@ -26,6 +27,7 @@ set(PROJECT_HEADERS
         src/objects/interactive/Ammunition.h
         src/objects/interactive/Platform.h
         src/objects/interactive/Tree.h
+        src/objects/interactive/Flag.h
         src/objects/units/Unit.h
         src/objects/units/Shooter.h
         src/objects/interactive/Bullet.h
@@ -51,6 +53,7 @@ set(PROJECT_SOURCES
         src/Fabric.cpp
         src/Resources.cpp
         src/LevelGenerator.cpp
+        src/StageProgress.cpp
         src/objects/backgrounds/Ground.cpp
         src/objects/backgrounds/GroundBlock.cpp
         src/objects/backgrounds/GroundBlock.cpp
@@ -59,6 +62,7 @@ set(PROJECT_SOURCES
         src/objects/interactive/Ammunition.cpp
         src/objects/interactive/Platform.cpp
         src/objects/interactive/Tree.cpp
+        src/objects/interactive/Flag.cpp
         src/objects/units/Unit.cpp
         src/objects/units/Shooter.cpp
         src/objects/interactive/Bullet.cpp

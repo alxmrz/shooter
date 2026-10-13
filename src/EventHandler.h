@@ -54,9 +54,18 @@ private:
     void handleRealTimeKeyboardState();
 
     /**
-     * Handle a left mouse button press: UI buttons first, then a shot.
+     * Handle a left mouse button press: death dialog choice, then UI buttons,
+     * then a shot.
      */
     void handleLeftClick(sf::Event& event);
+
+    /**
+     * Handle a click on the death dialog's choice buttons.
+     */
+    bool handleDeathChoice(sf::Event& event);
+    bool clickDeathChoice(sf::Event& event);
+    void applyDeathChoice(int choice);
+    bool isDeathDialogueOpen();
 
     /**
      * Fire the player weapon if a game is running and the player is alive.

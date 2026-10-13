@@ -1,4 +1,6 @@
 #include <string>
+#include <vector>
+#include <algorithm>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include "Fabric.h"
@@ -15,6 +17,7 @@
 #include "objects/backgrounds/GroundBlock.h"
 #include "objects/interactive/Tree.h"
 #include "objects/interactive/Aim.h"
+#include "objects/interactive/Flag.h"
 #include "ui/Button.h"
 #include "ui/Text.h"
 #include "ui/Dialogue.h"
@@ -25,6 +28,12 @@ go(go)
 {
     resources = new Resources();
     resources->load();
+}
+
+Fabric::Fabric():
+go(nullptr),
+resources(nullptr)
+{
 }
 
 Fabric::Fabric(const Fabric& orig)
@@ -143,6 +152,28 @@ GroundBlock* Fabric::createGroundBlock(float x, float y, int width, int height)
     return groundBlock;
 }
 
+Flag* Fabric::createFlag(float x, float y, int width, int height)
+{
+    sf::Sprite* sprite = createSprite("flag", x, y);
+    scaleFlagSprite(sprite, width, height);
+
+    Flag* flag = new Flag(x, y, width, height);
+    flag->setMainSprite(sprite);
+    return flag;
+}
+
+void Fabric::scaleFlagSprite(sf::Sprite* sprite, int width, int height)
+{
+    sf::Vector2u size = sprite->getTexture()->getSize();
+    if (size.x == 0 || size.y == 0) {
+        return;
+    }
+
+    float scale = std::min(width / static_cast<float>(size.x),
+                           height / static_cast<float>(size.y));
+    sprite->setScale(scale, scale);
+}
+
 Shooter* Fabric::createShooter(float x, float y, int width, int height)
 {
     Shooter* shooter = new Shooter(go, x, y, width, height);
@@ -202,11 +233,21 @@ Button* Fabric::createButton(std::string id, std::string text, float x, float y,
 
 Dialogue* Fabric::createDialogue(std::string type)
 {
-    Dialogue* dialogue = new Dialogue(resources->getDialogue(type), Dialogue::CHARS_PER_SECOND);
+    return createDialogue(getDialogueFragments(type));
+}
+
+Dialogue* Fabric::createDialogue(std::vector<std::string> fragments)
+{
+    Dialogue* dialogue = new Dialogue(fragments, Dialogue::CHARS_PER_SECOND);
     dialogue->setFont(resources->getFont("arial"));
     dialogue->setPortraitTexture(resources->getTexture("analytic"));
 
     return dialogue;
+}
+
+std::vector<std::string> Fabric::getDialogueFragments(std::string type)
+{
+    return resources->getDialogue(type);
 }
 
 sf::Sound* Fabric::getBackgroundSound()

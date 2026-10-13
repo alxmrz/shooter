@@ -62,3 +62,25 @@ TEST_F(GameObjectsFixture, DialogueLinesIgnoreBlankLines) {
     EXPECT_EQ(lines[0], "line one");
     EXPECT_EQ(lines[1], "line two");
 }
+
+TEST_F(GameObjectsFixture, DialogueChoicesDisableAdvance) {
+    spawnDialogue({"Stay or go?"});
+    go->dialogue->setChoices({"Yes", "No"});
+    EXPECT_TRUE(go->dialogue->hasChoices());
+
+    updateDialogue(10.f);
+    advanceDialogue();
+
+    EXPECT_TRUE(dialogueOpen());
+    expectDialogueIndex(0);
+}
+
+TEST_F(GameObjectsFixture, DialogueWithoutChoicesKeepsAdvancing) {
+    spawnDialogue({"Hi"});
+    EXPECT_FALSE(go->dialogue->hasChoices());
+
+    updateDialogue(1.0f);
+    advanceDialogue();
+
+    EXPECT_FALSE(dialogueOpen());
+}

@@ -16,6 +16,7 @@ class Window;
 class Text;
 class AI;
 class Platform;
+class Flag;
 
 class Unit : public Movable {
 public:
@@ -160,6 +161,7 @@ protected:
 
 private:
     void collectItems();
+    bool tryCollectFlag(Flag* flag, unsigned index);
     bool resolvePlatformCollision(float x, float y);
     Platform* findCollidingPlatform();
     bool isSolidCollision(Platform* platform);

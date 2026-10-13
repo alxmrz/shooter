@@ -9,12 +9,45 @@
 
 #include "GameObjects.h"
 #include "CObject.h"
+#include "Fabric.h"
+#include "GameState.h"
 #include "objects/interactive/Platform.h"
 #include "objects/backgrounds/GroundBlock.h"
 #include "objects/units/Shooter.h"
 #include "objects/interactive/Bullet.h"
 #include "objects/interactive/Aim.h"
+#include "objects/interactive/Flag.h"
 #include "ui/Dialogue.h"
+
+// Lightweight dialogue factory: creates dialogues from configured fragments
+// without loading any resources, so flag and intro flows can be exercised
+// headlessly.
+class TestFabric : public Fabric {
+public:
+    std::vector<std::string> introFragments {"Intro line"};
+    std::vector<std::string> continuationFragments {"Flags {flags}, stage {stage}. Good luck!"};
+    std::vector<std::string> flagFragments {"Congratulations!"};
+
+    TestFabric() : Fabric() {
+    }
+
+    Dialogue* createDialogue(std::vector<std::string> fragments) override {
+        return new Dialogue(fragments, Dialogue::CHARS_PER_SECOND);
+    }
+
+    std::vector<std::string> getDialogueFragments(std::string type) override {
+        if (type == "intro") {
+            return introFragments;
+        }
+        if (type == "intro_continue") {
+            return continuationFragments;
+        }
+        if (type == "flag") {
+            return flagFragments;
+        }
+        return {};
+    }
+};
 
 // Test double that counts how many times the game world updates it, so the
 // dialogue pause can be observed without touching real objects.
@@ -58,6 +91,7 @@ class GameObjectsFixture : public ::testing::Test {
 protected:
     alignas(GameObjects) char goBuf[sizeof(GameObjects)];
     GameObjects* go = nullptr;
+    TestFabric testFabric;
 
     sf::Texture dummyTexture;
     sf::Sprite mainSpr;
@@ -75,9 +109,12 @@ protected:
         new (&go->all) std::vector<CObject*>();
         new (&go->borders) std::map<int, CObject*>();
         go->player = nullptr;
-        go->fabric = nullptr;
+        go->fabric = &testFabric;
+        go->gs = new GameState();
         go->aim = nullptr;
         go->dialogue = nullptr;
+        go->flagDialogue = false;
+        go->stageRestartPending = false;
         go->gameOver = false;
     }
 
@@ -187,7 +224,7 @@ protected:
     }
 
     void advanceDialogue() {
-        go->dialogue->advance();
+        go->advanceDialogue();
     }
 
     bool dialogueOpen() {
@@ -222,6 +259,68 @@ protected:
 
     void expectObjectUpdated(UpdateSpy* spy) {
         EXPECT_EQ(spy->updateCount, 1);
+    }
+
+    Flag* spawnFlag(float x, float y, int width = ACTOR_W, int height = ACTOR_W) {
+        Flag* flag = new Flag(x, y, width, height);
+        flag->setMainSprite(makeSprite());
+        go->all.push_back(flag);
+        return flag;
+    }
+
+    void touchFlag() {
+        go->player->move(1.f, 0.f);
+    }
+
+    bool flagPresent() {
+        return containsFlag(go->all);
+    }
+
+    bool containsFlag(const std::vector<CObject*>& objects) {
+        for (CObject* object : objects) {
+            if (dynamic_cast<Flag*>(object) != nullptr) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void expectFlagCount(int expected) {
+        EXPECT_EQ(go->gs->getFlags(), expected);
+    }
+
+    void expectStage(int expected) {
+        EXPECT_EQ(go->gs->getStage(), expected);
+    }
+
+    void startFlagDialogue(std::vector<std::string> fragments) {
+        go->startDialogue(new Dialogue(fragments, Dialogue::CHARS_PER_SECOND), true);
+    }
+
+    bool flagDialogueOpen() {
+        return go->isDialogueOpen() && go->isFlagDialogue();
+    }
+
+    bool consumeStageRestart() {
+        return go->consumeStageRestart();
+    }
+
+    std::vector<std::string> introFragmentsFor(int flags) {
+        return GameObjects::buildIntroFragments(testFabric.introFragments,
+                                                testFabric.continuationFragments, flags, flags + 1);
+    }
+
+    bool introFragmentsContain(int flags, const std::string& text) {
+        return fragmentsContain(introFragmentsFor(flags), text);
+    }
+
+    bool fragmentsContain(const std::vector<std::string>& fragments, const std::string& text) {
+        for (const std::string& fragment : fragments) {
+            if (fragment.find(text) != std::string::npos) {
+                return true;
+            }
+        }
+        return false;
     }
 };
 

@@ -100,12 +100,16 @@ public:
     static constexpr int ITEM_HEART = 2;
     static constexpr int ITEM_CRYSTAL = 4;
 
+    // The flag marks the level goal and sits on the highest ground block.
+    static constexpr int FLAG_SIZE = 50;
+
     // Public methods for testing
     void generateGround(std::vector<GeneratedObject>& objects);
     void generatePlatforms(std::vector<GeneratedObject>& objects);
     void generatePlatformItems(std::vector<GeneratedObject>& objects);
     void generateEnemies(std::vector<GeneratedObject>& objects);
     void generateTrees(std::vector<GeneratedObject>& objects);
+    void generateFlag(std::vector<GeneratedObject>& objects);
     
     float randomFloat(float min, float max);
     int randomInt(int min, int max);
@@ -159,6 +163,17 @@ private:
     void generateGuaranteedAmmo(std::vector<GeneratedObject>& objects) const;
     void generateGuaranteedHeart(std::vector<GeneratedObject>& objects) const;
     void generateGuaranteedCrystal(std::vector<GeneratedObject>& objects) const;
+
+    // Highest-platform lookup and flag assembly, split so each function keeps
+    // to at most a single loop and a single branch (complexity budget).
+    static const GeneratedObject* highestGroundBlock(
+        const std::vector<GeneratedObject>& objects);
+    static void addGroundBlocks(std::vector<const GeneratedObject*>& out,
+                                const std::vector<GeneratedObject>& objects);
+    static void addIfGroundBlock(std::vector<const GeneratedObject*>& out,
+                                 const GeneratedObject& object);
+    static bool isAbove(const GeneratedObject* a, const GeneratedObject* b);
+    static GeneratedObject makeFlag(const GeneratedObject& block);
 };
 
 #endif /* LEVELGENERATOR_H */

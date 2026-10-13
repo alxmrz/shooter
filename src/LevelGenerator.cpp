@@ -15,6 +15,7 @@
 #include "objects/interactive/Ammunition.h"
 #include "objects/interactive/Crystal.h"
 #include "objects/interactive/Tree.h"
+#include "objects/interactive/Flag.h"
 #include "objects/interactive/Aim.h"
 #include "objects/backgrounds/GroundBlock.h"
 
@@ -44,6 +45,7 @@ constexpr int LevelGenerator::TREE_TRUNK_HEIGHT;
 constexpr int LevelGenerator::TREE_BRANCH_STEP;
 constexpr int LevelGenerator::TREE_TRUNK_MARGIN;
 constexpr int LevelGenerator::TREE_COLUMN_STEP;
+constexpr int LevelGenerator::FLAG_SIZE;
 
 LevelGenerator::LevelGenerator(GameObjects* go) : go(go)
 {
@@ -71,6 +73,8 @@ void LevelGenerator::generateLevel(Map* map)
     generatePlatformItems(objects);
 
     generateEnemies(objects);
+
+    generateFlag(objects);
 
 
     // Create the player on top of the fixed start block in the bottom-left corner.
@@ -130,6 +134,10 @@ void LevelGenerator::generateLevel(Map* map)
         {
             Shooter* shooter = go->fabric->createShooter(obj.x, obj.y, obj.width, obj.height);
             go->all.push_back(shooter);
+        }
+        else if (obj.type == "Flag")
+        {
+            go->all.push_back(go->fabric->createFlag(obj.x, obj.y, obj.width, obj.height));
         }
     }
 }
@@ -707,4 +715,69 @@ float LevelGenerator::randomFloat(float min, float max)
 int LevelGenerator::randomInt(int min, int max)
 {
     return min + std::rand() % (max - min + 1);
+}
+
+void LevelGenerator::generateFlag(std::vector<GeneratedObject>& objects)
+{
+    const GeneratedObject* top = highestGroundBlock(objects);
+    if (top == nullptr)
+    {
+        return;
+    }
+
+    objects.push_back(makeFlag(*top));
+}
+
+const GeneratedObject* LevelGenerator::highestGroundBlock(
+    const std::vector<GeneratedObject>& objects)
+{
+    std::vector<const GeneratedObject*> blocks;
+    addGroundBlocks(blocks, objects);
+    if (blocks.empty())
+    {
+        return nullptr;
+    }
+
+    return *std::min_element(blocks.begin(), blocks.end(), isAbove);
+}
+
+void LevelGenerator::addGroundBlocks(std::vector<const GeneratedObject*>& out,
+                                     const std::vector<GeneratedObject>& objects)
+{
+    for (const auto& obj : objects)
+    {
+        addIfGroundBlock(out, obj);
+    }
+}
+
+void LevelGenerator::addIfGroundBlock(std::vector<const GeneratedObject*>& out,
+                                      const GeneratedObject& object)
+{
+    if (object.type != "GroundBlock")
+    {
+        return;
+    }
+
+    out.push_back(&object);
+}
+
+bool LevelGenerator::isAbove(const GeneratedObject* a, const GeneratedObject* b)
+{
+    if (a->y != b->y)
+    {
+        return a->y < b->y;
+    }
+
+    return a->x < b->x;
+}
+
+GeneratedObject LevelGenerator::makeFlag(const GeneratedObject& block)
+{
+    GeneratedObject flag;
+    flag.x = block.x + (block.width - FLAG_SIZE) / 2.0f;
+    flag.y = block.y - FLAG_SIZE;
+    flag.width = FLAG_SIZE;
+    flag.height = FLAG_SIZE;
+    flag.type = "Flag";
+    return flag;
 }
